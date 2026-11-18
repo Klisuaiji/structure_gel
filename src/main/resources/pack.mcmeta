@@ -1,10 +1,10 @@
 {
   "pack": {
     "description": "Structure Gel resources",
-    "pack_format": 26,
+    "pack_format": 48,
     "supported_formats": [
-      0,
-      2147483647
+      34,
+      48
     ]
   }
 }
