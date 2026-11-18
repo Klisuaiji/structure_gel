@@ -1,0 +1,27 @@
+# Gradle / build
+.gradle/
+build/
+out/
+!src/**/out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# OS / temp
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+
+# 反编译中间产物
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
