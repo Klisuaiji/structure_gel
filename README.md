@@ -2,6 +2,8 @@
 
 <p align="center">Decompiled Java sources of <b>Structure Gel API</b> for Minecraft 1.20.4 / NeoForge</p>
 
+> **分支说明**：当前 `1.21.1` 分支是 NeoForge 1.21.1 的迁移分支，进度与待办见 [MIGRATION.md](MIGRATION.md)。`main` 分支保留 1.20.4 的忠实反编译存档。
+
 > **这不是官方源码仓库。** 本仓库是对已发布构建产物 `structure_gel-1.20.4-2.19.1.jar` 的反编译存档，用于学习、逆向研究与移植参考。
 
 ## 项目信息
