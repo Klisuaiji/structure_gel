@@ -44,7 +44,7 @@ public class Remap {
                 return n != null ? n : internalName;
             }
             @Override public String mapMethodName(String owner, String name, String d) {
-                String k = owner + '|' + name + '|' + d;
+                String k = owner + '|' + name + '|' + mapMethodDesc(d);
                 String n = methodMap.get(k);
                 if (n != null) return n;
                 Set<String> s = looseM.get(owner + '|' + name);
@@ -52,7 +52,7 @@ public class Remap {
                 return name;
             }
             @Override public String mapFieldName(String owner, String name, String d) {
-                String k = owner + '|' + name + '|' + d;
+                String k = owner + '|' + name + '|' + mapDesc(d);
                 String n = fieldMap.get(k);
                 if (n != null) return n;
                 Set<String> s = looseF.get(owner + '|' + name);
@@ -94,7 +94,7 @@ public class Remap {
         System.out.println("remapped=" + done + " failed=" + failed);
     }
 
-    static void parseMappings(List<String> lines) {
+    public static void parseMappings(List<String> lines) {
         String cur = null;
         for (String raw : lines) {
             if (raw.startsWith("#") || raw.trim().isEmpty()) continue;
@@ -111,6 +111,9 @@ public class Remap {
             }
             if (cur == null) continue;
             String t = ln.trim();
+            for (int i = 0; i < 3 && t.matches("^\\d+:(.*)"); i++) {          // 去掉（可能多段的）行号前缀
+                t = t.substring(t.indexOf(':') + 1);
+            }
             int arrow = t.lastIndexOf(" -> ");
             if (arrow < 0) continue;
             String left = t.substring(0, arrow).trim();

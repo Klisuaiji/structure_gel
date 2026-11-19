@@ -8,51 +8,55 @@
 
 ## 环境是怎么拼出来的（可复现）
 
-1. **Minecraft 1.21.1 客户端 jar**：从 `piston-meta.mojang.com` 取（这个域名可达），得到混淆 jar（8269 个类）。
-2. **重映射成 Mojang 官方名**：ART 的 ProGuard 解析方向不对，改用 `tools/compile-check/Remap.java`（自写 ASM 重映射器），把 `client.txt`（ProGuard 映射）应用成 mojmap jar。结果为 `net/minecraft/world/item/ItemStack.class` 等 8269 个正常类。
-3. **NeoForge 本体**：`neoforge-21.1.265-universal.jar`（此版本类已是 Mojang 名，可直接当 API 参照；但**不含 `net/minecraft` 类**）。
-4. **Minecraft 依赖库**：从版本 JSON 的 `libraries` 段全部拉取（97 个 jar，72 MB）。
-5. **编译期缺件的临时桩**：`net.neoforged.api.distmarker.Dist`、`net.neoforged.fml.loading.FMLEnvironment`、`net.neoforged.fml.util.ObfuscationReflectionHelper`（这三个在 FML 里，本机拿不到）；Mixin 用 Fabric 镜像的 `sponge-mixin 0.16.4`，MixinExtras 用 Central 的 `0.5.5`。
+1. **Minecraft 1.21.1 客户端 jar**：从 `piston-meta.mojang.com` 取（该域名可达），得到混淆 jar（8269 个类）。
+2. **重映射成 Mojang 官方名**：ART 的 ProGuard 解析方向相反（输出成 `a.class`），改用 `tools/compile-check/Remap.java`（自写 ASM 重映射器）。过程中踩到两个必须记住的点：
+   - 映射表里的**类型是官方名**，字节码里是混淆名，所以做成员查表前必须先把 `desc` 走一遍 `mapMethodDesc`，否则所有带对象参数的成员都对不上（第一版就是这样漏掉了 `Component.literal`）；
+   - ProGuard 成员行带 `225:225:` 这种**行号前缀**，必须剥掉，否则返回类型会被污染成 `L225:net/...`。
+3. **NeoForge 本体**：`neoforge-21.1.265-universal.jar`（类已是官方名，可直接当 API 参照；但**不含 `net/minecraft` 类**，也不含对 MC 的二进制补丁）。
+4. **Minecraft 依赖库**：从版本 JSON 的 `libraries` 全量拉取（97 个 jar，72 MB）。
+5. **编译期缺件的临时桩**：`Dist`、`FMLEnvironment`、`ObfuscationReflectionHelper`（在 FML 里，本机拿不到）；Mixin 用 Fabric 镜像的 `sponge-mixin 0.16.4`，MixinExtras 用 Central 的 `0.5.5`。
 6. `javac -proc:none` 编译 `src/main/java`（208 个文件）。
 
 ## 结果
 
-| 指标 | 数值 |
-| --- | --- |
-| 源文件 | 208 |
-| 报错文件 | 170（仅 38 个文件零报错） |
-| 错误总数 | **2747** |
-
-高频缺失符号（`symbol:` 计数）：
-
-| 符号 | 次数 | 归类 |
+| 指标 | 修正前 | 修正后 |
 | --- | --- | --- |
-| `literal(String)` / `translatable(String)` | 143 / 59 | 反编译残留：接收者类型丢失，源码里其实是 `Component.literal` |
-| `getX()` / `getY()` / `z()` / `location()` | 71 / 57 / 16 / 49 | 反编译残留：`BlockPos`/`Vec3` 接收者被还原成弱类型 |
-| `PlayPayloadContext` | 41 | 1.20.5+ 网络 API 改名（`IPayloadContext`） |
-| `OnlyIn` / `SubscribeEvent` | 36 / 21 | 缺编译期依赖（FML 注解、`net.neoforged:bus`） |
-| `BootstapContext` | 34 | 反编译残留：拼写/泛型恢复错误 |
-| `vertex(Matrix4f, float, float, float)` | 24 | 1.20.5+ 渲染管线重写 |
-| `setBlock(BlockPos, BlockState, int)` | 20 | 1.21 签名变化 |
-| `relative(Direction)` | 17 | 反编译残留（`Direction` 接收者类型丢失） |
-| `getTag()` | 18 | **真实**：物品 NBT 已被数据组件取代 |
-| `getData()` | 16 | 真实/半真实：NeoForge 的 `AttachmentHolder#getData` 存在，但 vanilla jar 里没有 |
+| 错误总数 | 2747 | **731** |
+| 报错文件 | 170 / 208 | **119 / 208** |
+
+首版 2747 里有约 2000 个是我自己重映射器漏映射造成的假错，修掉后才剩下真正可分析的部分。
+
+高频错误（修正后）：
+
+| 错误 | 次数 | 性质 |
+| --- | --- | --- |
+| `PlayPayloadContext` 不存在 | 41 | **真**：1.20.5+ 拆成 `ClientPayloadContext` / `ServerPayloadContext` |
+| `OnlyIn` 不存在 | 36 | 噪声：FML 注解，本机缺 jar |
+| `BootstapContext` 不存在 | 34 | **反编译残留**：拼写错误，源码本意是 `BootstrapContext` |
+| `vertex(Matrix4f, float, float, float)` | 24 | **真**：渲染管线/`GuiGraphics` 变更 |
+| `SubscribeEvent` / `IEventBus` / `net.neoforged.bus.api` | 21 / 9 / 16 | 噪声：缺 `net.neoforged:bus` |
+| `ResourceLocation(String,String)` 私有 | 23 + 11 | **真**：1.21 必须走 `ResourceLocation.fromNamespaceAndPath` |
+| `getTag()` / `getOrCreateTag()` | 19 / 15 | **真**：物品 NBT 已由数据组件取代 |
+| `getData()` | 16 | 一半真：附件 API 在补丁 class 里，本机不可见 |
+| `isValidResourceLocation(String)` | 12 | **真**：已移除 |
+| `KeyMapping(String, KeyConflictContext, ...)` | 6 | **真**：构造签名变更 |
+| `TabVisibility` protected | 5 | **真**：可见性变更 |
+| `saveWithoutMetadata` | 5 | **真**：签名变更 |
+| `portalTime` 字段 | 6 | **真**：字段移除 |
+| `TickEvent` 包不存在 | 6 | **真**：包路径迁移 |
 
 ## 结论
 
-1. **2747 个错误不能全部算到版本迁移头上**。粗分三类：
-   - 反编译残留（约六成）：Vineflower 从字节码恢复出的弱类型接收者、`instanceof var`、错误的泛型参数。这类问题**在 1.20.4 上也一样存在**——也就是说，这份反编译源码本来就无法编译，跟迁不迁移无关。
-   - 缺失编译期依赖（约两成）：FML、bus、coremods、JarJar 这些只有 neoforged 仓库才有的包。
-   - 真实版本差异（约两成）：数据组件、网络 API、渲染管线、`Level.random`、签名变更。
-2. **顺序必须倒过来**：先让 1.20.4 那份源码能编译，再谈往 1.21.1 迁。否则迁移的每一步都踩在反编译噪声上。
-3. 顺带验证到两条确定的 1.21.1 事实（用于后续改代码）：`Level` 有 `getRandom()`、没有 `random` 字段；`ItemStack` 实现 `DataComponentHolder`，没有 `getOrCreateTag()`。
+1. **731 个错误里，噪声约 90 个**（缺 FML/bus jar、补丁成员不可见），**反编译残留约 40 个**（`BootstapContext` 这类），其余 **约 600 个是真实的 1.21.1 版本差异**。这个比例说明：结构是能迁的，但必须逐处改，不能靠正则批量替换。
+2. **顺序要倒过来**：反编译残留（`BootstapContext`、`instanceof var`）在 1.20.4 上同样编译不过。理想是先让 1.20.4 基线能编译，再迁移；否则每次编译都在跟两类问题混战。
+3. 顺带实证到 1.21.1 的两条事实（后面改代码直接可用）：`Level` 有 `getRandom()`、无 `random` 字段；`ItemStack` 实现 `DataComponentHolder`、无 `getOrCreateTag()`。
 
-## 要真正编译，还差这些
+## 要真正做到“编译通过”，还差什么
 
-只用 `universal.jar` 不够：NeoForge 对 Minecraft 类的**二进制补丁**（例如 `ItemStack` 上的附件接口、`Level` 上的扩展方法）只在 NeoForm 产出的 patched jar 里。缺的就是这一个：
+`universal.jar` 不含 NeoForge 对 Minecraft 的**二进制补丁**（例如 `ItemStack` 上的附件接口、`Level` 上的扩展方法），这些只在 NeoForm 产出的 patched jar 里。缺的是：
 
 ```
 net.neoforged:neoform:1.21.1-20240808.144430
 ```
 
-拿到它（或直接给 MDK 跑过一次 `gradlew build` 之后的 Gradle 缓存），就能把上面“缺失依赖”和“补丁成员”两类噪声消掉，剩下的错误才是真正需要改的迁移点。
+拿到它（或者 MDK 跑过一次 `gradlew build` 之后的 Gradle 缓存），就能消掉“缺 jar”和“补丁成员”这两类噪声，剩下的错误才是真正需要逐处改的迁移点。
