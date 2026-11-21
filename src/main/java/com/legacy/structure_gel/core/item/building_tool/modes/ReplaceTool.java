@@ -121,7 +121,7 @@ public class ReplaceTool extends BuildingToolMode
 			Direction[] dirs = Direction.values();
 			offsets = new Vec3i[dirs.length];
 			for (int i = 0; i < dirs.length; i++)
-				offsets[i] = dirs[i].getUnitVec3i();
+				offsets[i] = dirs[i].getNormal();
 		}
 
 		while (!posesToSearch.isEmpty())

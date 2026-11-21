@@ -10,7 +10,6 @@ import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.api.registry.registrar.RegistrarHandler;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.commands.StructureGelCommand;
-import com.legacy.structure_gel.core.data.generators.SGModelProvider;
 import com.legacy.structure_gel.core.data.generators.SGTagProv;
 import com.legacy.structure_gel.core.item.building_tool.ActionHistory;
 import com.legacy.structure_gel.core.item.building_tool.BuildingToolItem;
@@ -165,9 +164,6 @@ public class SGCommonEvents
 			dataGen.addProvider(server, blockTags);
 			dataGen.addProvider(server, new SGTagProv.ItemTagProv(packOutput, registrarProv.getRegistryProvider(), blockTags.contentsGetter()));
 			dataGen.addProvider(server, new SGTagProv.StructureTagProv(packOutput, registrarProv.getRegistryProvider()));
-
-			// Client
-			dataGen.addProvider(server, new SGModelProvider(packOutput));
 
 			dataGen.addProvider(server, packMcmeta(packOutput, "Structure Gel resources"));
 		}

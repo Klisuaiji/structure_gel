@@ -34,7 +34,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -590,7 +590,7 @@ public class CapturedBlocks
 		@Nullable
 		public Entity createEntity(Level level, BlockPos startPos, Mirror mirror, Rotation rotation)
 		{
-			Entity entity = EntityType.create(this.entityTag(), level, EntitySpawnReason.COMMAND).orElse(null);
+			Entity entity = EntityType.create(this.entityTag(), level, MobSpawnType.COMMAND).orElse(null);
 			if (entity != null)
 			{
 				float rot = entity.mirror(mirror);

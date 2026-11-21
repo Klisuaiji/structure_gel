@@ -20,8 +20,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.equipment.trim.ArmorTrim;
-import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -84,7 +84,7 @@ public class ClientUtil
 			Direction offsetDir = null;
 			for (Direction dir : Direction.orderedByNearest(Minecraft.getInstance().player))
 			{
-				BlockPos normal = new BlockPos(dir.getOpposite().getUnitVec3i());
+				BlockPos normal = new BlockPos(dir.getOpposite().getNormal());
 				if (level.getBlockState(pos.offset(normal)).isAir())
 				{
 					offset = Vec3.atCenterOf(normal);

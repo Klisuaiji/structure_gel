@@ -39,7 +39,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Entity.RemovalReason;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -694,7 +694,7 @@ public class ActionHistory
 		@Override
 		public void redo(ServerPlayer player, ServerLevel level, ActionCounter actionsFinished)
 		{
-			Entity entity = EntityType.create(this.entity, level, EntitySpawnReason.COMMAND).orElse(null);
+			Entity entity = EntityType.create(this.entity, level, MobSpawnType.COMMAND).orElse(null);
 			if (entity != null)
 				level.addFreshEntity(entity);
 

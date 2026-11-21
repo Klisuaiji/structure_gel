@@ -21,7 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -95,7 +95,7 @@ public class EntityHandler extends ProbabilityDataHandler<EntityHandler>
 
 		CompoundTag entityTag = this.tag.copy();
 		entityTag.putString("id", this.entityType.location().toString());
-		Entity entity = EntityType.loadEntityRecursive(entityTag, level.getLevel(), EntitySpawnReason.STRUCTURE, e ->
+		Entity entity = EntityType.loadEntityRecursive(entityTag, level.getLevel(), MobSpawnType.STRUCTURE, e ->
 		{
 			Direction facing = dataHandler.hasProperty(BlockStateProperties.FACING) ? dataHandler.getValue(BlockStateProperties.FACING) : Direction.SOUTH;
 			float yRot = facing.getAxis() != Direction.Axis.Y ? facing.toYRot() : e.getYRot();
@@ -113,7 +113,7 @@ public class EntityHandler extends ProbabilityDataHandler<EntityHandler>
 		if (entity instanceof Mob)
 		{
 			Mob mobEntity = (Mob) entity;
-			EventHooks.finalizeMobSpawn(mobEntity, level, level.getCurrentDifficultyAt(BlockPos.containing(pos)), EntitySpawnReason.STRUCTURE, null);
+			EventHooks.finalizeMobSpawn(mobEntity, level, level.getCurrentDifficultyAt(BlockPos.containing(pos)), MobSpawnType.STRUCTURE, null);
 
 			if (this.loot != null)
 				EntityAccessHelper.setDeathLootTable(mobEntity, LootTableAlias.getLootTable(this.loot));

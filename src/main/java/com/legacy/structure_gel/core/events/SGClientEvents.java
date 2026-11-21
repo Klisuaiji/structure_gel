@@ -6,8 +6,6 @@ import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.client.ClientProxy;
 import com.legacy.structure_gel.core.client.SGShaders;
 import com.legacy.structure_gel.core.client.gui.ClientPaletteTooltip;
-import com.legacy.structure_gel.core.client.item_model_properties.BuildingToolModeProperty;
-import com.legacy.structure_gel.core.client.item_model_properties.StructureModeProperty;
 import com.legacy.structure_gel.core.client.renderers.BuildingToolRenderer;
 import com.legacy.structure_gel.core.client.renderers.StructureBoundsRenderer;
 import com.legacy.structure_gel.core.client.renderers.block_entity.DataHandlerRenderer;
@@ -36,7 +34,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterSelectItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
@@ -50,13 +47,6 @@ public class SGClientEvents
 	@EventBusSubscriber(modid = StructureGelMod.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 	protected static class ModBus
 	{
-		@SubscribeEvent
-		protected static void clientInit(final RegisterSelectItemModelPropertyEvent event)
-		{
-			event.register(StructureGelMod.locate("structure_mode"), StructureModeProperty.TYPE);
-			event.register(StructureGelMod.locate("building_tool_mode"), BuildingToolModeProperty.TYPE);
-		}
-
 		@SubscribeEvent
 		protected static void registerKeyMappings(final RegisterKeyMappingsEvent event)
 		{

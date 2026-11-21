@@ -25,6 +25,9 @@ license="https://www.gnu.org/licenses/gpl-3.0.en.html"
 	ordering="NONE"
 	side="BOTH"
 
+[[accesstransformers]]
+	file="META-INF/accesstransformer.cfg"
+
 [[mixins]]
 	config="structure_gel.mixins.json"
 

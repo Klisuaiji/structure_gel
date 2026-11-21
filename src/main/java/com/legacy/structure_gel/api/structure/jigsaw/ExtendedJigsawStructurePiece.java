@@ -22,7 +22,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -202,7 +202,7 @@ public abstract class ExtendedJigsawStructurePiece extends PoolElementStructureP
 	 */
 	public <T extends Entity> T createEntity(EntityType<T> entityType, ServerLevelAccessor level, BlockPos pos, Rotation rotation)
 	{
-		T entity = entityType.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
+		T entity = entityType.create(level.getLevel(), MobSpawnType.STRUCTURE);
 		entity.moveTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, rotation.rotate(Direction.SOUTH).toYRot(), 0);
 		return entity;
 	}

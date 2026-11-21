@@ -45,7 +45,7 @@ public interface GelSpreadBehavior
 			List<Vec3i> offsets = new ArrayList<>();
 			for (Direction dir : Direction.values())
 			{
-				offsets.add(dir.getUnitVec3i());
+				offsets.add(dir.getNormal());
 			}
 			return offsets;
 		}
@@ -76,12 +76,12 @@ public interface GelSpreadBehavior
 			{
 				for (Direction h : Direction.Plane.HORIZONTAL)
 				{
-					offsets.add(h.getUnitVec3i().offset(v.getUnitVec3i()));
+					offsets.add(h.getNormal().offset(v.getNormal()));
 				}
 			}
 			for (Direction h : Direction.Plane.HORIZONTAL)
 			{
-				offsets.add(h.getUnitVec3i().offset(h.getClockWise().getUnitVec3i()));
+				offsets.add(h.getNormal().offset(h.getClockWise().getNormal()));
 			}
 			return offsets;
 		}
@@ -136,7 +136,7 @@ public interface GelSpreadBehavior
 			List<Vec3i> offsets = new ArrayList<>();
 			for (Direction d : Direction.values())
 				if (context.initialAxis.map(a -> a != d.getAxis()).orElse(true))
-					offsets.add(d.getUnitVec3i());
+					offsets.add(d.getNormal());
 			return offsets;
 		}
 

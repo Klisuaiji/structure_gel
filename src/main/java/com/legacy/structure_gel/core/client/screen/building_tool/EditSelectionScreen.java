@@ -182,17 +182,17 @@ public class EditSelectionScreen extends LayeredScreen
 	{
 		direction = rotatedByPlayer(direction);
 		if (direction.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-			this.positivePos = this.positivePos.offset(direction.getUnitVec3i());
+			this.positivePos = this.positivePos.offset(direction.getNormal());
 		else
-			this.negativePos = this.negativePos.offset(direction.getUnitVec3i());
+			this.negativePos = this.negativePos.offset(direction.getNormal());
 
 		if (Screen.hasShiftDown())
 		{
 			Direction opposite = direction.getOpposite();
 			if (opposite.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-				this.positivePos = this.positivePos.subtract(opposite.getUnitVec3i());
+				this.positivePos = this.positivePos.subtract(opposite.getNormal());
 			else
-				this.negativePos = this.negativePos.subtract(opposite.getUnitVec3i());
+				this.negativePos = this.negativePos.subtract(opposite.getNormal());
 		}
 
 		this.updateBounds(true);
@@ -202,17 +202,17 @@ public class EditSelectionScreen extends LayeredScreen
 	{
 		direction = rotatedByPlayer(direction);
 		if (direction.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-			this.positivePos = this.positivePos.subtract(direction.getUnitVec3i());
+			this.positivePos = this.positivePos.subtract(direction.getNormal());
 		else
-			this.negativePos = this.negativePos.subtract(direction.getUnitVec3i());
+			this.negativePos = this.negativePos.subtract(direction.getNormal());
 
 		if (Screen.hasShiftDown())
 		{
 			Direction opposite = direction.getOpposite();
 			if (opposite.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-				this.positivePos = this.positivePos.offset(opposite.getUnitVec3i());
+				this.positivePos = this.positivePos.offset(opposite.getNormal());
 			else
-				this.negativePos = this.negativePos.offset(opposite.getUnitVec3i());
+				this.negativePos = this.negativePos.offset(opposite.getNormal());
 		}
 
 		this.updateBounds(true);
@@ -232,17 +232,17 @@ public class EditSelectionScreen extends LayeredScreen
 	{
 		Direction direction = Direction.orderedByNearest(this.minecraft.player)[0];
 		if (direction.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-			this.positivePos = this.positivePos.offset(direction.getUnitVec3i());
+			this.positivePos = this.positivePos.offset(direction.getNormal());
 		else
-			this.negativePos = this.negativePos.offset(direction.getUnitVec3i());
+			this.negativePos = this.negativePos.offset(direction.getNormal());
 
 		if (Screen.hasShiftDown())
 		{
 			Direction opposite = direction.getOpposite();
 			if (opposite.getAxisDirection() == Direction.AxisDirection.POSITIVE)
-				this.positivePos = this.positivePos.subtract(opposite.getUnitVec3i());
+				this.positivePos = this.positivePos.subtract(opposite.getNormal());
 			else
-				this.negativePos = this.negativePos.subtract(opposite.getUnitVec3i());
+				this.negativePos = this.negativePos.subtract(opposite.getNormal());
 		}
 
 		this.updateBounds(true);

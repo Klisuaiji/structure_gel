@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.ImmutableList;
@@ -19,26 +20,20 @@ import com.google.common.collect.ImmutableMap;
 import com.legacy.structure_gel.api.events.RegisterArmorTrimTexturesEvent;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.client.ClientUtil;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-
-import net.minecraft.client.model.Model;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceList;
 import net.minecraft.client.renderer.texture.atlas.sources.PalettedPermutations;
-import net.minecraft.client.resources.model.EquipmentClientInfo;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.EquipmentAsset;
-import net.minecraft.world.item.equipment.trim.ArmorTrim;
-import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.neoforged.fml.ModLoader;
 
 public class ArmorTrimMixins
@@ -120,26 +115,21 @@ public class ArmorTrimMixins
 		abstract List<SpriteSource> getSources();
 	}
 
-	@Mixin(EquipmentLayerRenderer.class)
+	@Mixin(HumanoidArmorLayer.class)
 	private static class EquipmentLayerRendererMixin
 	{
-		@WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;II)V"), method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V")
-		//@formatter:off
-		private void modifyLight(
-				Model target, 
-				PoseStack poseStack, VertexConsumer buff, int packedLight, int packedOverlay, 
-				Operation<Void> original, 
-				EquipmentClientInfo.LayerType layerType, ResourceKey<EquipmentAsset> equipmentAsset, Model model, ItemStack stack)
-		//@formatter:on
+		// 1.21.1 renders trims from HumanoidArmorLayer#renderTrim instead of the
+		// 1.21.4 EquipmentLayerRenderer#renderLayers pipeline.
+		@ModifyVariable(
+				method = "renderTrim(Lnet/minecraft/core/Holder;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/item/armortrim/ArmorTrim;Lnet/minecraft/client/model/HumanoidModel;Z)V",
+				at = @At("HEAD"), argsOnly = true, ordinal = 0)
+		private int modifyTrimLight(int packedLight, Holder<ArmorMaterial> material,
+				com.mojang.blaze3d.vertex.PoseStack poseStack, MultiBufferSource buffers, ArmorTrim trim, HumanoidModel<?> model, boolean inner)
 		{
-			ArmorTrim trim = stack.get(DataComponents.TRIM);
-			if (trim != null)
-			{
-				int customBlockLight = ClientUtil.getMaterialBrightness(trim);
-				if (customBlockLight > -1)
-					packedLight = LightTexture.pack(Math.max(customBlockLight, LightTexture.block(packedLight)), LightTexture.sky(packedLight));
-			}
-			original.call(target, poseStack, buff, packedLight, packedOverlay);
+			int customBlockLight = ClientUtil.getMaterialBrightness(trim);
+			if (customBlockLight > -1)
+				return LightTexture.pack(Math.max(customBlockLight, LightTexture.block(packedLight)), LightTexture.sky(packedLight));
+			return packedLight;
 		}
 	}
 }
