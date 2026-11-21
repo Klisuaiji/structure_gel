@@ -19,7 +19,7 @@ public class SGShaders
 		{
 			event.registerShader(
 					new ShaderInstance(event.getResourceProvider(),
-							StructureGelMod.locate("core/world_wireframe").toString(),
+							StructureGelMod.locate("world_wireframe").toString(),
 							DefaultVertexFormat.POSITION_COLOR),
 					shader -> WORLD_WIREFRAME = shader);
 		}
