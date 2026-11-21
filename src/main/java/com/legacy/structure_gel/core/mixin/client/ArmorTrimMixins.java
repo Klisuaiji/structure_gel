@@ -124,7 +124,7 @@ public class ArmorTrimMixins
 				method = "renderTrim(Lnet/minecraft/core/Holder;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/item/armortrim/ArmorTrim;Lnet/minecraft/client/model/HumanoidModel;Z)V",
 				at = @At("HEAD"), argsOnly = true, ordinal = 0)
 		private int modifyTrimLight(int packedLight, Holder<ArmorMaterial> material,
-				com.mojang.blaze3d.vertex.PoseStack poseStack, MultiBufferSource buffers, ArmorTrim trim, HumanoidModel<?> model, boolean inner)
+				com.mojang.blaze3d.vertex.PoseStack poseStack, MultiBufferSource buffers, int targetPackedLight, ArmorTrim trim, HumanoidModel<?> model, boolean inner)
 		{
 			int customBlockLight = ClientUtil.getMaterialBrightness(trim);
 			if (customBlockLight > -1)
