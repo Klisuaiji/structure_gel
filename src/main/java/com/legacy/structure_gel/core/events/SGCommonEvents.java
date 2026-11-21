@@ -160,10 +160,10 @@ public class SGCommonEvents
 			registrarProv = dataGen.addProvider(server, registrarProv);
 
 			// Server
-			var blockTags = new SGTagProv.BlockTagProv(packOutput, registrarProv.getRegistryProvider());
+			var blockTags = new SGTagProv.BlockTagProv(packOutput, registrarProv.getRegistryProvider(), event.getExistingFileHelper());
 			dataGen.addProvider(server, blockTags);
-			dataGen.addProvider(server, new SGTagProv.ItemTagProv(packOutput, registrarProv.getRegistryProvider(), blockTags.contentsGetter()));
-			dataGen.addProvider(server, new SGTagProv.StructureTagProv(packOutput, registrarProv.getRegistryProvider()));
+			dataGen.addProvider(server, new SGTagProv.ItemTagProv(packOutput, registrarProv.getRegistryProvider(), blockTags.contentsGetter(), event.getExistingFileHelper()));
+			dataGen.addProvider(server, new SGTagProv.StructureTagProv(packOutput, registrarProv.getRegistryProvider(), event.getExistingFileHelper()));
 
 			dataGen.addProvider(server, packMcmeta(packOutput, "Structure Gel resources"));
 		}

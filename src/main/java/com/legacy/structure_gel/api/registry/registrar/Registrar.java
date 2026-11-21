@@ -87,7 +87,8 @@ public abstract class Registrar<T>
 	@Nullable
 	public T get(RegistryAccess registryAccess)
 	{
-		return this.get(registryAccess.lookupOrThrow(this.getRegistryKey()));
+		Registry<?> registry = registryAccess.registryOrThrow(this.getRegistryKey());
+		return this.get(registry);
 	}
 
 	@Nullable
@@ -125,7 +126,8 @@ public abstract class Registrar<T>
 
 	public Optional<Holder<T>> getHolder(RegistryAccess registryAccess)
 	{
-		return this.getHolder(registryAccess.lookupOrThrow(this.getRegistryKey()));
+		Registry<?> registry = registryAccess.registryOrThrow(this.getRegistryKey());
+		return this.getHolder(registry);
 	}
 
 	public Optional<Holder<T>> getHolder(CommonLevelAccessor level)
@@ -136,7 +138,7 @@ public abstract class Registrar<T>
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Optional<Holder<T>> getHolder(Registry<?> registry)
 	{
-		return registry.get((ResourceKey) this.getKey());
+		return (Optional<Holder<T>>) (Optional<?>) registry.getHolder((ResourceKey) this.getKey());
 	}
 
 	public Optional<Holder.Reference<T>> getHolder(BootstrapContext<?> bootstrapContext)

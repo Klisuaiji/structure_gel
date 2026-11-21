@@ -44,7 +44,7 @@ public interface GelSpreadRestriction
 			BlockPos pos = context.placePos;
 			if (level.canSeeSky(pos)) // Light level 15 check (glass would pass this)
 				return false;
-			for (int dy = 1; pos.above(dy).getY() < level.getMaxY(); dy++) // Check the actual blocks. If we find something, we can't see the sky
+			for (int dy = 1; pos.above(dy).getY() < level.getMaxBuildHeight(); dy++) // Check the actual blocks. If we find something, we can't see the sky
 				if (!level.isEmptyBlock(pos.above(dy)))
 					return true;
 			return false;

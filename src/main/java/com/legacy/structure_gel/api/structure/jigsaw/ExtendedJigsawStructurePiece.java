@@ -202,7 +202,7 @@ public abstract class ExtendedJigsawStructurePiece extends PoolElementStructureP
 	 */
 	public <T extends Entity> T createEntity(EntityType<T> entityType, ServerLevelAccessor level, BlockPos pos, Rotation rotation)
 	{
-		T entity = entityType.create(level.getLevel(), MobSpawnType.STRUCTURE);
+		T entity = entityType.create(level.getLevel());
 		entity.moveTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, rotation.rotate(Direction.SOUTH).toYRot(), 0);
 		return entity;
 	}

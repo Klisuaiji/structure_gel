@@ -24,6 +24,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -134,7 +135,7 @@ public class StructureBoundsRenderer implements IRenderBase
 	@Nullable
 	private MeshData compileBounds(Minecraft mc, PoseStack poseStack, Tesselator tesselator, double camX, double camY, double camZ)
 	{
-		BufferBuilder buffBuilder = tesselator.begin(VertexFormat.Mode.QUADS, SGShaders.WORLD_WIREFRAME.vertexFormat());
+		BufferBuilder buffBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		BoundingBox fullBounds = this.structureInfo.fullBounds();
 		int minX = fullBounds.minX();
 		int minY = fullBounds.minY();

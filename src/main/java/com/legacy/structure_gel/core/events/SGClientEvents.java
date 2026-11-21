@@ -100,9 +100,9 @@ public class SGClientEvents
 				if (name != null && ClientProxy.lastPortal != null)
 				{
 					SoundInstance newSound = null;
-					if (name.equals(SoundEvents.PORTAL_TRAVEL.location()))
+					if (name.equals(SoundEvents.PORTAL_TRAVEL.getLocation()))
 						newSound = ClientProxy.lastPortal.getTravelSound();
-					else if (name.equals(SoundEvents.PORTAL_TRIGGER.location()))
+					else if (name.equals(SoundEvents.PORTAL_TRIGGER.getLocation()))
 						newSound = ClientProxy.lastPortal.getTriggerSound();
 
 					if (newSound != null)

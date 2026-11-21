@@ -98,14 +98,14 @@ public class PanelSelectionButton<T extends ToolModeProperty.IPanelSelection> ex
 			poseStack.translate(0, 0, 10);
 
 			int texWidth = BUTTON_SIZE + BUTTON_PADDING;
-			graphics.blitSprite(RenderType::guiTextured, this.backgroundTexture, this.getX() - 5, this.getY() - 5, this.backgroundWidth + 9, this.backgroundHeight + 9);
+			graphics.blitSprite(this.backgroundTexture, this.getX() - 5, this.getY() - 5, this.backgroundWidth + 9, this.backgroundHeight + 9);
 			
 			for (int i = 0; i < this.values.size(); i++)
 			{
 				int x = this.getX() + (i % BUTTON_COLUMNS) * texWidth;
 				int y = this.getY() + (i / BUTTON_COLUMNS) * texWidth;
 				boolean isHovered = mouseX >= x && mouseX <= x + BUTTON_SIZE && mouseY >= y && mouseY <= y + BUTTON_SIZE;
-				graphics.blitSprite(RenderType::guiTextured, this.textures[i].get(true, isHovered), x, y, BUTTON_SIZE, BUTTON_SIZE);
+				graphics.blitSprite(this.textures[i].get(true, isHovered), x, y, BUTTON_SIZE, BUTTON_SIZE);
 				if (isHovered)
 					graphics.renderTooltip(Minecraft.getInstance().font, PanelSelectionButton.this.property.getValueComponent(this.values.get(i)), mouseX, mouseY);
 			}

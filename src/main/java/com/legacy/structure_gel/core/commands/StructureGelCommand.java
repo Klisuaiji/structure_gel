@@ -39,7 +39,7 @@ public class StructureGelCommand
 {
 	public static <T> CompletableFuture<Suggestions> suggestFromRegistry(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, ResourceKey<Registry<T>> registry)
 	{
-		context.getSource().registryAccess().lookup(registry).get().keySet().stream().map(ResourceLocation::toString).forEach(builder::suggest);
+		context.getSource().registryAccess().registryOrThrow(registry).keySet().stream().map(ResourceLocation::toString).forEach(builder::suggest);
 		return builder.buildFuture();
 	}
 
@@ -140,7 +140,7 @@ public class StructureGelCommand
 				BlockPos above = entry.getKey().above();
 				if (level.getBlockState(above).isAir())
 				{
-					level.sendParticles(player, new BlockParticleOption(ParticleTypes.BLOCK_MARKER, Blocks.REDSTONE_TORCH.defaultBlockState()), true, true, above.getX() + 0.5, above.getY() + 0.5, above.getZ() + 0.5, 1, 0, 0, 0, 0);
+					level.sendParticles(player, new BlockParticleOption(ParticleTypes.BLOCK_MARKER, Blocks.REDSTONE_TORCH.defaultBlockState()), true, above.getX() + 0.5, above.getY() + 0.5, above.getZ() + 0.5, 1, 0, 0, 0, 0);
 				}
 			}
 		}

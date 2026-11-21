@@ -86,7 +86,7 @@ public class BuildingToolOverlay
 							int xSize = innerWidth + (isFirst ? 1 : 0) + (isLast ? 1 : 0);
 							int ySize = innerWidth + (isTop ? 1 : 0) + (isBottom ? 1 : 0);
 							// Stretch, slide, pos, size
-							graphics.blitSprite(RenderType::guiTextured, SGSprites.HUD_ITEM_SLOT, tileWidth, tileWidth, xOffset, yOffset, x - 3 + texX, y - 3 + texY, xSize, ySize);
+							graphics.blitSprite(SGSprites.HUD_ITEM_SLOT, tileWidth, tileWidth, xOffset, yOffset, x - 3 + texX, y - 3 + texY, xSize, ySize);
 							RenderSystem.disableBlend();
 
 							// Render item with weight

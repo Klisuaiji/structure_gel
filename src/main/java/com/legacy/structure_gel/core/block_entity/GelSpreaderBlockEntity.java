@@ -68,7 +68,7 @@ public class GelSpreaderBlockEntity extends SGBlockEntity
 		if (stack.getItem() instanceof BlockItem blockItem)
 		{
 			this.placedBy = stack.copy();
-			this.setGel(registries.lookupOrThrow(Registries.BLOCK).getResourceKey(blockItem.getBlock()));
+			this.setGel(registries.registryOrThrow(Registries.BLOCK).getResourceKey(blockItem.getBlock()));
 		}
 	}
 

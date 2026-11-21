@@ -24,7 +24,7 @@ public class ClientPaletteTooltip implements ClientTooltipComponent
 	}
 
 	@Override
-	public void renderImage(Font font, int x, int y, int a, int b, GuiGraphics graphics)
+	public void renderImage(Font font, int x, int y, GuiGraphics graphics)
 	{
 		Minecraft mc = Minecraft.getInstance();
 
@@ -72,7 +72,7 @@ public class ClientPaletteTooltip implements ClientTooltipComponent
 	}
 
 	@Override
-	public int getHeight(Font font)
+	public int getHeight()
 	{
 		return getRows() * getYSpacing() + 4;
 	}

@@ -56,10 +56,9 @@ public class FilterHolderSet<T> implements ICustomHolderSet<T>
 		this.blacklist.addInvalidationListener(this::invalidate);
 	}
 
-	@Override
 	public boolean isBound()
 	{
-		return whitelist.isBound() && blacklist.isBound();
+		return whitelist.stream().allMatch(Holder::isBound) && blacklist.stream().allMatch(Holder::isBound);
 	}
 
 	public static <T> Builder<T> builder(ResourceKey<Registry<T>> registry)

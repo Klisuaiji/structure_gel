@@ -101,7 +101,7 @@ public class GelPortalForcer
 				double alternativeDist = -1.0;
 				BlockPos alternativeFoundPos = null;
 				WorldBorder worldBorder = level.getWorldBorder();
-				int maxHeight = Math.min(level.getMaxY(), level.getMinY() + level.getLogicalHeight() - 1);
+				int maxHeight = Math.min(level.getMaxBuildHeight(), level.getMinBuildHeight() + level.getLogicalHeight() - 1);
 				int portalWidth = 1;
 				// This only gets used to store values instead of making a new BlockPos
 				BlockPos.MutableBlockPos mutablePos = pos.mutable();
@@ -115,14 +115,14 @@ public class GelPortalForcer
 					{
 						searchPos.move(direction.getOpposite(), portalWidth);
 
-						for (int h = surfaceHeight; h >= level.getMinY(); h--)
+						for (int h = surfaceHeight; h >= level.getMinBuildHeight(); h--)
 						{
 							searchPos.setY(h);
 							if (this.canPortalReplaceBlock(level, searchPos))
 							{
 								int hCopy = h;
 
-								while (h > level.getMinY() && (this.canPortalReplaceBlock(level, searchPos.move(Direction.DOWN)) || this.shouldIgnoreForHeight(level, searchPos) /*seachPos already gets moved by the first check*/))
+								while (h > level.getMinBuildHeight() && (this.canPortalReplaceBlock(level, searchPos.move(Direction.DOWN)) || this.shouldIgnoreForHeight(level, searchPos) /*seachPos already gets moved by the first check*/))
 								{
 									h--;
 								}
@@ -173,7 +173,7 @@ public class GelPortalForcer
 			protected Optional<FoundRectangle> createPortal(GelPortalForcer portalForcer, BlockPos pos, BlockPos foundPos, double dist, Direction.Axis axis, Direction direction, ServerLevel level, UnaryOperator<BlockState> portalState)
 			{
 				WorldBorder worldBorder = level.getWorldBorder();
-				int maxHeight = Math.min(level.getMaxY(), level.getMinY() + level.getLogicalHeight() - 1);
+				int maxHeight = Math.min(level.getMaxBuildHeight(), level.getMinBuildHeight() + level.getLogicalHeight() - 1);
 				BlockPos.MutableBlockPos mutablePos = pos.mutable();
 				GelPortalSize size = portalForcer.portalBlock.getSizeRules();
 				int minWidth = size.minWidth(), minHeight = size.minHeight();
@@ -182,7 +182,7 @@ public class GelPortalForcer
 				boolean shouldMakePlatform = false;
 				if (dist == -1.0)
 				{
-					int lowest = Math.max(level.getMinY() + 1, this.getDefaultHeight());
+					int lowest = Math.max(level.getMinBuildHeight() + 1, this.getDefaultHeight());
 					int heighest = maxHeight - 9;
 					if (heighest < lowest)
 					{

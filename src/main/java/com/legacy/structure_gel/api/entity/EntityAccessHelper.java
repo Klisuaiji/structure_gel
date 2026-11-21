@@ -21,7 +21,7 @@ public class EntityAccessHelper
 	 */
 	public static Optional<ResourceKey<LootTable>> getDeathLootTable(Mob entity)
 	{
-		return entity.lootTable;
+		return Optional.ofNullable(entity.lootTable);
 	}
 
 	/**
@@ -32,6 +32,6 @@ public class EntityAccessHelper
 	 */
 	public static void setDeathLootTable(Mob entity, @Nullable ResourceKey<LootTable> lootTable)
 	{
-		entity.lootTable = Optional.ofNullable(lootTable);
+		entity.lootTable = lootTable;
 	}
 }

@@ -151,7 +151,7 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
 		if (mouseY > this.getY() && mouseY < this.getBottom()) // Allows the cancel and generate buttons to work
 		{
 			boolean clickedChild = this.getEntryAtPosition(mouseX, mouseY) != null;
-			boolean clickedScrollBar = clickType == 0 && mouseX >= (double) this.scrollAmount() && mouseX < (double) (this.scrollAmount() + 6);
+			boolean clickedScrollBar = clickType == 0 && mouseX >= (double) this.getScrollbarPosition() && mouseX < (double) (this.getScrollbarPosition() + 6);
 			return clickedChild || clickedScrollBar;
 		}
 		return ret;

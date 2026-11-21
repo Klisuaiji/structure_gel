@@ -187,14 +187,6 @@ public class BuildingToolPlayerData extends SavedData
 		return super.isDirty() || this.actionHistory.isDirty(); // Make sure we save when action history is dirty
 	}
 
-	@Override
-	public CompoundTag save(HolderLookup.Provider lookup)
-	{
-		CompoundTag tag = super.save(lookup);
-		this.actionHistory.setDirty(false);
-		return tag;
-	}
-
 	public static class BuildingToolClientData extends BuildingToolPlayerData
 	{
 		final Object2ObjectLinkedOpenHashMap<String, Object2ObjectLinkedOpenHashMap<BoundingBox, CapturedBlocks>> otherPlayerClipboards;
@@ -262,11 +254,5 @@ public class BuildingToolPlayerData extends SavedData
 			return tag;
 		}
 
-		// ServerLevel is null so this doesn't work anyway
-		@Override
-		public CompoundTag save(HolderLookup.Provider lookup)
-		{
-			return new CompoundTag();
-		}
 	}
 }

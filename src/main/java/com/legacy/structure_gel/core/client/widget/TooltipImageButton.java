@@ -70,7 +70,7 @@ public class TooltipImageButton extends Button
 		}
 
 		RenderSystem.enableDepthTest();
-		graphics.blit(RenderType::guiTextured, this.texture, this.getX(), this.getY(), this.u, i, this.width, this.height, this.textureWidth, this.textureHeight);
+		graphics.blit(this.texture, this.getX(), this.getY(), this.u, i, this.width, this.height, this.textureWidth, this.textureHeight);
 		if (this.isHoveredOrFocused() && this.onTooltip != null)
 			this.onTooltip.onTooltip(this, graphics, mouseX, mouseY);
 	}

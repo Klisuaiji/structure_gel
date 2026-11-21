@@ -83,7 +83,7 @@ public class DynamicSpawnerBlockEntity extends SGBlockEntity implements Spawner
 			}
 			else
 			{
-				this.setSpawner(StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getValue(typeName), lookup);
+				this.setSpawner(StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.get(typeName), lookup);
 			}
 		}
 		if (tag.contains(EXP_RANGE_KEY, Tag.TAG_COMPOUND))

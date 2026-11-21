@@ -95,7 +95,7 @@ public class EntityHandler extends ProbabilityDataHandler<EntityHandler>
 
 		CompoundTag entityTag = this.tag.copy();
 		entityTag.putString("id", this.entityType.location().toString());
-		Entity entity = EntityType.loadEntityRecursive(entityTag, level.getLevel(), MobSpawnType.STRUCTURE, e ->
+		Entity entity = EntityType.loadEntityRecursive(entityTag, level.getLevel(), e ->
 		{
 			Direction facing = dataHandler.hasProperty(BlockStateProperties.FACING) ? dataHandler.getValue(BlockStateProperties.FACING) : Direction.SOUTH;
 			float yRot = facing.getAxis() != Direction.Axis.Y ? facing.toYRot() : e.getYRot();
@@ -147,7 +147,6 @@ public class EntityHandler extends ProbabilityDataHandler<EntityHandler>
 		builder.addEnum("enum_test", EquipmentSlot.class, EquipmentSlot.OFFHAND);
 
 		ItemStack helm = Items.CHAINMAIL_HELMET.getDefaultInstance();
-		helm.set(DataComponents.ITEM_MODEL, ResourceLocation.tryParse("stick"));
 		helm.set(DataComponents.DAMAGE, 55);
 		helm.set(DataComponents.CUSTOM_NAME, Component.literal("oh yeah"));
 		CompoundTag customData = new CompoundTag();

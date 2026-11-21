@@ -15,7 +15,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -94,14 +94,14 @@ public class GelSpreaderBlock extends BaseEntityBlock
 	// -------- COPIES PROPERTIES FROM GEL BLOCKS -----------
 
 	@Override
-	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
 		if (player.isCreative() && stack.is(Items.GUNPOWDER))
 		{
 			StructureGelBlock.scheduleRemoval(level, pos, state);
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 		}
-		return InteractionResult.FAIL;
+		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class GelSpreaderBlock extends BaseEntityBlock
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState state)
+	public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
 	{
 		return true;
 	}

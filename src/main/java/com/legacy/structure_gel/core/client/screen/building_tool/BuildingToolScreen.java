@@ -312,7 +312,7 @@ public class BuildingToolScreen extends LayeredScreen
 			return;
 		}
 
-		float mixedTick = this.tick + this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+		float mixedTick = this.tick + this.minecraft.getTimer().getGameTimeDeltaPartialTick(true);
 		float animationTime = 2.5F;
 
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -369,10 +369,11 @@ public class BuildingToolScreen extends LayeredScreen
 			float innerPercent = isCardinal ? 0.8F : 0.6F;
 			float scaledPercent = 1.0F - innerPercent;
 			Vec3 sliceMove = isCardinal ? new Vec3(0, -60, 0) : new Vec3(50, -50, 0);
-			pose.translate(sliceMove.multiply(innerPercent, innerPercent, innerPercent).add(sliceMove.multiply(scaledPercent, scaledPercent, scaledPercent).multiply(scale, scale, scale)));
+			Vec3 sliceOffset = sliceMove.multiply(innerPercent, innerPercent, innerPercent).add(sliceMove.multiply(scaledPercent, scaledPercent, scaledPercent).multiply(scale, scale, scale));
+			pose.translate(sliceOffset.x, sliceOffset.y, sliceOffset.z);
 			int size = isCardinal ? 80 : 100;
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			graphics.blitSprite(RenderType::guiTextured, slice.sprite.get(this.selectedRadial != i, hovered), -size / 2, -size / 2, size, size);
+			graphics.blitSprite(slice.sprite.get(this.selectedRadial != i, hovered), -size / 2, -size / 2, size, size);
 			pose.popPose();
 			
 			// Icon
@@ -383,12 +384,13 @@ public class BuildingToolScreen extends LayeredScreen
 			innerPercent = isCardinal ? 0.5F : 0.3F;
 			scaledPercent = 1.0F - innerPercent;
 			Vec3 iconMove = new Vec3(0, -84 + 16, 0);
-			pose.translate(iconMove.multiply(innerPercent, innerPercent, innerPercent).add(iconMove.multiply(scaledPercent, scaledPercent, scaledPercent).multiply(scale, scale, scale)));
+			Vec3 iconOffset = iconMove.multiply(innerPercent, innerPercent, innerPercent).add(iconMove.multiply(scaledPercent, scaledPercent, scaledPercent).multiply(scale, scale, scale));
+			pose.translate(iconOffset.x, iconOffset.y, iconOffset.z);
 			pose.mulPose(Axis.ZP.rotationDegrees(-rot));
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			if (!(this.hoveredRadial == i || this.selectedRadial == i))
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.75F);
-			graphics.blit(RenderType::guiTextured, slice.mode.getIconTexture(), -16, -16, 0, 0, 32, 32, 32, 32);
+			graphics.blit(slice.mode.getIconTexture(), -16, -16, 0, 0, 32, 32, 32, 32);
 			pose.popPose();
 		}
 
@@ -396,7 +398,7 @@ public class BuildingToolScreen extends LayeredScreen
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (dist < 21)
 			this.hoveredRadial = -2;
-		graphics.blitSprite(RenderType::guiTextured, SGSprites.RADIAL_CENTER.get(true, dist < 21 && this.mode.hasBlockPalette()), centerX - 20, centerY - 20, 40, 40);
+		graphics.blitSprite(SGSprites.RADIAL_CENTER.get(true, dist < 21 && this.mode.hasBlockPalette()), centerX - 20, centerY - 20, 40, 40);
 
 		// Other widgets (undo, redo)
 		this.widgetsToRender.forEach(widget ->

@@ -34,6 +34,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceKey;
@@ -246,7 +247,7 @@ public class DataParser
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public <T> ResourceKeyParser<ResourceKey<T>> add(String key, @Nonnull ResourceKey<Registry<T>> registryKey, @Nullable T defaultVal) throws NullPointerException
 		{
-			Registry registry = BuiltInRegistries.REGISTRY.getValue((ResourceKey) registryKey);
+			Registry registry = BuiltInRegistries.REGISTRY.get((ResourceKey) registryKey);
 			if (registry != null)
 			{
 				Optional<ResourceKey> resourceKey = registry.getResourceKey(defaultVal);
@@ -400,7 +401,7 @@ public class DataParser
 	{
 		try
 		{
-			BlockState state = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, new StringReader(key), false).blockState();
+			BlockState state = BlockStateParser.parseForBlock(level.registryAccess().lookupOrThrow(Registries.BLOCK), new StringReader(key), false).blockState();
 			return state.getBlock().isEnabled(level.enabledFeatures()) ? state : null;
 		}
 		catch (CommandSyntaxException e)

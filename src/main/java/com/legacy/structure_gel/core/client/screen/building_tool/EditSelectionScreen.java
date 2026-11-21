@@ -315,7 +315,7 @@ public class EditSelectionScreen extends LayeredScreen
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
 
-		graphics.blitSprite(RenderType::guiTextured, sprites.get(true, hovered), texX + x, texY + y, width, height);
+		graphics.blitSprite(sprites.get(true, hovered), texX + x, texY + y, width, height);
 	}
 
 	@Override

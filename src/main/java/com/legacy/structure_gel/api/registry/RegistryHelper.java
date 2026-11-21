@@ -52,10 +52,10 @@ public class RegistryHelper
 		Optional<ResourceKey<T>> key = registry.getResourceKey(object);
 		if (key.isPresent())
 		{
-			Optional<Holder.Reference<T>> holder = registry.get(key.get());
+			Optional<Holder.Reference<T>> holder = registry.getHolder(key.get());
 			if (holder.isPresent())
 			{
-				Optional<HolderSet.Named<T>> tag = registry.get(tagKey);
+				Optional<HolderSet.Named<T>> tag = registry.getTag(tagKey);
 				return tag.isPresent() ? tag.get().contains(holder.get()) : false;
 			}
 		}
@@ -64,8 +64,8 @@ public class RegistryHelper
 
 	public static <T> boolean isInTag(RegistryAccess registryAccess, ResourceKey<Registry<T>> registryKey, TagKey<T> tagKey, T object)
 	{
-		Optional<Holder.Reference<Registry<T>>> registry = registryAccess.get(registryKey);
-		return registry.isPresent() ? isInTag(registry.get().value(), tagKey, object) : false;
+		Optional<Registry<T>> registry = registryAccess.registry(registryKey);
+		return registry.isPresent() ? isInTag(registry.get(), tagKey, object) : false;
 	}
 
 	/**

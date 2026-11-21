@@ -57,7 +57,7 @@ public class GetStructuresCommand
 	{
 		CommandSourceStack source = context.getSource();
 		ServerLevel level = source.getLevel();
-		var structureReg = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+		var structureReg = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
 		List<Pair<String, String>> structures = level.structureManager().startsForStructure(new ChunkPos(pos), s -> true).stream().map(s ->
 		{
 			Structure struc = s.getStructure();
@@ -119,7 +119,7 @@ public class GetStructuresCommand
 				source.sendSuccess(() -> Component.literal(name.toString() + " has no structures."), true);
 			else
 			{
-				Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+				Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
 				structures.stream().map(registry::getKey).map(r -> r == null ? "null" : r.toString()).sorted().forEach(r -> source.sendSuccess(() -> Component.literal(" - " + r), true));
 			}
 			return structures.size();

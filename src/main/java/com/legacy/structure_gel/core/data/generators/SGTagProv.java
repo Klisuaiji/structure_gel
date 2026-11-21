@@ -16,14 +16,15 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 public class SGTagProv
 {
 	public static class BlockTagProv extends BlockTagsProvider
 	{
-		public BlockTagProv(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
+		public BlockTagProv(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper)
 		{
-			super(output, lookupProvider, StructureGelMod.MODID);
+			super(output, lookupProvider, StructureGelMod.MODID, existingFileHelper);
 		}
 
 		@Override
@@ -43,9 +44,9 @@ public class SGTagProv
 	public static class ItemTagProv extends ItemTagsProvider
 	{
 
-		public ItemTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags)
+		public ItemTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags, ExistingFileHelper existingFileHelper)
 		{
-			super(output, lookupProvider, blockTags, StructureGelMod.MODID);
+			super(output, lookupProvider, blockTags, StructureGelMod.MODID, existingFileHelper);
 		}
 
 		@Override
@@ -58,9 +59,9 @@ public class SGTagProv
 
 	public static class StructureTagProv extends StructureTagsProvider
 	{
-		public StructureTagProv(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
+		public StructureTagProv(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper)
 		{
-			super(output, lookupProvider, StructureGelMod.MODID);
+			super(output, lookupProvider, StructureGelMod.MODID, existingFileHelper);
 		}
 
 		@Override

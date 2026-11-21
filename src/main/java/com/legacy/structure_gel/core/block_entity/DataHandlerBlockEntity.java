@@ -288,7 +288,7 @@ public class DataHandlerBlockEntity extends SGBlockEntity/* implements IRotatabl
 			{
 				if (this.typeName != null)
 				{
-					DataHandlerType<?> type = StructureGelRegistries.DATA_HANDLER_TYPE.getValue(this.typeName);
+					DataHandlerType<?> type = StructureGelRegistries.DATA_HANDLER_TYPE.get(this.typeName);
 					if (type != null)
 					{
 						return type.create(type.getDataParser(level.registryAccess()).parse(this.dataEntries, level));

@@ -412,7 +412,7 @@ public class DataHandlerScreen extends Screen
 		}
 
 		ResourceLocation typeName = ResourceLocation.tryParse(typeStr);
-		DataHandlerType<?> type = StructureGelRegistries.DATA_HANDLER_TYPE.getValue(typeName);
+		DataHandlerType<?> type = StructureGelRegistries.DATA_HANDLER_TYPE.get(typeName);
 
 		if (type != null)
 		{

@@ -694,7 +694,7 @@ public class ActionHistory
 		@Override
 		public void redo(ServerPlayer player, ServerLevel level, ActionCounter actionsFinished)
 		{
-			Entity entity = EntityType.create(this.entity, level, MobSpawnType.COMMAND).orElse(null);
+			Entity entity = EntityType.create(this.entity, level).orElse(null);
 			if (entity != null)
 				level.addFreshEntity(entity);
 

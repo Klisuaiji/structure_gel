@@ -92,7 +92,7 @@ public class GelPortalFinder
 	@Nullable
 	private BlockPos calculateBottomLeft(BlockGetter level, Direction dir, BlockPos pos)
 	{
-		int i = Math.max(level.getMinY(), pos.getY() - size.maxHeight());
+		int i = Math.max(level.getMinBuildHeight(), pos.getY() - size.maxHeight());
 
 		while (pos.getY() > i && isEmpty(level.getBlockState(pos.below()), level, pos.below()))
 		{

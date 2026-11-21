@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item.TooltipContext;
@@ -35,6 +36,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.GameMasterBlock;
@@ -77,7 +79,7 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean copyData)
+	public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state)
 	{
 		ItemStack stack = new ItemStack(this);
 		Map<String, String> props = new HashMap<>();
@@ -107,7 +109,7 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 	}
 
 	@Override
-	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
 	{
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity instanceof DataHandlerBlockEntity dataHandler && player.canUseGameMasterBlocks())
@@ -115,17 +117,17 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 			boolean waterlogged = state.getValue(WATERLOGGED);
 			if ((stack.is(Items.WATER_BUCKET) && !waterlogged) || (stack.is(Items.BUCKET) && waterlogged))
 			{
-				return InteractionResult.PASS;
+				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 			}
 			if (level.isClientSide)
 			{
 				StructureGelMod.proxy.openDataHandlerScreen(dataHandler);
 			}
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 		}
 		else
 		{
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
 	}
 
@@ -142,7 +144,7 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 		{
 			if (level.getBlockEntity(pos) instanceof DataHandlerBlockEntity dataHandler)
 			{
-				dataHandler.setCustomName(stack.getCustomName());
+				dataHandler.setCustomName(stack.get(DataComponents.CUSTOM_NAME));
 			}
 		}
 
@@ -164,7 +166,7 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState state)
+	public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos)
 	{
 		return state.getValue(WATERLOGGED) ? Shapes.empty() : Shapes.block();
 	}

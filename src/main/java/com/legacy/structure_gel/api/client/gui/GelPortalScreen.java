@@ -37,7 +37,7 @@ public class GelPortalScreen extends ReceivingLevelScreen
 			return;
 		}
 
-		guiGraphics.blitSprite(RenderType::guiOpaqueTexturedBackground, this.getSprite(), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight());
+		guiGraphics.blit(0, 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), this.getSprite());
 	}
 
 	protected TextureAtlasSprite getSprite()

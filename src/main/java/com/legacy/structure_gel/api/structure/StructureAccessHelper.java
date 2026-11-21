@@ -44,7 +44,7 @@ public class StructureAccessHelper
 	 */
 	public static boolean isLakeProof(RegistryAccess registryAccess, Structure structure)
 	{
-		Registry<Structure> registry = registryAccess.lookupOrThrow(Registries.STRUCTURE);
+		Registry<Structure> registry = registryAccess.registryOrThrow(Registries.STRUCTURE);
 		Optional<ResourceKey<Structure>> key = registry.getResourceKey(structure);
 		if (key.isPresent() && LAKE_PROOF.contains(key.get()))
 			return true;
@@ -85,7 +85,7 @@ public class StructureAccessHelper
 	 */
 	public static boolean isInStructurePiece(ServerLevelAccessor levelAccessor, StructureType<?> type, BlockPos pos)
 	{
-		return levelAccessor.registryAccess().lookupOrThrow(Registries.STRUCTURE).stream().filter(s -> type.equals(s.type())).anyMatch(s -> isInStructurePiece(levelAccessor, s, pos));
+		return levelAccessor.registryAccess().registryOrThrow(Registries.STRUCTURE).stream().filter(s -> type.equals(s.type())).anyMatch(s -> isInStructurePiece(levelAccessor, s, pos));
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class StructureAccessHelper
 	 */
 	public static boolean isInStructure(ServerLevelAccessor levelAccessor, StructureType<?> type, BlockPos pos)
 	{
-		return levelAccessor.registryAccess().lookupOrThrow(Registries.STRUCTURE).stream().filter(s -> type.equals(s.type())).anyMatch(s -> isInStructure(levelAccessor, s, pos));
+		return levelAccessor.registryAccess().registryOrThrow(Registries.STRUCTURE).stream().filter(s -> type.equals(s.type())).anyMatch(s -> isInStructure(levelAccessor, s, pos));
 	}
 
 	/**

@@ -66,9 +66,11 @@ public class DistanceCommand
 		return command;
 	}
 
-	private static <T> Optional<? extends HolderSet.ListBacked<T>> getHolders(ResourceOrTagKeyArgument.Result<T> result, Registry<T> registry)
+	private static <T> Optional<HolderSet<T>> getHolders(ResourceOrTagKeyArgument.Result<T> result, Registry<T> registry)
 	{		
-		return result.unwrap().map(key -> registry.get(key).map(HolderSet::direct), tagKey -> registry.get(tagKey));
+		return result.unwrap().map(
+				key -> registry.getHolder(key).map(holder -> (HolderSet<T>) HolderSet.direct(holder)),
+				tagKey -> registry.getTag(tagKey).map(tag -> (HolderSet<T>) tag));
 	}
 
 	private static int structure(CommandContext<CommandSourceStack> context, ResourceOrTagKeyArgument.Result<Structure> result, int sampleSize) throws CommandSyntaxException
@@ -88,7 +90,7 @@ public class DistanceCommand
 		ServerLevel level = source.getLevel();
 		int r = (int) (level.getServer().getAbsoluteMaxWorldSize() * 0.9);
 		int y = (int) source.getPosition().y;
-		HolderSet<T> holderSet = getHolders(result, source.registryAccess().lookupOrThrow(registry)).orElseThrow(() -> error.create(searchFor));
+		HolderSet<T> holderSet = getHolders(result, source.registryAccess().registryOrThrow(registry)).orElseThrow(() -> error.create(searchFor));
 		if (holderSet.size() < 1)
 		{
 			source.sendFailure(Component.literal(searchFor + " contains no values or does not exist."));

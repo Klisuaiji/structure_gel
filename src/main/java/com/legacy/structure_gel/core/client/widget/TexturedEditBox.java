@@ -143,7 +143,7 @@ public class TexturedEditBox extends EditBox
 	public void renderTexture(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
 	{
 		RenderSystem.enableBlend();
-		graphics.blitSprite(RenderType::guiTextured, this.sprite.get(this.isActive(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
+		graphics.blitSprite(this.sprite.get(this.isActive(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
 		RenderSystem.disableBlend();
 	}
 

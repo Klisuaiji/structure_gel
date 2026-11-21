@@ -45,7 +45,7 @@ public class DynamicSpawnerHandler extends ProbabilityDataHandler<DynamicSpawner
 		level.setBlock(pos, SGRegistry.Blocks.DYNAMIC_SPAWNER.get().defaultBlockState(), Block.UPDATE_CLIENTS);
 		if (level.getBlockEntity(pos) instanceof DynamicSpawnerBlockEntity dynamicSpawner)
 		{
-			dynamicSpawner.setSpawner(StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getValueOrThrow(this.dynamicSpawnerType), level.registryAccess());
+			dynamicSpawner.setSpawner(StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getOrThrow(this.dynamicSpawnerType), level.registryAccess());
 			dynamicSpawner.setExpRange(this.expRange);
 			dynamicSpawner.setChanged();
 		}

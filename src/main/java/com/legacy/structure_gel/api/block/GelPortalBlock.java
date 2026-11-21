@@ -152,7 +152,7 @@ public abstract class GelPortalBlock extends Block implements Portal
 		}
 		TextureAtlasSprite textureatlassprite = this.getPortalTexture();
 		graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
-		graphics.blit(0, 0, graphics.guiWidth(), graphics.guiHeight(), textureatlassprite,
+		graphics.blit(0, 0, 0, graphics.guiWidth(), graphics.guiHeight(), textureatlassprite,
 				textureatlassprite.getU0(), textureatlassprite.getV0(),
 				textureatlassprite.getU1(), textureatlassprite.getV1());
 		graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -338,7 +338,7 @@ public abstract class GelPortalBlock extends Block implements Portal
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(LevelReader level, BlockPos blockPos, BlockState state, boolean copyData)
+	public ItemStack getCloneItemStack(LevelReader level, BlockPos blockPos, BlockState state)
 	{
 		return ItemStack.EMPTY;
 	}

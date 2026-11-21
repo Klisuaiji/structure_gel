@@ -1,6 +1,7 @@
 package com.legacy.structure_gel.core.registry;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import com.legacy.structure_gel.api.block.gel.GelSpreadBehavior;
@@ -131,7 +132,7 @@ public class SGRegistry
 			handler.registerBlock(YELLOW_GEL, p -> new StructureGelBlock(p, InitialAxisSpread.INSTANCE, List.of(DistanceRestriction.FIFTY)), gelProps, StructureGelItem::new, gelItemProps);
 
 			handler.registerBlock(DATA_HANDLER, DataHandlerBlock::new, () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STRUCTURE_BLOCK), GameMasterBlockItem::new, () -> new Item.Properties().rarity(Rarity.EPIC));
-			handler.registerBlock(DYNAMIC_SPAWNER, DynamicSpawnerBlock::new, () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SPAWNER).overrideLootTable(net.minecraft.world.level.block.Blocks.SPAWNER.getLootTable()), () -> new Item.Properties().rarity(Rarity.EPIC));
+			handler.registerBlock(DYNAMIC_SPAWNER, DynamicSpawnerBlock::new, () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SPAWNER).lootFrom(() -> net.minecraft.world.level.block.Blocks.SPAWNER), () -> new Item.Properties().rarity(Rarity.EPIC));
 		}
 	}
 
@@ -176,9 +177,9 @@ public class SGRegistry
 	public static interface BlockEntities
 	{
 		RegistrarHandler<BlockEntityType<?>> HANDLER = RegistrarHandler.getOrCreate(Registries.BLOCK_ENTITY_TYPE, StructureGelMod.MODID);
-		Static<BlockEntityType<GelSpreaderBlockEntity>> GEL_SPREADER = HANDLER.createStatic("gel_spreader", () -> new BlockEntityType<>(GelSpreaderBlockEntity::new, Blocks.GEL_SPREADER.get()));
-		Static<BlockEntityType<DataHandlerBlockEntity>> DATA_HANDLER = HANDLER.createStatic("data_handler", () -> new BlockEntityType<>(DataHandlerBlockEntity::new, Blocks.DATA_HANDLER.get()));
-		Static<BlockEntityType<DynamicSpawnerBlockEntity>> DYNAMIC_SPAWNER = HANDLER.createStatic("dynamic_spawner", () -> new BlockEntityType<>(DynamicSpawnerBlockEntity::new, Blocks.DYNAMIC_SPAWNER.get()));
+		Static<BlockEntityType<GelSpreaderBlockEntity>> GEL_SPREADER = HANDLER.createStatic("gel_spreader", () -> BlockEntityType.Builder.of(GelSpreaderBlockEntity::new, Blocks.GEL_SPREADER.get()).build(null));
+		Static<BlockEntityType<DataHandlerBlockEntity>> DATA_HANDLER = HANDLER.createStatic("data_handler", () -> BlockEntityType.Builder.of(DataHandlerBlockEntity::new, Blocks.DATA_HANDLER.get()).build(null));
+		Static<BlockEntityType<DynamicSpawnerBlockEntity>> DYNAMIC_SPAWNER = HANDLER.createStatic("dynamic_spawner", () -> BlockEntityType.Builder.of(DynamicSpawnerBlockEntity::new, Blocks.DYNAMIC_SPAWNER.get()).build(null));
 	}
 
 	@RegistrarHolder

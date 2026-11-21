@@ -52,7 +52,7 @@ public class TooltipSpriteButton extends Button
 	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
 	{
 		RenderSystem.enableDepthTest();
-		graphics.blitSprite(RenderType::guiTextured, this.sprites.get().get(this.isActive(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
+		graphics.blitSprite(this.sprites.get().get(this.isActive(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
 		if (this.isHoveredOrFocused() && this.onTooltip != null)
 			this.onTooltip.onTooltip(this, graphics, mouseX, mouseY);
 	}

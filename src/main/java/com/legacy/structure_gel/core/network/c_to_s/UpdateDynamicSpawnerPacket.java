@@ -84,7 +84,7 @@ public record UpdateDynamicSpawnerPacket(BlockPos pos, ResourceLocation spawnerT
 			if (state.getBlock() == SGRegistry.Blocks.DYNAMIC_SPAWNER.get() && level.getBlockEntity(pos) instanceof DynamicSpawnerBlockEntity spawner)
 			{
 				// Save
-				DynamicSpawnerType dynSpawn = StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getValue(packet.spawnerType);
+				DynamicSpawnerType dynSpawn = StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.get(packet.spawnerType);
 				if (dynSpawn != null)
 					spawner.setSpawner(dynSpawn, level.registryAccess());
 

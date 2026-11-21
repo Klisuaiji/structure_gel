@@ -402,7 +402,7 @@ public class RegistrarHandler<T>
 		{
 			ResourceKey<Block> key = this.key(name);
 			Registrar.BlockRef<V> ret = Registrar.createBlockRef(key);
-			this.needsRegistered.put(key, new FutureRegister<>(ret, () -> blockFactory.apply(properties.get().setId(key))));
+			this.needsRegistered.put(key, new FutureRegister<>(ret, () -> blockFactory.apply(properties.get())));
 			return ret;
 		}
 
@@ -419,7 +419,7 @@ public class RegistrarHandler<T>
 		public <V extends Block, I extends Item> Registrar.BlockRef<V> block(String name, Function<BlockBehaviour.Properties, V> blockFactory, Supplier<BlockBehaviour.Properties> properties, BiFunction<V, Item.Properties, I> itemFactory, Supplier<Item.Properties> itemProperties)
 		{
 			Registrar.BlockRef<V> ret = this.blockOnly(name, blockFactory, properties);
-			getOrCreateItems(this.modID).item(name, p -> itemFactory.apply(ret.get(), p), () -> itemProperties.get().useBlockDescriptionPrefix());
+			getOrCreateItems(this.modID).item(name, p -> itemFactory.apply(ret.get(), p), itemProperties);
 			return ret;
 		}
 		
@@ -434,7 +434,7 @@ public class RegistrarHandler<T>
 		
 		public <V extends Block> void registerBlockOnly(Registrar.Static<V> registrar, Function<BlockBehaviour.Properties, V> blockFactory, Supplier<BlockBehaviour.Properties> properties)
 		{
-			super.register(registrar, () -> blockFactory.apply(properties.get().setId(registrar.getKey(this.registry))));
+			super.register(registrar, () -> blockFactory.apply(properties.get()));
 		}
 
 		public <V extends Block> void registerBlock(Registrar.Static<V> registrar, Function<BlockBehaviour.Properties, V> blockFactory, Supplier<BlockBehaviour.Properties> properties)
@@ -450,7 +450,7 @@ public class RegistrarHandler<T>
 		public <V extends Block, I extends Item> void registerBlock(Registrar.Static<V> registrar, Function<BlockBehaviour.Properties, V> blockFactory, Supplier<BlockBehaviour.Properties> properties, BiFunction<V, Item.Properties, I> itemFactory, Supplier<Item.Properties> itemProperties)
 		{
 			this.registerBlockOnly(registrar, blockFactory, properties);
-			getOrCreateItems(this.modID).item(registrar.key.location().getPath(), p -> itemFactory.apply(registrar.get(), p), () -> itemProperties.get().useBlockDescriptionPrefix());
+			getOrCreateItems(this.modID).item(registrar.key.location().getPath(), p -> itemFactory.apply(registrar.get(), p), itemProperties);
 		}
 	}
 
@@ -466,7 +466,7 @@ public class RegistrarHandler<T>
 		{
 			ResourceKey<Item> key = this.key(name);
 			Registrar.ItemRef<V> ret = Registrar.createItemRef(key);
-			this.needsRegistered.put(key, new FutureRegister<>(ret, () -> itemFactory.apply(properties.get().setId(key))));
+			this.needsRegistered.put(key, new FutureRegister<>(ret, () -> itemFactory.apply(properties.get())));
 			return ret;
 		}
 
@@ -481,7 +481,7 @@ public class RegistrarHandler<T>
 		
 		public <V extends Item> void registerItem(Registrar.Static<V> registrar, Function<Item.Properties, V> itemFactory, Supplier<Item.Properties> properties)
 		{
-			super.register(registrar, () -> itemFactory.apply(properties.get().setId(registrar.getKey(this.registry))));
+			super.register(registrar, () -> itemFactory.apply(properties.get()));
 		}
 	}
 

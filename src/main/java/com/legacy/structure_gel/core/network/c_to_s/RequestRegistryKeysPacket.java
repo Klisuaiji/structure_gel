@@ -53,7 +53,7 @@ public record RequestRegistryKeysPacket(ResourceKey<? extends Registry<?>> regis
 			ServerLevel level = player.serverLevel();
 			if (level != null)
 			{
-				var opRegistry = level.registryAccess().lookup(packet.registry);
+				var opRegistry = level.registryAccess().registry(packet.registry);
 				if (opRegistry.isPresent())
 				{
 					Registry<?> registry = opRegistry.get();

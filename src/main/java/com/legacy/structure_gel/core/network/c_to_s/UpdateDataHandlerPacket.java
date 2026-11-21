@@ -171,7 +171,7 @@ public record UpdateDataHandlerPacket(Mode mode, BlockPos pos, List<RawHandler> 
 				// Generate
 				if (packet.mode.shouldGenerate())
 				{
-					ItemStack stack = SGRegistry.Blocks.DATA_HANDLER.get() instanceof DataHandlerBlock d ? d.getCloneItemStack(level, pos, state, true) : SGRegistry.Blocks.DATA_HANDLER.asItem().getDefaultInstance();
+					ItemStack stack = SGRegistry.Blocks.DATA_HANDLER.get() instanceof DataHandlerBlock d ? d.getCloneItemStack(level, pos, state) : SGRegistry.Blocks.DATA_HANDLER.asItem().getDefaultInstance();
 
 					// Copy Block Entity data to the item
 					CompoundTag beTag = dataHandler.saveCustomOnly(level.registryAccess());

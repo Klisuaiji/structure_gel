@@ -311,7 +311,7 @@ public class EditPaletteScreen extends LayeredScreen
 
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableBlend();
-			graphics.blitSprite(RenderType::guiTextured, SGSprites.BUILDING_TOOL_BUTTON.enabled(), centerX - 163, widgetY, 24, 24);
+			graphics.blitSprite(SGSprites.BUILDING_TOOL_BUTTON.enabled(), centerX - 163, widgetY, 24, 24);
 
 			Optional<Pair<BlockState, Integer>> parsed = this.parse();
 			if (parsed.isPresent())

@@ -267,7 +267,7 @@ public class CapturedBlocks
 			{
 				BlockPos offset = pos.relative(dir);
 				BlockState offsetState = positions.get(offset);
-				if (offsetState == null || !offsetState.isSolidRender())
+				if (offsetState == null || !offsetState.isSolidRender(level, offset))
 				{
 					remove = false;
 					break;
@@ -590,7 +590,7 @@ public class CapturedBlocks
 		@Nullable
 		public Entity createEntity(Level level, BlockPos startPos, Mirror mirror, Rotation rotation)
 		{
-			Entity entity = EntityType.create(this.entityTag(), level, MobSpawnType.COMMAND).orElse(null);
+			Entity entity = EntityType.create(this.entityTag(), level).orElse(null);
 			if (entity != null)
 			{
 				float rot = entity.mirror(mirror);
