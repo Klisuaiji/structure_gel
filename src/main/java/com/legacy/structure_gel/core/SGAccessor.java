@@ -46,17 +46,17 @@ public record SGAccessor<R>(Method method) {
    public static <R> SGAccessor<R> create(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
       try {
          return new SGAccessor<>(ObfuscationReflectionHelper.findMethod(clazz, methodName, parameterTypes));
-      } catch (Throwable var4) {
-         throw new UnableToFindMethodException(var4);
+      } catch (Throwable t) {
+         throw new UnableToFindMethodException(t);
       }
    }
 
    @Nullable
-   public R invoke(@Nullable Object owner, Object... params) {
+   public R invoke(Object owner, Object... params) {
       try {
          return (R)this.method.invoke(owner, params);
-      } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException var4) {
-         StructureGelMod.LOGGER.fatal("Couldn't use accessor. {}", var4);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+         StructureGelMod.LOGGER.fatal("Couldn't use accessor. {}", e);
          return null;
       }
    }

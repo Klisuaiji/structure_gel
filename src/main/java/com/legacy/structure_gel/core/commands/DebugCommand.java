@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.commands;
 
+import com.legacy.blue_skies.compat.*;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -82,8 +83,8 @@ public class DebugCommand {
             String oldName = structureBlock.getStructureName();
             if (oldName.contains(":structures/")) {
                String newName = oldName.replaceFirst(":structures/", ":structure/");
-               if (ResourceLocation.isValidResourceLocation(newName)) {
-                  structureBlock.setStructureName(new ResourceLocation(newName));
+               if (LegacyRL.isValid(newName)) {
+                  structureBlock.setStructureName(ResourceLocation.parse(newName));
                   structureBlock.setChanged();
                   BlockState state = structureBlock.getBlockState();
                   level.sendBlockUpdated(entry.getKey(), state, state, 3);

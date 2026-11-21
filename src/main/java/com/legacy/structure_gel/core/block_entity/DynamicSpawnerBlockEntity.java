@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.block_entity;
 
+import net.minecraft.core.HolderLookup;
 import com.legacy.structure_gel.api.dynamic_spawner.DynamicSpawnerType;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.core.dynamic_spawner.DynamicSpawner;
@@ -45,10 +46,10 @@ public class DynamicSpawnerBlockEntity extends SGBlockEntity {
       return this.expRange;
    }
 
-   public void load(CompoundTag tag) {
-      super.load(tag);
+   public void loadAdditional(CompoundTag tag, HolderLookup.Provider p) {
+      super.loadAdditional(tag, p);
       if (tag.contains("SpawnerID", 8)) {
-         ResourceLocation typeName = new ResourceLocation(tag.getString("SpawnerID"));
+         ResourceLocation typeName = ResourceLocation.parse(tag.getString("SpawnerID"));
          if (tag.contains("Spawner", 10)) {
             this.spawnerID = typeName;
             this.spawner.load(this.level, this.worldPosition, tag.getCompound("Spawner"));
@@ -62,8 +63,8 @@ public class DynamicSpawnerBlockEntity extends SGBlockEntity {
       }
    }
 
-   protected void saveAdditional(CompoundTag tag) {
-      super.saveAdditional(tag);
+   protected void saveAdditional(CompoundTag tag, HolderLookup.Provider p) {
+      super.saveAdditional(tag, p);
       if (this.spawnerID != null) {
          tag.putString("SpawnerID", this.spawnerID.toString());
       }
@@ -73,9 +74,9 @@ public class DynamicSpawnerBlockEntity extends SGBlockEntity {
 
    @Override
    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-      return ClientboundBlockEntityDataPacket.create(this, b -> {
-         CompoundTag tag = this.serializeNBT();
-         this.saveAdditional(tag);
+      return ClientboundBlockEntityDataPacket.create(this, (b, registries) -> {
+         CompoundTag tag = this.saveWithFullMetadata(registries);
+         this.saveAdditional(tag, registries);
          CompoundTag spawnerTag = this.spawner.save(new CompoundTag());
          tag.put("Spawner", spawnerTag);
          return tag;

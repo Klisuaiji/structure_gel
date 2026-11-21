@@ -20,9 +20,7 @@ public class RegisterArmorTrimTexturesEvent extends Event implements IModBusEven
    private final Map<ResourceKey<TrimMaterial>, Map<ArmorMaterial, String>> colorPaletteOverrides;
    private final Map<ResourceKey<TrimMaterial>, Integer> materialLight;
 
-   @Deprecated(
-      forRemoval = true
-   )
+   @Deprecated(forRemoval = true)
    public RegisterArmorTrimTexturesEvent(
       Set<ResourceLocation> armorPatterns,
       Map<String, ResourceLocation> trimMaterials,

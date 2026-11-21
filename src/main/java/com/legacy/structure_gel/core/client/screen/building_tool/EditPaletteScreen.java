@@ -95,7 +95,7 @@ public class EditPaletteScreen extends LayeredScreen {
       this.repositionPaletteEntries();
    }
 
-   private void addPaletteEntry(@Nullable BlockState state, int weight, boolean reposition) {
+   private void addPaletteEntry(BlockState state, int weight, boolean reposition) {
       int texSize = 256;
       int centerX = this.width / 2;
       int centerY = this.height / 2;
@@ -130,7 +130,7 @@ public class EditPaletteScreen extends LayeredScreen {
             if (!result.blockState().getBlock().isEnabled(this.minecraft.level.enabledFeatures())) {
                color = 14703708;
             }
-         } catch (CommandSyntaxException var5x) {
+         } catch (CommandSyntaxException e) {
             color = 14703708;
          }
 
@@ -293,17 +293,17 @@ public class EditPaletteScreen extends LayeredScreen {
    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
       if (super.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
          return true;
-      } else {
-         if (deltaY > 0.0) {
-            this.scrollUp();
-         }
-
-         if (deltaY < 0.0) {
-            this.scrollDown();
-         }
-
-         return true;
       }
+
+      if (deltaY > 0.0) {
+         this.scrollUp();
+      }
+
+      if (deltaY < 0.0) {
+         this.scrollDown();
+      }
+
+      return true;
    }
 
    @Override
@@ -367,10 +367,10 @@ public class EditPaletteScreen extends LayeredScreen {
          && !pressedEnter
          && backspace != keyCode) {
          return super.keyPressed(keyCode, scanCode, modifiers);
-      } else {
-         this.back();
-         return true;
       }
+
+      this.back();
+      return true;
    }
 
    private void back() {

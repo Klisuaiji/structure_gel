@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
 public interface SinglePoolElementExtension {
-   void structure_gel$setPiece(@Nullable StructurePiece var1);
+   void structure_gel$setPiece(StructurePiece var1);
 
    @Nullable
    StructurePiece structure_gel$getPiece();

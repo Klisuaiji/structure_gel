@@ -1,8 +1,8 @@
 package com.legacy.structure_gel.core.block_entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,25 +13,15 @@ public abstract class SGBlockEntity extends BlockEntity {
       super(type, pos, state);
    }
 
-   public CompoundTag getUpdateTag() {
+   @Override
+   public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
       CompoundTag tag = new CompoundTag();
-      this.saveAdditional(tag);
+      this.saveAdditional(tag, registries);
       return tag;
    }
 
-   public void handleUpdateTag(CompoundTag tag) {
-      this.load(tag);
-   }
-
+   @Override
    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-      return ClientboundBlockEntityDataPacket.create(this, b -> {
-         CompoundTag tag = this.serializeNBT();
-         this.saveAdditional(tag);
-         return tag;
-      });
-   }
-
-   public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-      this.load(packet.getTag());
+      return ClientboundBlockEntityDataPacket.create(this);
    }
 }

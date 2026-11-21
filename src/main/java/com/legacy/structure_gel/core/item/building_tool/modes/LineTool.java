@@ -5,7 +5,6 @@ import com.legacy.structure_gel.core.item.building_tool.BuildingToolItem;
 import com.legacy.structure_gel.core.item.building_tool.BuildingToolMode;
 import com.legacy.structure_gel.core.item.building_tool.ToolModeProperty;
 import com.legacy.structure_gel.core.util.SGText;
-import java.lang.invoke.StringConcatFactory;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -100,8 +99,7 @@ public class LineTool extends BuildingToolMode.ForCorners {
          return Component.translatable(
             "info.structure_gel.building_tool.message.length",
             new Object[]{
-               Component.literal(StringConcatFactory.makeConcatWithConstants<"makeConcatWithConstants","\u0001">(format.format(dist)))
-                  .withStyle(SGText.VALUE_LABEL_STYLE),
+               Component.literal(format.format(dist) + "").withStyle(SGText.VALUE_LABEL_STYLE),
                Component.literal(getLinePositions(p1.get(), p2.get()).size() + "").withStyle(SGText.VALUE_LABEL_STYLE)
             }
          );
@@ -116,23 +114,23 @@ public class LineTool extends BuildingToolMode.ForCorners {
       if (magnitude == 0.0) {
          poses.add(cornerA);
          return poses;
-      } else {
-         int x = cornerA.getX();
-         int y = cornerA.getY();
-         int z = cornerA.getZ();
-         double dX = (x - cornerB.getX()) / magnitude;
-         double dY = (y - cornerB.getY()) / magnitude;
-         double dZ = (z - cornerB.getZ()) / magnitude;
-         BlockPos pos = cornerA;
-         int i = 0;
-
-         while (!pos.equals(cornerB) && i < magnitude + 1.0) {
-            pos = cornerA.offset((int)(-Math.round(dX * i)), (int)(-Math.round(dY * i)), (int)(-Math.round(dZ * i)));
-            i++;
-            poses.add(pos);
-         }
-
-         return poses;
       }
+
+      int x = cornerA.getX();
+      int y = cornerA.getY();
+      int z = cornerA.getZ();
+      double dX = (x - cornerB.getX()) / magnitude;
+      double dY = (y - cornerB.getY()) / magnitude;
+      double dZ = (z - cornerB.getZ()) / magnitude;
+      BlockPos pos = cornerA;
+      int i = 0;
+
+      while (!pos.equals(cornerB) && i < magnitude + 1.0) {
+         pos = cornerA.offset((int)(-Math.round(dX * i)), (int)(-Math.round(dY * i)), (int)(-Math.round(dZ * i)));
+         i++;
+         poses.add(pos);
+      }
+
+      return poses;
    }
 }

@@ -16,7 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -53,19 +53,13 @@ public class RegistrarHandler<T> {
    }
 
    public static <T> RegistrarHandler<T> getOrCreate(ResourceKey<Registry<T>> registry, String modID) {
-      return getOrCreate(
-         registry,
-         modID,
-         r -> {
-            if (r.equals(Registries.BLOCK)) {
-               return new RegistrarHandler.BlockHandler(modID);
-            } else {
-               return (RegistrarHandler<?>)(r.equals(Registries.ITEM)
-                  ? new RegistrarHandler.ItemHandler(modID)
-                  : new RegistrarHandler((ResourceKey<Registry<T>>)r, modID));
-            }
+      return getOrCreate(registry, modID, r -> {
+         if (r.equals(Registries.BLOCK)) {
+            return new RegistrarHandler.BlockHandler(modID);
+         } else {
+            return r.equals(Registries.ITEM) ? new RegistrarHandler.ItemHandler(modID) : new RegistrarHandler((ResourceKey<Registry<T>>)r, modID);
          }
-      );
+      });
    }
 
    public static RegistrarHandler.BlockHandler getOrCreateBlocks(String modID) throws ClassCastException {
@@ -109,7 +103,7 @@ public class RegistrarHandler<T> {
    }
 
    public <V extends T> Registrar.Static<V> createStatic(String key, Supplier<V> value) {
-      return this.createStatic(new ResourceLocation(this.modID, key), value);
+      return this.createStatic(ResourceLocation.fromNamespaceAndPath(this.modID, key), value);
    }
 
    public <V extends T> Registrar.Static<V> createStatic(ResourceLocation key, Supplier<V> value) {
@@ -126,11 +120,11 @@ public class RegistrarHandler<T> {
       return this.createPointer(key, c -> value.get());
    }
 
-   public <V extends T> Registrar.Pointer<V> createPointer(String key, Function<BootstapContext<?>, V> value) {
-      return this.createPointer(new ResourceLocation(this.modID, key), value);
+   public <V extends T> Registrar.Pointer<V> createPointer(String key, Function<BootstrapContext<?>, V> value) {
+      return this.createPointer(ResourceLocation.fromNamespaceAndPath(this.modID, key), value);
    }
 
-   public <V extends T> Registrar.Pointer<V> createPointer(ResourceLocation key, Function<BootstapContext<?>, V> value) {
+   public <V extends T> Registrar.Pointer<V> createPointer(ResourceLocation key, Function<BootstrapContext<?>, V> value) {
       Registrar.Pointer<V> ret = Registrar.createPointer(this.registry, key, value);
       if (ret instanceof Registrar.DataGenPointer) {
          this.needsGenerated.add((Registrar.DataGenPointer<?>)ret);
@@ -150,11 +144,11 @@ public class RegistrarHandler<T> {
    }
 
    public ResourceKey<T> key(String name) {
-      return ResourceKey.create(this.registry, new ResourceLocation(this.modID, name));
+      return ResourceKey.create(this.registry, ResourceLocation.fromNamespaceAndPath(this.modID, name));
    }
 
    public TagKey<T> tagKey(String name) {
-      return TagKey.create(this.registry, new ResourceLocation(this.modID, name));
+      return TagKey.create(this.registry, ResourceLocation.fromNamespaceAndPath(this.modID, name));
    }
 
    public static void registerHandlers(String modID, IEventBus modBus, RegistrarHandler<?>... handlers) {
@@ -210,8 +204,8 @@ public class RegistrarHandler<T> {
          }
       }
 
-      for (Entry<ResourceKey<Registry<?>>, List<RegistrarHandler<?>>> entryx : registrars.entrySet()) {
-         builder.add(entryx.getKey(), c -> entry.getValue().forEach(r -> r.registerForDatagen(c)));
+      for (Entry<ResourceKey<Registry<?>>, List<RegistrarHandler<?>>> entry : registrars.entrySet()) {
+         builder.add(entry.getKey(), c -> entry.getValue().forEach(r -> r.registerForDatagen(c)));
       }
 
       return builder;
@@ -221,7 +215,7 @@ public class RegistrarHandler<T> {
       return BuiltInRegistries.REGISTRY.containsKey(this.registry.location());
    }
 
-   private void registerForDatagen(BootstapContext<T> context) {
+   private void registerForDatagen(BootstrapContext<T> context) {
       StructureGelMod.LOGGER.info("Registering {} ({})", this.registry.location(), this.modID);
       this.bootstraps.forEach(b -> b.run(context));
       int s = this.needsGenerated.size();
@@ -242,7 +236,7 @@ public class RegistrarHandler<T> {
       }
 
       public <V extends Block> Registrar.BlockRef<V> createStatic(String key, Supplier<V> value) {
-         return this.createStatic(new ResourceLocation(this.modID, key), value);
+         return this.createStatic(ResourceLocation.fromNamespaceAndPath(this.modID, key), value);
       }
 
       public <V extends Block> Registrar.BlockRef<V> createStatic(ResourceLocation key, Supplier<V> value) {
@@ -262,7 +256,7 @@ public class RegistrarHandler<T> {
       public <V extends Block> Registrar.BlockRef<V> createStatic(
          String key, Supplier<V> value, Properties itemProperties, BiFunction<V, Properties, BlockItem> blockItemFactory
       ) {
-         return this.createStatic(new ResourceLocation(this.modID, key), value, itemProperties, blockItemFactory);
+         return this.createStatic(ResourceLocation.fromNamespaceAndPath(this.modID, key), value, itemProperties, blockItemFactory);
       }
 
       public <V extends Block> Registrar.BlockRef<V> createStatic(
@@ -275,7 +269,7 @@ public class RegistrarHandler<T> {
    }
 
    public interface BootstrapInit<T> {
-      void run(BootstapContext<T> var1);
+      void run(BootstrapContext<T> var1);
    }
 
    private static class GroupedRegistryListener {
@@ -304,7 +298,7 @@ public class RegistrarHandler<T> {
       }
 
       public <V extends Item> Registrar.ItemRef<V> createStatic(String key, Supplier<V> value) {
-         return this.createStatic(new ResourceLocation(this.modID, key), value);
+         return this.createStatic(ResourceLocation.fromNamespaceAndPath(this.modID, key), value);
       }
 
       public <V extends Item> Registrar.ItemRef<V> createStatic(ResourceLocation key, Supplier<V> value) {

@@ -78,9 +78,9 @@ public class DataHandlerRenderer implements BlockEntityRenderer<DataHandlerBlock
       Vec3 offset = dataHandler.getOffset();
       if (Vec3.ZERO.equals(offset)) {
          return super.getRenderBoundingBox(dataHandler);
-      } else {
-         double size = Math.max(Math.max(Math.abs(offset.x()), Math.abs(offset.y())), Math.abs(offset.z())) + 3.0;
-         return AABB.ofSize(Vec3.atCenterOf(dataHandler.getBlockPos()), size, size, size);
       }
+
+      double size = Math.max(Math.max(Math.abs(offset.x()), Math.abs(offset.y())), Math.abs(offset.z())) + 3.0;
+      return AABB.ofSize(Vec3.atCenterOf(dataHandler.getBlockPos()), size, size, size);
    }
 }

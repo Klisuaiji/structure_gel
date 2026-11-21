@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.flag.FeatureFlagSet;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record RequestRegistryKeysPacket(ResourceKey<? extends Registry<?>> registry)
    implements SGPacketHandler.ModPacket<RequestRegistryKeysPacket, RequestRegistryKeysPacket.Handler> {
@@ -36,8 +36,8 @@ public record RequestRegistryKeysPacket(ResourceKey<? extends Registry<?>> regis
          return new RequestRegistryKeysPacket(buff.readRegistryKey());
       }
 
-      public void handler(RequestRegistryKeysPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(RequestRegistryKeysPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             ServerLevel level = this.serverLevel(context);
             if (level != null) {
                Optional<Registry<Object>> opRegistry = level.registryAccess().registry(packet.registry);

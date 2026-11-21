@@ -20,14 +20,14 @@ public class DynamicSpawnerType {
    }
 
    @Internal
-   public DynamicSpawner createSpawner(@Nullable Level level, BlockPos pos) {
+   public DynamicSpawner createSpawner(Level level, BlockPos pos) {
       return this.spawnerMaker.make(level, pos);
    }
 
    private interface SpawnerMaker {
-      DynamicSpawner make(@Nullable Level var1, BlockPos var2);
+      DynamicSpawner make(Level var1, BlockPos var2);
 
-      private static DynamicSpawner makeSpawner(DynamicSpawnerType.SpawnerModifier modifier, @Nullable Level level, BlockPos pos) {
+      private static DynamicSpawner makeSpawner(DynamicSpawnerType.SpawnerModifier modifier, Level level, BlockPos pos) {
          BlockState state = level != null ? level.getBlockState(pos) : ((DynamicSpawnerBlock)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()).defaultBlockState();
          if (!state.is((Block)SGRegistry.Blocks.DYNAMIC_SPAWNER.get())) {
             state = ((DynamicSpawnerBlock)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()).defaultBlockState();
@@ -42,6 +42,6 @@ public class DynamicSpawnerType {
    }
 
    public interface SpawnerModifier {
-      void modify(SpawnerBlockEntity var1, @Nullable Level var2, BlockPos var3);
+      void modify(SpawnerBlockEntity var1, Level var2, BlockPos var3);
    }
 }

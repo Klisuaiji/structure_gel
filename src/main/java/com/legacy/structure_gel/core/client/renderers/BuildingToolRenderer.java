@@ -72,7 +72,7 @@ public abstract class BuildingToolRenderer implements IRenderBase {
    protected BuildingToolRenderer() {
    }
 
-   private static void updateRenderedMode(@Nullable ItemStack stack) {
+   private static void updateRenderedMode(ItemStack stack) {
       BuildingToolMode newMode = stack != null && stack.is(SGRegistry.Items.BUILDING_TOOL.get()) ? BuildingToolItem.getMode(stack) : null;
       if (currentMode != newMode || instance == null) {
          currentMode = newMode;
@@ -114,7 +114,7 @@ public abstract class BuildingToolRenderer implements IRenderBase {
                   instance.needsCompiled = false;
                }
 
-               instance.render(mc, player, toolStack, poseStack, projectionMatrix, camX, camY, camZ);
+               instance.render(mc, player, toolStack, poseStack, -1);
                poseStack.popPose();
             }
          }
@@ -150,8 +150,8 @@ public abstract class BuildingToolRenderer implements IRenderBase {
                VertexBuffer.unbind();
                this.renderPos = result.renderInfo().renderPos;
                this.lastRenderInfo = result.renderInfo();
-            } catch (Throwable var13) {
-               var13.printStackTrace();
+            } catch (Throwable t) {
+               t.printStackTrace();
             }
          }
       } else {
@@ -469,7 +469,7 @@ public abstract class BuildingToolRenderer implements IRenderBase {
          Vec3i camPos = mc.gameRenderer.getMainCamera().getBlockPosition();
          int dist = 300;
          if (this.pos != null && this.pos.closerThan(camPos, dist) || this.secondPos != null && this.secondPos.closerThan(camPos, dist)) {
-            super.render(mc, player, stack, poseStack, projectionMatrix, camX, camY, camZ);
+            super.render(mc, player, stack, poseStack, -1);
          }
 
          if (this.targetBuffer != null && this.hitPos != null) {

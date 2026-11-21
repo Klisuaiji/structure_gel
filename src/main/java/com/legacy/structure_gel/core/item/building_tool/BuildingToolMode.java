@@ -87,7 +87,7 @@ public abstract class BuildingToolMode {
    private BuildingToolMode(ResourceLocation name, int modelIndex) {
       this.name = name;
       this.modelIndex = modelIndex;
-      this.iconTexture = new ResourceLocation(name.getNamespace(), "textures/item/building_tool_" + name.getPath() + ".png");
+      this.iconTexture = ResourceLocation.fromNamespaceAndPath(name.getNamespace(), "textures/item/building_tool_" + name.getPath() + ".png");
       this.component = Component.translatable("item.structure_gel.building_tool.mode." + name.toString());
       this.descKey = "item.structure_gel.building_tool.mode.description." + name.toString();
       List<ToolModeProperty<?>> props = new ArrayList<>();
@@ -153,9 +153,9 @@ public abstract class BuildingToolMode {
    }
 
    protected boolean setBlock(
-      Level level, BlockPos pos, BlockState state, boolean causeBlockUpdates, @Nullable CompoundTag blockEntityTag, ActionHistory.ActionBuilder actionBuilder
+      Level level, BlockPos pos, BlockState state, boolean causeBlockUpdates, CompoundTag blockEntityTag, ActionHistory.ActionBuilder actionBuilder
    ) {
-      return this.setBlock(level, pos, (Function<BlockState, BlockState>)(old -> state), causeBlockUpdates, blockEntityTag, actionBuilder);
+      return this.setBlock(level, pos, old -> state, causeBlockUpdates, blockEntityTag, actionBuilder);
    }
 
    protected boolean setBlock(
@@ -169,7 +169,7 @@ public abstract class BuildingToolMode {
       BlockPos pos,
       Function<BlockState, BlockState> modifyState,
       boolean causeBlockUpdates,
-      @Nullable CompoundTag blockEntityTag,
+      CompoundTag blockEntityTag,
       ActionHistory.ActionBuilder actionBuilder
    ) {
       return this.setBlock(level, pos, modifyState, causeBlockUpdates, blockEntityTag, actionBuilder, Mirror.NONE, Rotation.NONE);
@@ -180,7 +180,7 @@ public abstract class BuildingToolMode {
       BlockPos pos,
       Function<BlockState, BlockState> modifyState,
       boolean causeBlockUpdates,
-      @Nullable CompoundTag blockEntityTag,
+      CompoundTag blockEntityTag,
       ActionHistory.ActionBuilder actionBuilder,
       Mirror mirror,
       Rotation rotation
@@ -189,45 +189,45 @@ public abstract class BuildingToolMode {
       BlockState newState = modifyState.apply(oldState);
       if (newState == null) {
          return false;
-      } else {
-         BlockEntity oldBlockEntity = level.getBlockEntity(pos);
-         CompoundTag oldBETag;
-         if (oldBlockEntity != null) {
-            oldBETag = oldBlockEntity.saveWithoutMetadata();
-            Clearable.tryClear(oldBlockEntity);
-            level.setBlock(pos, Blocks.BARRIER.defaultBlockState(), 18);
-         } else {
-            oldBETag = null;
-         }
+      }
 
-         int flags = 2;
-         if (causeBlockUpdates) {
-            flags++;
-            if (newState.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) || newState.hasProperty(BlockStateProperties.BED_PART)) {
-               flags += 16;
-            }
-         } else {
+      BlockEntity oldBlockEntity = level.getBlockEntity(pos);
+      CompoundTag oldBETag;
+      if (oldBlockEntity != null) {
+         oldBETag = oldBlockEntity.saveWithoutMetadata();
+         Clearable.tryClear(oldBlockEntity);
+         level.setBlock(pos, Blocks.BARRIER.defaultBlockState(), 18);
+      } else {
+         oldBETag = null;
+      }
+
+      int flags = 2;
+      if (causeBlockUpdates) {
+         flags++;
+         if (newState.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) || newState.hasProperty(BlockStateProperties.BED_PART)) {
             flags += 16;
          }
-
-         boolean ret = level.setBlock(pos, newState, flags);
-         BlockEntity newBlockEntity = level.getBlockEntity(pos);
-         if (newBlockEntity != null) {
-            if (blockEntityTag != null) {
-               newBlockEntity.load(blockEntityTag);
-            }
-
-            if (newBlockEntity instanceof IRotatable r) {
-               r.transform(mirror, rotation);
-            }
-         }
-
-         if (ret) {
-            actionBuilder.changeBlock(pos, oldState, oldBETag, newState, blockEntityTag, flags);
-         }
-
-         return ret;
+      } else {
+         flags += 16;
       }
+
+      boolean ret = level.setBlock(pos, newState, flags);
+      BlockEntity newBlockEntity = level.getBlockEntity(pos);
+      if (newBlockEntity != null) {
+         if (blockEntityTag != null) {
+            newBlockEntity.load(blockEntityTag);
+         }
+
+         if (newBlockEntity instanceof IRotatable r) {
+            r.transform(mirror, rotation);
+         }
+      }
+
+      if (ret) {
+         actionBuilder.changeBlock(pos, oldState, oldBETag, newState, blockEntityTag, flags);
+      }
+
+      return ret;
    }
 
    protected boolean addEntity(Level level, Entity entity, ActionHistory.ActionBuilder actionBuilder) {
@@ -450,7 +450,7 @@ public abstract class BuildingToolMode {
          Optional<BlockPos> pos1 = BuildingToolItem.getPos(stack, 1);
          if (pos0.isPresent() && pos1.isPresent()) {
             if (this.requiresSelectionLoaded() && (!level.isLoaded(pos0.get()) || !level.isLoaded(pos1.get()))) {
-               sendMessage(player, "info.structure_gel.building_tool.message.pos_unloaded", new Object[0]);
+               sendMessage(player, "info.structure_gel.building_tool.message.pos_unloaded");
             } else {
                this.performAction(level, player, clickedPos, stack, pos0.get(), pos1.get());
             }
@@ -468,7 +468,7 @@ public abstract class BuildingToolMode {
                player,
                "info.structure_gel.building_tool.message.missing_pos",
                Style.EMPTY.withColor(ChatFormatting.RED),
-               new Object[]{"[" + String.join(", ", missingPoses) + "]"}
+               "[" + String.join(", ", missingPoses) + "]"
             );
          }
       }

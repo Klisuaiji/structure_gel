@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class LootTableAlias {
    @Nullable
-   public static ResourceLocation getLootTable(@Nullable ResourceLocation alias) {
+   public static ResourceLocation getLootTable(ResourceLocation alias) {
       return alias == null ? null : StructureGelRegistries.LOOT_TABLE_ALIAS.getOptional(alias).orElse(alias);
    }
 }

@@ -12,7 +12,7 @@ public interface SGTags {
       return TagKey.create(registryKey, StructureGelMod.locate(name));
    }
 
-   public interface StructureTags {
+   interface StructureTags {
       TagKey<Structure> LAKE_PROOF = create("lake_proof");
 
       static TagKey<Structure> create(String name) {

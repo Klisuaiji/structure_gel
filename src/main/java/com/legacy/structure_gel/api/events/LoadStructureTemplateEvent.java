@@ -73,7 +73,7 @@ public class LoadStructureTemplateEvent extends Event {
       }
    }
 
-   public void setBlock(Palette palette, BlockPos pos, BlockState state, @Nullable CompoundTag tag) {
+   public void setBlock(Palette palette, BlockPos pos, BlockState state, CompoundTag tag) {
       this.setBlock(palette, new StructureBlockInfo(pos, state, tag));
    }
 

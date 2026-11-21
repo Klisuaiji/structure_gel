@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class RequestClipboardPacket implements SGPacketHandler.ModPacket<RequestClipboardPacket, RequestClipboardPacket.Handler> {
    final BoundingBox bounds;
@@ -38,8 +38,8 @@ public class RequestClipboardPacket implements SGPacketHandler.ModPacket<Request
          return new RequestClipboardPacket(NetworkUtil.readBoundingBox(buff));
       }
 
-      public void handler(RequestClipboardPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(RequestClipboardPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             ServerPlayer player = this.serverPlayer(context);
             if (player != null) {
                ServerLevel level = player.serverLevel();

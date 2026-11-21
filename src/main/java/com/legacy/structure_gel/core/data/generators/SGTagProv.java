@@ -12,11 +12,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 public class SGTagProv {
    public static class BlockTagProv extends BlockTagsProvider {
-      public BlockTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+      public BlockTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
          super(output, lookupProvider, "structure_gel", existingFileHelper);
       }
 
@@ -30,7 +29,7 @@ public class SGTagProv {
    }
 
    public static class StructureTagProv extends StructureTagsProvider {
-      public StructureTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+      public StructureTagProv(PackOutput output, CompletableFuture<Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
          super(output, lookupProvider, "structure_gel", existingFileHelper);
       }
 

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class UpdateGelPlayerPacket implements SGPacketHandler.ModPacket<UpdateGelPlayerPacket, UpdateGelPlayerPacket.Handler> {
    protected final GelEntity gelEntity;
@@ -40,9 +40,9 @@ public class UpdateGelPlayerPacket implements SGPacketHandler.ModPacket<UpdateGe
          return new UpdateGelPlayerPacket(gelEntity);
       }
 
-      public void handler(UpdateGelPlayerPacket packet, PlayPayloadContext context) {
+      public void handler(UpdateGelPlayerPacket packet, IPayloadContext context) {
          if (FMLEnvironment.dist == Dist.CLIENT) {
-            context.workHandler().submitAsync(() -> handleClient(packet));
+            context.enqueueWork(() -> handleClient(packet));
          }
       }
 

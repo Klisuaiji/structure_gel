@@ -65,9 +65,9 @@ public class StructureBoundsRenderer implements IRenderBase {
             Vec3i camPos = Positions.vec3i(camX, camY, camZ);
 
             for (int i = renderers.size() - 1; i > -1; i--) {
-               StructureBoundsRenderer rendererx = renderers.get(i);
-               if (rendererx.pos.closerThan(camPos, 300.0)) {
-                  rendererx.renderBounds(mc, poseStack, projectionMatrix, shaderInstance, camX, camY, camZ);
+               StructureBoundsRenderer renderer = renderers.get(i);
+               if (renderer.pos.closerThan(camPos, 300.0)) {
+                  renderer.renderBounds(mc, poseStack, projectionMatrix, shaderInstance, camX, camY, camZ);
                }
             }
 

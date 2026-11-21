@@ -33,19 +33,17 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod.EventBusSubscriber;
-import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
 import net.neoforged.neoforge.network.handling.ConfigurationPayloadContext;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-@EventBusSubscriber(
-   bus = Bus.MOD
-)
+@EventBusSubscriber(bus = Bus.MOD)
 public class SGPacketHandler {
    @SubscribeEvent
    public static void registerPayloads(RegisterPayloadHandlerEvent event) {
@@ -152,8 +150,8 @@ public class SGPacketHandler {
       }
    }
 
-   public interface PlayHandler<T extends SGPacketHandler.ModPacket<T, ?>> extends SGPacketHandler.Handler<T, PlayPayloadContext> {
-      private void handlePacket(T packet, PlayPayloadContext context) {
+   public interface PlayHandler<T extends SGPacketHandler.ModPacket<T, ?>> extends SGPacketHandler.Handler<T, IPayloadContext> {
+      private void handlePacket(T packet, IPayloadContext context) {
          if (context.flow().isServerbound()) {
             this.handleServerbound(packet, context);
          } else {

@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.client.screen;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.core.block_entity.DynamicSpawnerBlockEntity;
 import com.legacy.structure_gel.core.client.widget.RenderWidget;
@@ -43,7 +44,7 @@ public class DynamicSpawnerScreen extends Screen {
       DynamicSpawnerBlockEntity.ExpRange range = new DynamicSpawnerBlockEntity.ExpRange(
          Integer.parseInt(this.minEdit.getValue()), Integer.parseInt(this.maxEdit.getValue())
       );
-      SGPacketHandler.sendToServer(new UpdateDynamicSpawnerPacket(this.spawner.getBlockPos(), new ResourceLocation(this.typeEdit.getValue()), range));
+      SGPacketHandler.sendToServer(new UpdateDynamicSpawnerPacket(this.spawner.getBlockPos(), ResourceLocation.parse(this.typeEdit.getValue()), range));
    }
 
    public void onClose() {
@@ -103,7 +104,7 @@ public class DynamicSpawnerScreen extends Screen {
       this.typeEdit.setTextColor(14737632);
       this.minEdit.setTextColor(14737632);
       this.maxEdit.setTextColor(14737632);
-      if (!ResourceLocation.isValidResourceLocation(this.typeEdit.getValue())) {
+      if (!LegacyRL.isValid(this.typeEdit.getValue())) {
          this.typeEdit.setTextColor(14703708);
          isValid = false;
       }
@@ -122,16 +123,16 @@ public class DynamicSpawnerScreen extends Screen {
             this.maxEdit.setTextColor(14703708);
             isValid = false;
          }
-      } catch (Exception var8) {
+      } catch (Exception e) {
          try {
             Integer.parseInt(minStr);
-         } catch (Exception var7) {
+         } catch (Exception minE) {
             this.minEdit.setTextColor(14703708);
          }
 
          try {
             Integer.parseInt(maxStr);
-         } catch (Exception var6) {
+         } catch (Exception maxE) {
             this.maxEdit.setTextColor(14703708);
          }
 
@@ -167,13 +168,17 @@ public class DynamicSpawnerScreen extends Screen {
    public boolean keyPressed(int keyCode, int keyB, int modifiers) {
       if (this.typeEdit.isFocused() && this.typeEdit.keyPressed(keyCode, keyB, modifiers)) {
          return true;
-      } else if (super.keyPressed(keyCode, keyB, modifiers)) {
-         return true;
-      } else if (!this.doneButton.active || keyCode != 257 && keyCode != 335) {
-         return false;
-      } else {
-         this.onDone((byte)0);
+      }
+
+      if (super.keyPressed(keyCode, keyB, modifiers)) {
          return true;
       }
+
+      if (!this.doneButton.active || keyCode != 257 && keyCode != 335) {
+         return false;
+      }
+
+      this.onDone((byte)0);
+      return true;
    }
 }

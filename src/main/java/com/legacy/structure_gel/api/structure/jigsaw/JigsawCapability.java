@@ -23,7 +23,7 @@ public interface JigsawCapability {
    default void modifyPieceBuilder(StructurePiecesBuilder pieceBuilder, GenerationContext context) {
    }
 
-   public static final class Vanilla implements JigsawCapability {
+   final class Vanilla implements JigsawCapability {
       public static final JigsawCapability.Vanilla INSTANCE = new JigsawCapability.Vanilla();
       public static final Codec<JigsawCapability.Vanilla> CODEC = Codec.unit(INSTANCE);
 

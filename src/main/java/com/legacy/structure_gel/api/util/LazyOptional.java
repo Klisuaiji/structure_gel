@@ -2,7 +2,6 @@ package com.legacy.structure_gel.api.util;
 
 import java.util.function.Supplier;
 import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.Nullable;
 
 public class LazyOptional<T> implements Lazy<T> {
    protected final Lazy<T> lazy;
@@ -56,8 +55,7 @@ public class LazyOptional<T> implements Lazy<T> {
       @Override
       public final T get() {
          if (!this.isPresent) {
-            Object localLock = this.lock;
-            synchronized (localLock) {
+            synchronized (this.lock) {
                this.lock = null;
                return super.get();
             }

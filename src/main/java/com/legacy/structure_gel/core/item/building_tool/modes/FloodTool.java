@@ -95,32 +95,32 @@ public class FloodTool extends BuildingToolMode {
       BlockPos startPos = clickedPos.relative(clickedFace);
       if (!replace.shouldReplace(level, level.getBlockState(startPos), startPos)) {
          return Collections.emptySet();
-      } else {
-         Set<BlockPos> allPositions = new HashSet<>();
-         Set<BlockPos> posesToSearch = new HashSet<>();
-         posesToSearch.add(startPos);
-         Direction[] dirs = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+      }
 
-         while (!posesToSearch.isEmpty()) {
-            Set<BlockPos> newPoses = new HashSet<>();
+      Set<BlockPos> allPositions = new HashSet<>();
+      Set<BlockPos> posesToSearch = new HashSet<>();
+      posesToSearch.add(startPos);
+      Direction[] dirs = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
-            for (BlockPos pos : posesToSearch) {
-               if (pos.distManhattan(startPos) <= radius) {
-                  allPositions.add(pos);
+      while (!posesToSearch.isEmpty()) {
+         Set<BlockPos> newPoses = new HashSet<>();
 
-                  for (Direction dir : dirs) {
-                     BlockPos offset = pos.relative(dir);
-                     if (!allPositions.contains(offset) && replace.shouldReplace(level, level.getBlockState(offset), offset)) {
-                        newPoses.add(offset);
-                     }
+         for (BlockPos pos : posesToSearch) {
+            if (pos.distManhattan(startPos) <= radius) {
+               allPositions.add(pos);
+
+               for (Direction dir : dirs) {
+                  BlockPos offset = pos.relative(dir);
+                  if (!allPositions.contains(offset) && replace.shouldReplace(level, level.getBlockState(offset), offset)) {
+                     newPoses.add(offset);
                   }
                }
             }
-
-            posesToSearch = newPoses;
          }
 
-         return allPositions;
+         posesToSearch = newPoses;
       }
+
+      return allPositions;
    }
 }

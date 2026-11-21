@@ -58,7 +58,7 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
    public boolean showScrollBar = true;
    public boolean renderTopAndBottom = true;
 
-   public DataParamsList(DataHandlerScreen screen, Minecraft mc, @Nullable DataParser dataParser) {
+   public DataParamsList(DataHandlerScreen screen, Minecraft mc, DataParser dataParser) {
       super(mc, screen.width + 55, screen.height - 88, 52, 25);
       this.parentScreen = screen;
       this.setRenderBackground(false);
@@ -90,7 +90,7 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
       return new ArrayList<>(this.children());
    }
 
-   public void createEntries(@Nullable DataParser dataParser) {
+   public void createEntries(DataParser dataParser) {
       this.clearEntries();
       if (dataParser != null) {
          List<DataParser.Parser<?>> parsers = dataParser.getParsers();
@@ -113,7 +113,7 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
       }
    }
 
-   public void setEntries(@Nullable List<DataParamsList.Entry> entries) {
+   public void setEntries(List<DataParamsList.Entry> entries) {
       this.clearEntries();
       if (entries != null) {
          entries.forEach(x$0 -> this.addEntry(x$0));
@@ -123,17 +123,17 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
       if (this.parentScreen.nameEdit.isVisible()) {
          return false;
-      } else {
-         for (DataParamsList.Entry e : this.children()) {
-            if (e.widget instanceof SuggestionEditBox suggestionEditBox
-               && suggestionEditBox.isFocused()
-               && suggestionEditBox.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
-               return true;
-            }
-         }
-
-         return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
       }
+
+      for (DataParamsList.Entry e : this.children()) {
+         if (e.widget instanceof SuggestionEditBox suggestionEditBox
+            && suggestionEditBox.isFocused()
+            && suggestionEditBox.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
+            return true;
+         }
+      }
+
+      return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
    }
 
    public boolean mouseClicked(double mouseX, double mouseY, int clickType) {
@@ -403,9 +403,10 @@ public class DataParamsList extends ContainerObjectSelectionList<DataParamsList.
       private static <T extends Enum<T> & StringRepresentable> AbstractWidget hackyEnumButton(Minecraft mc, DataParser.Parser<?> parser, Class<?> clazz) {
          if (!canMakeEnumButton(clazz)) {
             throw new IllegalArgumentException("clazz (" + clazz.getSimpleName() + ") must be an Enum and " + StringRepresentable.class.getSimpleName());
-         } else {
-            return enumButton(mc, parser, clazz);
          }
+
+         Class<T> realClazz = (Class<T>)clazz;
+         return enumButton(mc, parser, realClazz);
       }
 
       private static AbstractWidget directionButton(Minecraft mc, DataParser.Parser<?> parser) {

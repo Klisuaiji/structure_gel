@@ -160,12 +160,12 @@ public class GelPortalLogic {
 
       if (this.height <= 21 && this.height >= 3) {
          return this.height;
-      } else {
-         this.bottomLeft = null;
-         this.width = 0;
-         this.height = 0;
-         return 0;
       }
+
+      this.bottomLeft = null;
+      this.width = 0;
+      this.height = 0;
+      return 0;
    }
 
    private boolean isValidInsideMaterial(BlockState state) {

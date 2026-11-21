@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.block;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.block_entity.DynamicSpawnerBlockEntity;
 import com.legacy.structure_gel.core.registry.SGRegistry;
@@ -92,7 +93,7 @@ public class DynamicSpawnerBlock extends BaseEntityBlock {
       } else {
          lore.add(SGText.applyKeybindFilter(Component.translatable("info.structure_gel.hold_shift")));
          String beTagKey = "BlockEntityTag";
-         CompoundTag tag = stack.getTag();
+         CompoundTag tag = LegacyNbt.get(stack);
          if (tag != null && tag.contains(beTagKey, 10)) {
             lore.add(SGText.NEW_LINE);
             CompoundTag beTag = tag.getCompound(beTagKey);

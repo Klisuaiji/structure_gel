@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SendRegistryKeysToClientPacket(ResourceKey<? extends Registry<?>> registry, Collection<ResourceLocation> keys)
    implements SGPacketHandler.ModPacket<SendRegistryKeysToClientPacket, SendRegistryKeysToClientPacket.Handler> {
@@ -36,14 +36,14 @@ public record SendRegistryKeysToClientPacket(ResourceKey<? extends Registry<?>> 
          return new SendRegistryKeysToClientPacket(ResourceKey.createRegistryKey(buff.readResourceLocation()), buff.readList(b -> b.readResourceLocation()));
       }
 
-      public void handler(SendRegistryKeysToClientPacket packet, PlayPayloadContext context) {
+      public void handler(SendRegistryKeysToClientPacket packet, IPayloadContext context) {
          if (FMLEnvironment.dist == Dist.CLIENT) {
-            context.workHandler().submitAsync(() -> handleClient(packet, context));
+            context.enqueueWork(() -> handleClient(packet, context));
          }
       }
 
       @OnlyIn(Dist.CLIENT)
-      private static void handleClient(SendRegistryKeysToClientPacket packet, PlayPayloadContext context) {
+      private static void handleClient(SendRegistryKeysToClientPacket packet, IPayloadContext context) {
          ResourceKey<? extends Registry<?>> registry = packet.registry;
          List<ResourceKey<?>> keys = new ArrayList<>(packet.keys.size());
 

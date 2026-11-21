@@ -24,7 +24,8 @@ public interface IColoredBoundingBox {
    }
 
    static int toRgbInt(int r, int g, int b) {
-      int rgb = r << 8 | g;
+      int rgb = r;
+      rgb = rgb << 8 | g;
       return rgb << 8 | b;
    }
 

@@ -26,7 +26,7 @@ public class SGSimpleRegistry<K, V> implements Iterable<V> {
    private final Supplier<Event> event;
    private boolean frozen = false;
 
-   public SGSimpleRegistry(ResourceLocation name, Supplier<V> defaultValue, @Nullable Supplier<Event> event) {
+   public SGSimpleRegistry(ResourceLocation name, Supplier<V> defaultValue, Supplier<Event> event) {
       this.name = name;
       this.defaultValue = defaultValue;
       this.event = event;
@@ -56,7 +56,7 @@ public class SGSimpleRegistry<K, V> implements Iterable<V> {
    }
 
    @Nullable
-   public K getKey(V value, @Nullable K defaultKey) {
+   public K getKey(V value, K defaultKey) {
       return (K)this.registry.inverse().getOrDefault(value, defaultKey);
    }
 
@@ -66,7 +66,7 @@ public class SGSimpleRegistry<K, V> implements Iterable<V> {
    }
 
    @Nullable
-   public V get(K key, @Nullable V defaultValue) {
+   public V get(K key, V defaultValue) {
       return (V)this.registry.getOrDefault(key, defaultValue);
    }
 
@@ -109,10 +109,10 @@ public class SGSimpleRegistry<K, V> implements Iterable<V> {
          throw new IllegalStateException(
             "Attempted to register an object after registry data has been frozen. Registry = " + this.name + ", Entry = [" + key + " = " + value + "]"
          );
-      } else {
-         this.registry.forcePut(key, value);
-         return value;
       }
+
+      this.registry.forcePut(key, value);
+      return value;
    }
 
    public ResourceLocation getRegistryName() {

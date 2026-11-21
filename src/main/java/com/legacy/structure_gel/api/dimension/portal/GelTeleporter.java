@@ -34,10 +34,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
-import net.minecraft.world.level.portal.PortalInfo;
+import com.legacy.blue_skies.compat.PortalInfo;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.ITeleporter;
+import com.legacy.blue_skies.compat.ITeleporter;
 
 public class GelTeleporter implements ITeleporter {
    private final ServerLevel level;
@@ -173,17 +173,17 @@ public class GelTeleporter implements ITeleporter {
 
       if (!result.isPresent()) {
          return null;
-      } else {
-         PortalInfo portalInfo = PortalShape.createPortalInfo(
-            destLevel, result.get(), portalAxis, offset, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()
-         );
-         return new PortalInfo(
-            new Vec3(result.get().minCorner.getX() + 0.5, result.get().minCorner.getY() + 0.05, result.get().minCorner.getZ() + 0.5),
-            portalInfo.speed,
-            portalInfo.yRot,
-            portalInfo.xRot
-         );
       }
+
+      PortalInfo portalInfo = PortalShape.createPortalInfo(
+         destLevel, result.get(), portalAxis, offset, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()
+      );
+      return new PortalInfo(
+         new Vec3(result.get().minCorner.getX() + 0.5, result.get().minCorner.getY() + 0.05, result.get().minCorner.getZ() + 0.5),
+         portalInfo.speed,
+         portalInfo.yRot,
+         portalInfo.xRot
+      );
    }
 
    protected BlockPos scalePosition(Entity entity, ServerLevel destLevel) {
@@ -234,8 +234,8 @@ public class GelTeleporter implements ITeleporter {
       BlockState portalState = (BlockState)teleporter.getPortalBlock().get().defaultBlockState().setValue(NetherPortalBlock.AXIS, Axis.Z);
 
       for (int horizontalOffset = 0; horizontalOffset < 2; horizontalOffset++) {
-         for (int verticalOffsetx = 0; verticalOffsetx < 3; verticalOffsetx++) {
-            BlockPos pos2 = new BlockPos(x, y + verticalOffsetx, z + horizontalOffset);
+         for (int verticalOffset = 0; verticalOffset < 3; verticalOffset++) {
+            BlockPos pos2 = new BlockPos(x, y + verticalOffset, z + horizontalOffset);
             serverLevel.setBlock(pos2, portalState, 18);
          }
       }
@@ -256,8 +256,8 @@ public class GelTeleporter implements ITeleporter {
 
       if (placePlatform) {
          for (int x1 = -1; x1 < 2; x1++) {
-            for (int z1x = 0; z1x < 2; z1x++) {
-               serverLevel.setBlockAndUpdate(new BlockPos(x + x1, y - 1, z + z1x), frameState);
+            for (int z1 = 0; z1 < 2; z1++) {
+               serverLevel.setBlockAndUpdate(new BlockPos(x + x1, y - 1, z + z1), frameState);
             }
          }
       }
@@ -380,13 +380,13 @@ public class GelTeleporter implements ITeleporter {
       return true;
    }
 
-   public static enum CreatePortalBehavior {
+   public enum CreatePortalBehavior {
       NETHER(GelTeleporter::createAndFindPortalNether),
       ON_SURFACE(GelTeleporter::createAndFindPortalSurface);
 
       private final GelTeleporter.ICreatePortalFuncion function;
 
-      private CreatePortalBehavior(GelTeleporter.ICreatePortalFuncion function) {
+      CreatePortalBehavior(GelTeleporter.ICreatePortalFuncion function) {
          this.function = function;
       }
 

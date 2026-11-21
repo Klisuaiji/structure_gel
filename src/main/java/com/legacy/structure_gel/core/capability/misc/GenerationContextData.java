@@ -10,7 +10,7 @@ public interface GenerationContextData {
    @Nullable
    Structure structure_gel$getStructure();
 
-   void structure_gel$setStructure(@Nullable Structure var1);
+   void structure_gel$setStructure(Structure var1);
 
    default Optional<JigsawCapability> structure_gel$getJigsawCapability() {
       return this.structure_gel$getStructure() instanceof ExtendedJigsawStructure extended ? extended.getCapability() : Optional.empty();

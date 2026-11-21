@@ -30,7 +30,7 @@ public class StructureGelMod {
    }
 
    public static ResourceLocation locate(String key) {
-      return new ResourceLocation("structure_gel", key);
+      return ResourceLocation.fromNamespaceAndPath("structure_gel", key);
    }
 
    private static boolean isRunningFromIDE() {

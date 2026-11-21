@@ -498,10 +498,10 @@ public class EditSelectionScreen extends LayeredScreen {
             && !((KeyMapping)ClientProxy.BUILDING_TOOL_KEY.get()).isActiveAndMatches(key)
             && !pressedEnter) {
             return consumed;
-         } else {
-            this.close();
-            return true;
          }
+
+         this.close();
+         return true;
       } else {
          this.back();
          BuildingToolScreen.playClickSound();

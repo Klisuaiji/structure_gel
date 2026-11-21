@@ -183,7 +183,7 @@ public final class SmartBoundingBox {
       }
    }
 
-   public static enum CornerType {
+   public enum CornerType {
       NNN(false, false, false),
       NNP(false, false, true),
       NPN(false, true, false),
@@ -197,7 +197,7 @@ public final class SmartBoundingBox {
       final boolean yPositive;
       final boolean zPositive;
 
-      private CornerType(boolean xPositive, boolean yPositive, boolean zPositive) {
+      CornerType(boolean xPositive, boolean yPositive, boolean zPositive) {
          this.xPositive = xPositive;
          this.yPositive = yPositive;
          this.zPositive = zPositive;

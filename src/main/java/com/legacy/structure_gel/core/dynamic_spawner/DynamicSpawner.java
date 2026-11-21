@@ -15,7 +15,7 @@ public class DynamicSpawner extends BaseSpawner implements Cloneable {
       level.blockEvent(pos, Blocks.SPAWNER, param, 0);
    }
 
-   public void setNextSpawnData(@Nullable Level level, BlockPos pos, SpawnData spawnData) {
+   public void setNextSpawnData(Level level, BlockPos pos, SpawnData spawnData) {
       super.setNextSpawnData(level, pos, spawnData);
       if (level != null) {
          BlockState state = level.getBlockState(pos);

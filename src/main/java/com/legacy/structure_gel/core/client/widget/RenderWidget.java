@@ -30,7 +30,7 @@ public class RenderWidget implements Renderable, LayoutElement, GuiEventListener
    Renderable customRender;
 
    private RenderWidget(
-      Font font, int x, int y, int width, int height, @Nullable Tooltip tooltip, @Nullable Component label, int textColor, @Nullable Renderable customRender
+      Font font, int x, int y, int width, int height, Tooltip tooltip, Component label, int textColor, Renderable customRender
    ) {
       this.font = font;
       this.x = x;
@@ -83,7 +83,7 @@ public class RenderWidget implements Renderable, LayoutElement, GuiEventListener
       return this.tooltip;
    }
 
-   public void setTooltip(@Nullable Tooltip tooltip) {
+   public void setTooltip(Tooltip tooltip) {
       this.tooltip = tooltip;
    }
 

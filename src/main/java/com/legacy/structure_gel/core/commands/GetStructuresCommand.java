@@ -75,10 +75,10 @@ public class GetStructuresCommand {
       Optional<ResourceKey<Biome>> opName = source.getLevel().getBiome(BlockPos.containing(source.getPosition())).unwrapKey();
       if (opName.isPresent()) {
          return biome(context, opName.get());
-      } else {
-         source.sendFailure(Component.literal("The biome you're in doesn't have a registry name."));
-         return 0;
       }
+
+      source.sendFailure(Component.literal("The biome you're in doesn't have a registry name."));
+      return 0;
    }
 
    private static int biome(CommandContext<CommandSourceStack> context, ResourceKey<Biome> biomeKey) {

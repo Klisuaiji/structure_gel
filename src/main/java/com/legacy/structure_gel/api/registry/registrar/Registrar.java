@@ -11,7 +11,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Holder.Reference;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -37,11 +37,9 @@ public abstract class Registrar<T> {
    }
 
    public static <T, V extends T> Registrar.Pointer<V> createPointer(
-      ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstapContext<?>, V> value
+      ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstrapContext<?>, V> value
    ) {
-      return (Registrar.Pointer<V>)(DatagenModLoader.isRunningDataGen()
-         ? new Registrar.DataGenPointer<>(registry, name, value)
-         : new Registrar.Pointer<>(registry, name));
+      return DatagenModLoader.isRunningDataGen() ? new Registrar.DataGenPointer<>(registry, name, value) : new Registrar.Pointer<>(registry, name);
    }
 
    public static <T, V extends T> Registrar.Static<V> createStatic(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<V> value) {
@@ -98,7 +96,7 @@ public abstract class Registrar<T> {
       return registry.getHolder(this.getKey());
    }
 
-   public Optional<Reference<T>> getHolder(BootstapContext<?> bootstrapContext) {
+   public Optional<Reference<T>> getHolder(BootstrapContext<?> bootstrapContext) {
       return this.getHolder(bootstrapContext.lookup(this.getRegistryKey()));
    }
 
@@ -139,14 +137,14 @@ public abstract class Registrar<T> {
 
    @Internal
    protected static class DataGenPointer<T> extends Registrar.Pointer<T> {
-      protected final Function<BootstapContext<?>, T> valueFactory;
+      protected final Function<BootstrapContext<?>, T> valueFactory;
 
-      protected DataGenPointer(ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstapContext<?>, T> valueFactory) {
+      protected DataGenPointer(ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstrapContext<?>, T> valueFactory) {
          super(registry, name);
          this.valueFactory = valueFactory;
       }
 
-      public void registerData(BootstapContext<?> context) {
+      public void registerData(BootstrapContext<?> context) {
          context.register(this.getKey(), this.valueFactory.apply(context));
       }
    }

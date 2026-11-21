@@ -1,5 +1,7 @@
 package com.legacy.structure_gel.core.block_entity;
 
+import net.minecraft.core.HolderLookup;
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data_handler.DataHandlerType;
 import com.legacy.structure_gel.api.data_handler.handlers.DataHandler;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
@@ -57,7 +59,7 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
       return this.name;
    }
 
-   public void setCustomName(@Nullable Component name) {
+   public void setCustomName(Component name) {
       this.name = name;
    }
 
@@ -85,8 +87,8 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
       this.offset = offset;
    }
 
-   protected void saveAdditional(CompoundTag tag) {
-      super.saveAdditional(tag);
+   protected void saveAdditional(CompoundTag tag, HolderLookup.Provider p) {
+      super.saveAdditional(tag, p);
       ListTag listTag = new ListTag();
 
       for (DataHandlerBlockEntity.RawHandler handler : this.handlers.unwrap()) {
@@ -110,8 +112,8 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
       tag.put("offset", offsetTag);
    }
 
-   public void load(CompoundTag tag) {
-      super.load(tag);
+   public void loadAdditional(CompoundTag tag, HolderLookup.Provider p) {
+      super.loadAdditional(tag, p);
       this.handlers = loadAllHandlers(tag);
       if (tag.contains("CustomName", 8)) {
          this.name = Serializer.fromJson(tag.getString("CustomName"));
@@ -166,7 +168,7 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
 
    public record RawHandler(Weight weight, ResourceLocation typeName, LinkedHashMap<String, String> dataEntries) implements WeightedEntry {
       public static final DataHandlerBlockEntity.RawHandler EMPTY = new DataHandlerBlockEntity.RawHandler(
-         Weight.of(1), new ResourceLocation(""), new LinkedHashMap<>()
+         Weight.of(1), ResourceLocation.parse(""), new LinkedHashMap<>()
       );
       public static final String WEIGHT_KEY = "weight";
       public static final String TYPE_KEY = "type";
@@ -176,19 +178,19 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
          ResourceLocation type = readType(tag);
          if (type == null) {
             return Optional.empty();
-         } else {
-            int weight = tag.contains("weight", 3) ? tag.getInt("weight") : 1;
-            LinkedHashMap<String, String> data = readDataEntries(tag);
-            return Optional.of(new DataHandlerBlockEntity.RawHandler(Weight.of(weight), type, data));
          }
+
+         int weight = tag.contains("weight", 3) ? tag.getInt("weight") : 1;
+         LinkedHashMap<String, String> data = readDataEntries(tag);
+         return Optional.of(new DataHandlerBlockEntity.RawHandler(Weight.of(weight), type, data));
       }
 
       @Nullable
       private static ResourceLocation readType(CompoundTag tag) {
          if (tag.contains("type", 8)) {
             String str = tag.getString("type");
-            if (ResourceLocation.isValidResourceLocation(str)) {
-               return new ResourceLocation(str);
+            if (LegacyRL.isValid(str)) {
+               return ResourceLocation.parse(str);
             }
          }
 
@@ -242,9 +244,9 @@ public class DataHandlerBlockEntity extends SGBlockEntity {
             } else {
                StructureGelMod.LOGGER.error("\type\" was null for the DataHandlerBlockEntity at {}", pos);
             }
-         } catch (Exception var4) {
+         } catch (Exception e) {
             StructureGelMod.LOGGER.error("Couldn't deserialize DataHandler from {}", pos);
-            StructureGelMod.LOGGER.error(var4);
+            StructureGelMod.LOGGER.error(e);
          }
 
          return null;

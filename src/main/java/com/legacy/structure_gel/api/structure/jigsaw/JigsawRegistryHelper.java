@@ -7,7 +7,7 @@ import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -18,15 +18,15 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 public class JigsawRegistryHelper {
    public final String modid;
    public final String prefix;
-   public final BootstapContext<StructureTemplatePool> bootstrapContext;
+   public final BootstrapContext<StructureTemplatePool> bootstrapContext;
    public final HolderGetter<StructureProcessorList> processorLookup;
    public final HolderGetter<StructureTemplatePool> templateLookup;
 
-   public JigsawRegistryHelper(String modid, BootstapContext<StructureTemplatePool> bootstrapContext) {
+   public JigsawRegistryHelper(String modid, BootstrapContext<StructureTemplatePool> bootstrapContext) {
       this(modid, "", bootstrapContext);
    }
 
-   public JigsawRegistryHelper(String modid, String prefix, BootstapContext<StructureTemplatePool> bootstrapContext) {
+   public JigsawRegistryHelper(String modid, String prefix, BootstrapContext<StructureTemplatePool> bootstrapContext) {
       this.modid = modid;
       this.prefix = prefix;
       this.bootstrapContext = bootstrapContext;
@@ -71,11 +71,11 @@ public class JigsawRegistryHelper {
    }
 
    protected ResourceLocation locatePiece(String key) {
-      return new ResourceLocation(this.modid, this.prefix + key);
+      return ResourceLocation.fromNamespaceAndPath(this.modid, this.prefix + key);
    }
 
    public class PoolRegisterBuilder {
-      ResourceLocation fallback = new ResourceLocation("empty");
+      ResourceLocation fallback = ResourceLocation.parse("empty");
       List<Pair<Function<Projection, ? extends StructurePoolElement>, Integer>> pool = Collections.emptyList();
       Projection projection = Projection.RIGID;
 

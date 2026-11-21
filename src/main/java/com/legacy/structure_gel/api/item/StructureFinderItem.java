@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.api.item;
 
+import com.legacy.blue_skies.compat.*;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -48,19 +49,19 @@ public interface StructureFinderItem {
 
    @Nullable
    default ResourceKey<Structure> getStructure(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("structure", 8)) {
          String structureS = tag.getString("structure");
-         if (ResourceLocation.isValidResourceLocation(structureS)) {
-            return ResourceKey.create(Registries.STRUCTURE, new ResourceLocation(structureS));
+         if (LegacyRL.isValid(structureS)) {
+            return ResourceKey.create(Registries.STRUCTURE, ResourceLocation.parse(structureS));
          }
       }
 
       return null;
    }
 
-   default void setStructure(ItemStack stack, @Nullable ResourceKey<Structure> structure) {
-      CompoundTag tag = stack.getOrCreateTag();
+   default void setStructure(ItemStack stack, ResourceKey<Structure> structure) {
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
       if (structure == null) {
          tag.remove("structure");
       } else {
@@ -70,12 +71,12 @@ public interface StructureFinderItem {
 
    @Nullable
    default BlockPos getStructurePos(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       return tag != null && tag.contains("pos", 4) ? BlockPos.of(tag.getLong("pos")) : null;
    }
 
-   default void setStructurePos(ItemStack stack, @Nullable BlockPos structurePos) {
-      CompoundTag tag = stack.getOrCreateTag();
+   default void setStructurePos(ItemStack stack, BlockPos structurePos) {
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
       if (structurePos == null) {
          tag.remove("pos");
       } else {
@@ -85,19 +86,19 @@ public interface StructureFinderItem {
 
    @Nullable
    default ResourceKey<Level> getStructureDimension(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("dimension", 8)) {
          String dimensionS = tag.getString("dimension");
-         if (ResourceLocation.isValidResourceLocation(dimensionS)) {
-            return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionS));
+         if (LegacyRL.isValid(dimensionS)) {
+            return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimensionS));
          }
       }
 
       return null;
    }
 
-   default void setStructureDimension(ItemStack stack, @Nullable ResourceKey<Level> dimension) {
-      CompoundTag tag = stack.getOrCreateTag();
+   default void setStructureDimension(ItemStack stack, ResourceKey<Level> dimension) {
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
       if (dimension == null) {
          tag.remove("dimension");
       } else {

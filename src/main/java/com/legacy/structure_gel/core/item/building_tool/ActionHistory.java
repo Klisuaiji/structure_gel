@@ -190,7 +190,7 @@ public class ActionHistory {
       this.lastActionIndex = 0;
    }
 
-   public static ActionHistory.ActionBuilder newAction(@Nullable Level level, boolean causeUpdates) {
+   public static ActionHistory.ActionBuilder newAction(Level level, boolean causeUpdates) {
       return new ActionHistory.ActionBuilder(level, causeUpdates);
    }
 
@@ -269,14 +269,14 @@ public class ActionHistory {
       private final boolean causeUpdates;
       private final LinkedList<ActionHistory.Change> changes = new LinkedList<>();
 
-      private ActionBuilder(@Nullable Level level, boolean causeUpdates) {
+      private ActionBuilder(Level level, boolean causeUpdates) {
          this.causeUpdates = causeUpdates;
          if (!this.causeUpdates) {
             LevelTicksData.shouldScheduleTicks(level, false);
          }
       }
 
-      public ActionHistory.ActionBuilder insertOld(@Nullable ActionHistory.Action action) {
+      public ActionHistory.ActionBuilder insertOld(ActionHistory.Action action) {
          if (action != null) {
             ActionHistory.Change[] changes = action.changes;
 
@@ -289,7 +289,7 @@ public class ActionHistory {
       }
 
       public ActionHistory.ActionBuilder changeBlock(
-         BlockPos pos, BlockState oldState, @Nullable CompoundTag oldBlockEntity, BlockState newState, @Nullable CompoundTag newBlockEntity, int flags
+         BlockPos pos, BlockState oldState, CompoundTag oldBlockEntity, BlockState newState, CompoundTag newBlockEntity, int flags
       ) {
          this.changes
             .add(new ActionHistory.BlockChange(pos, oldState, Optional.ofNullable(oldBlockEntity), newState, Optional.ofNullable(newBlockEntity), flags));
@@ -315,7 +315,7 @@ public class ActionHistory {
          return this;
       }
 
-      private ActionHistory.Action build(@Nullable Level level) {
+      private ActionHistory.Action build(Level level) {
          if (level != null && !this.causeUpdates) {
             LevelTicksData.shouldScheduleTicks(level, true);
          }
@@ -423,7 +423,7 @@ public class ActionHistory {
 
       ActionHistory.Change.ChangeType type();
 
-      public interface ChangeType {
+      interface ChangeType {
          Codec<? extends ActionHistory.Change> codec();
       }
    }

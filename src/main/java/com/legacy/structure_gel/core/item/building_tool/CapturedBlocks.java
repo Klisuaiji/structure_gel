@@ -122,7 +122,9 @@ public class CapturedBlocks {
    public boolean equals(Object obj) {
       if (this == obj) {
          return true;
-      } else if (obj instanceof CapturedBlocks other) {
+      }
+
+      if (obj instanceof CapturedBlocks other) {
          if (!this.worldPos.equals(other.worldPos)) {
             return false;
          } else if (!this.centerOffset.equals(other.centerOffset)) {
@@ -206,42 +208,42 @@ public class CapturedBlocks {
    public CapturedBlocks withTransforms(Mirror mirror, Rotation rotation) {
       if (this.lastTransform != null && this.lastTransform.mirror == mirror && this.lastTransform.rotation == rotation) {
          return this.lastTransform;
-      } else {
-         BoundingBox bounds = this.bounds;
-         List<CapturedBlocks.BlockInfo> blockInfos = new ArrayList<>(this.blockInfos.size());
-         int minX = bounds.minX();
-         int minY = bounds.minY();
-         int minZ = bounds.minZ();
-         int maxY = bounds.maxY();
-         Vec3i bbLength = bounds.getLength();
-         Vec3i transformedBBLength = bbLength;
-
-         for (CapturedBlocks.BlockInfo info : this.blockInfos) {
-            BlockPos pos = info.pos;
-            BlockPos transformedPos = this.transformPos(pos, bbLength, mirror, rotation);
-            blockInfos.add(new CapturedBlocks.BlockInfo(transformedPos, info.state.mirror(mirror).rotate(rotation), info.blockEntityTag));
-         }
-
-         if (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) {
-            bounds = BoundingBox.fromCorners(new Vec3i(minX, minY, minZ), new Vec3i(minX + bbLength.getZ(), maxY, minZ + bbLength.getX()));
-            transformedBBLength = bounds.getLength();
-         }
-
-         BlockPos centerOffset = new BlockPos(
-            -transformedBBLength.getX() + transformedBBLength.getX() / 2, 0, -transformedBBLength.getZ() + transformedBBLength.getZ() / 2
-         );
-         BlockPos worldPos = new BlockPos(bounds.minX(), bounds.minY(), bounds.minZ());
-         List<CapturedBlocks.EntityInfo> entityInfos = new ArrayList<>();
-
-         for (CapturedBlocks.EntityInfo info : this.entityInfos) {
-            Vec3 pos = info.pos;
-            Vec3 transformedPos = this.transformPos(pos, bbLength, mirror, rotation);
-            entityInfos.add(new CapturedBlocks.EntityInfo(info.original, transformedPos, info.entityTag));
-         }
-
-         this.lastTransform = new CapturedBlocks(worldPos, centerOffset, bounds, blockInfos, entityInfos, mirror, rotation);
-         return this.lastTransform;
       }
+
+      BoundingBox bounds = this.bounds;
+      List<CapturedBlocks.BlockInfo> blockInfos = new ArrayList<>(this.blockInfos.size());
+      int minX = bounds.minX();
+      int minY = bounds.minY();
+      int minZ = bounds.minZ();
+      int maxY = bounds.maxY();
+      Vec3i bbLength = bounds.getLength();
+      Vec3i transformedBBLength = bbLength;
+
+      for (CapturedBlocks.BlockInfo info : this.blockInfos) {
+         BlockPos pos = info.pos;
+         BlockPos transformedPos = this.transformPos(pos, bbLength, mirror, rotation);
+         blockInfos.add(new CapturedBlocks.BlockInfo(transformedPos, info.state.mirror(mirror).rotate(rotation), info.blockEntityTag));
+      }
+
+      if (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) {
+         bounds = BoundingBox.fromCorners(new Vec3i(minX, minY, minZ), new Vec3i(minX + bbLength.getZ(), maxY, minZ + bbLength.getX()));
+         transformedBBLength = bounds.getLength();
+      }
+
+      BlockPos centerOffset = new BlockPos(
+         -transformedBBLength.getX() + transformedBBLength.getX() / 2, 0, -transformedBBLength.getZ() + transformedBBLength.getZ() / 2
+      );
+      BlockPos worldPos = new BlockPos(bounds.minX(), bounds.minY(), bounds.minZ());
+      List<CapturedBlocks.EntityInfo> entityInfos = new ArrayList<>();
+
+      for (CapturedBlocks.EntityInfo info : this.entityInfos) {
+         Vec3 pos = info.pos;
+         Vec3 transformedPos = this.transformPos(pos, bbLength, mirror, rotation);
+         entityInfos.add(new CapturedBlocks.EntityInfo(info.original, transformedPos, info.entityTag));
+      }
+
+      this.lastTransform = new CapturedBlocks(worldPos, centerOffset, bounds, blockInfos, entityInfos, mirror, rotation);
+      return this.lastTransform;
    }
 
    public void compressForRender(Level level, BlockPos startPos, Player player) {
@@ -295,72 +297,72 @@ public class CapturedBlocks {
    private BlockPos transformPos(BlockPos pos, Vec3i size, Mirror mirror, Rotation rotation) {
       if (mirror == Mirror.NONE && rotation == Rotation.NONE) {
          return pos;
-      } else {
-         int x = pos.getX();
-         int y = pos.getY();
-         int z = pos.getZ();
-         switch (mirror) {
-            case LEFT_RIGHT:
-               z = size.getZ() - z;
-               break;
-            case FRONT_BACK:
-               x = size.getX() - x;
-         }
-
-         switch (rotation) {
-            case CLOCKWISE_90:
-               int invZ = size.getZ() - z;
-               z = x;
-               x = invZ;
-               break;
-            case CLOCKWISE_180:
-               x = size.getX() - x;
-               z = size.getZ() - z;
-               break;
-            case COUNTERCLOCKWISE_90:
-               int invX = size.getX() - x;
-               x = z;
-               z = invX;
-         }
-
-         return new BlockPos(x, y, z);
       }
+
+      int x = pos.getX();
+      int y = pos.getY();
+      int z = pos.getZ();
+      switch (mirror) {
+         case LEFT_RIGHT:
+            z = size.getZ() - z;
+            break;
+         case FRONT_BACK:
+            x = size.getX() - x;
+      }
+
+      switch (rotation) {
+         case CLOCKWISE_90:
+            int invZ = size.getZ() - z;
+            z = x;
+            x = invZ;
+            break;
+         case CLOCKWISE_180:
+            x = size.getX() - x;
+            z = size.getZ() - z;
+            break;
+         case COUNTERCLOCKWISE_90:
+            int invX = size.getX() - x;
+            x = z;
+            z = invX;
+      }
+
+      return new BlockPos(x, y, z);
    }
 
    private Vec3 transformPos(Vec3 pos, Vec3i size, Mirror mirror, Rotation rotation) {
       if (mirror == Mirror.NONE && rotation == Rotation.NONE) {
          return pos;
-      } else {
-         size = size.offset(1, 1, 1);
-         double x = pos.x();
-         double y = pos.y();
-         double z = pos.z();
-         switch (mirror) {
-            case LEFT_RIGHT:
-               z = size.getZ() - z;
-               break;
-            case FRONT_BACK:
-               x = size.getX() - x;
-         }
-
-         switch (rotation) {
-            case CLOCKWISE_90:
-               double invZ = size.getZ() - z;
-               z = x;
-               x = invZ;
-               break;
-            case CLOCKWISE_180:
-               x = size.getX() - x;
-               z = size.getZ() - z;
-               break;
-            case COUNTERCLOCKWISE_90:
-               double invX = size.getX() - x;
-               x = z;
-               z = invX;
-         }
-
-         return new Vec3(x, y, z);
       }
+
+      size = size.offset(1, 1, 1);
+      double x = pos.x();
+      double y = pos.y();
+      double z = pos.z();
+      switch (mirror) {
+         case LEFT_RIGHT:
+            z = size.getZ() - z;
+            break;
+         case FRONT_BACK:
+            x = size.getX() - x;
+      }
+
+      switch (rotation) {
+         case CLOCKWISE_90:
+            double invZ = size.getZ() - z;
+            z = x;
+            x = invZ;
+            break;
+         case CLOCKWISE_180:
+            x = size.getX() - x;
+            z = size.getZ() - z;
+            break;
+         case COUNTERCLOCKWISE_90:
+            double invX = size.getX() - x;
+            x = z;
+            z = invX;
+      }
+
+      return new Vec3(x, y, z);
    }
 
    public BoundingBox getBounds() {
@@ -445,30 +447,30 @@ public class CapturedBlocks {
       tag.put("palette", paletteTag);
       CompoundTag blocksTag = new CompoundTag();
 
-      for (CapturedBlocks.BlockInfo infox : this.blockInfos) {
-         if (infox.state != mostUsed) {
+      for (CapturedBlocks.BlockInfo info : this.blockInfos) {
+         if (info.state != mostUsed) {
             CompoundTag infoTag = new CompoundTag();
-            infoTag.putInt("state", (Integer)states.get(infox.state));
-            if (infox.blockEntityTag.isPresent()) {
-               infoTag.put("tag", (Tag)infox.blockEntityTag.get());
+            infoTag.putInt("state", (Integer)states.get(info.state));
+            if (info.blockEntityTag.isPresent()) {
+               infoTag.put("tag", (Tag)info.blockEntityTag.get());
             }
 
-            blocksTag.put(Long.toString(infox.pos.asLong()), infoTag);
+            blocksTag.put(Long.toString(info.pos.asLong()), infoTag);
          }
       }
 
       tag.put("blocks", blocksTag);
       ListTag entitiesListTag = new ListTag();
 
-      for (CapturedBlocks.EntityInfo infoxx : this.entityInfos) {
+      for (CapturedBlocks.EntityInfo info : this.entityInfos) {
          CompoundTag infoTag = new CompoundTag();
-         infoTag.putUUID("uuid", infoxx.original);
+         infoTag.putUUID("uuid", info.original);
          ListTag pos = new ListTag();
-         pos.add(FloatTag.valueOf((float)infoxx.pos.x));
-         pos.add(FloatTag.valueOf((float)infoxx.pos.y));
-         pos.add(FloatTag.valueOf((float)infoxx.pos.z));
+         pos.add(FloatTag.valueOf((float)info.pos.x));
+         pos.add(FloatTag.valueOf((float)info.pos.y));
+         pos.add(FloatTag.valueOf((float)info.pos.z));
          infoTag.put("pos", pos);
-         infoTag.put("entity", infoxx.entityTag);
+         infoTag.put("entity", info.entityTag);
          entitiesListTag.add(infoTag);
       }
 

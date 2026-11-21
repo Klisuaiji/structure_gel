@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class EditClipboardPacket implements SGPacketHandler.ModPacket<EditClipboardPacket, EditClipboardPacket.Handler> {
    Level level;
@@ -24,7 +24,7 @@ public class EditClipboardPacket implements SGPacketHandler.ModPacket<EditClipbo
    final CapturedBlocks captured;
    final BoundingBox removeKey;
 
-   public EditClipboardPacket(@Nullable Level level, BoundingBox addKey, @Nullable CapturedBlocks captured, BoundingBox removeKey) {
+   public EditClipboardPacket(Level level, BoundingBox addKey, CapturedBlocks captured, BoundingBox removeKey) {
       this.level = level;
       this.addKey = addKey;
       this.captured = captured;
@@ -69,14 +69,14 @@ public class EditClipboardPacket implements SGPacketHandler.ModPacket<EditClipbo
          }
       }
 
-      public void handler(EditClipboardPacket packet, PlayPayloadContext context) {
+      public void handler(EditClipboardPacket packet, IPayloadContext context) {
          if (FMLEnvironment.dist == Dist.CLIENT) {
-            context.workHandler().submitAsync(() -> handleClient(packet, context));
+            context.enqueueWork(() -> handleClient(packet, context));
          }
       }
 
       @OnlyIn(Dist.CLIENT)
-      public static void handleClient(EditClipboardPacket packet, PlayPayloadContext context) {
+      public static void handleClient(EditClipboardPacket packet, IPayloadContext context) {
          Player player = Minecraft.getInstance().player;
          BuildingToolPlayerData data = StructureGelMod.proxy.getBuildingToolData(player.level(), player.getGameProfile().getName());
          if (!packet.addKey.equals(BoundingBox.infinite()) && packet.captured != null) {

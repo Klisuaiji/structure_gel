@@ -140,22 +140,22 @@ public class GelSinglePoolElement extends SinglePoolElement {
       StructurePlaceSettings placementSettings = this.getSettings(rotation, bounds, isLegacy);
       if (!GelTemplate.placeInWorld(template, level, templatePos, jigsawPos, placementSettings, rand, 18, extendedJigsawPiece::modifyState)) {
          return false;
-      } else {
-         processDataHandlers(extendedJigsawPiece, template, templatePos, jigsawPos, placementSettings, level, rotation, bounds, rand);
-
-         for (StructureBlockInfo blockInfo : StructureTemplate.processBlockInfos(
-            level, templatePos, jigsawPos, placementSettings, this.getDataMarkers(templateManager, templatePos, rotation, false), template
-         )) {
-            this.handleDataMarker(level, blockInfo, templatePos, rotation, rand, bounds);
-            if (blockInfo.nbt() != null
-               && level.getBlockState(blockInfo.pos()).is(Blocks.STRUCTURE_BLOCK)
-               && StructureMode.valueOf(blockInfo.nbt().getString("mode")) == StructureMode.DATA) {
-               extendedJigsawPiece.handleDataMarker(blockInfo.nbt().getString("metadata"), blockInfo.pos(), level, rand, bounds);
-            }
-         }
-
-         return true;
       }
+
+      processDataHandlers(extendedJigsawPiece, template, templatePos, jigsawPos, placementSettings, level, rotation, bounds, rand);
+
+      for (StructureBlockInfo blockInfo : StructureTemplate.processBlockInfos(
+         level, templatePos, jigsawPos, placementSettings, this.getDataMarkers(templateManager, templatePos, rotation, false), template
+      )) {
+         this.handleDataMarker(level, blockInfo, templatePos, rotation, rand, bounds);
+         if (blockInfo.nbt() != null
+            && level.getBlockState(blockInfo.pos()).is(Blocks.STRUCTURE_BLOCK)
+            && StructureMode.valueOf(blockInfo.nbt().getString("mode")) == StructureMode.DATA) {
+            extendedJigsawPiece.handleDataMarker(blockInfo.nbt().getString("metadata"), blockInfo.pos(), level, rand, bounds);
+         }
+      }
+
+      return true;
    }
 
    public static void processDataHandlers(

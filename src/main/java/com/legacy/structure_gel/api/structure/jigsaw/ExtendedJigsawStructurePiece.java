@@ -126,7 +126,7 @@ public abstract class ExtendedJigsawStructurePiece extends PoolElementStructureP
    public ResourceLocation getLocation() {
       return this.element instanceof SinglePoolElement singleElement
          ? JigsawAccessHelper.getSingleJigsawPieceLocation(singleElement)
-         : new ResourceLocation("empty");
+         : ResourceLocation.parse("empty");
    }
 
    public StructureTemplateManager getStructureManager() {
@@ -143,7 +143,7 @@ public abstract class ExtendedJigsawStructurePiece extends PoolElementStructureP
    }
 
    public void extendDown(LevelAccessor level, BlockState state, BoundingBox bounds, Rotation rotation, RandomSource rand) {
-      this.extendDown(level, (Function<RandomSource, BlockState>)(random -> state), bounds, rotation, rand);
+      this.extendDown(level, random -> state, bounds, rotation, rand);
    }
 
    public void extendDown(LevelAccessor level, Function<RandomSource, BlockState> randStateGetter, BoundingBox bounds, Rotation rotation, RandomSource rand) {

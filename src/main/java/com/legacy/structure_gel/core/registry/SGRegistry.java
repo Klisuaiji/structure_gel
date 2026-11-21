@@ -71,10 +71,10 @@ public class SGRegistry {
    public static class BlockEntities {
       public static final RegistrarHandler<BlockEntityType<?>> HANDLER = RegistrarHandler.getOrCreate(Registries.BLOCK_ENTITY_TYPE, "structure_gel");
       public static final Registrar.Static<BlockEntityType<DataHandlerBlockEntity>> DATA_HANDLER = HANDLER.createStatic(
-         "data_handler", () -> Builder.of(DataHandlerBlockEntity::new, new Block[]{SGRegistry.Blocks.DATA_HANDLER.get()}).build(null)
+         "data_handler", () -> Builder.<DataHandlerBlockEntity>of(DataHandlerBlockEntity::new, new Block[]{SGRegistry.Blocks.DATA_HANDLER.get()}).build(null)
       );
       public static final Registrar.Static<BlockEntityType<DynamicSpawnerBlockEntity>> DYNAMIC_SPAWNER = HANDLER.createStatic(
-         "dynamic_spawner", () -> Builder.of(DynamicSpawnerBlockEntity::new, new Block[]{(Block)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()}).build(null)
+         "dynamic_spawner", () -> Builder.<DynamicSpawnerBlockEntity>of(DynamicSpawnerBlockEntity::new, new Block[]{(Block)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()}).build(null)
       );
    }
 

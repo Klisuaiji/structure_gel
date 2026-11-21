@@ -10,9 +10,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record MiddleClickBuildingToolPacket(InteractionHand hand, @Nullable BlockPos pos)
+public record MiddleClickBuildingToolPacket(InteractionHand hand, BlockPos pos)
    implements SGPacketHandler.ModPacket<MiddleClickBuildingToolPacket, MiddleClickBuildingToolPacket.Handler> {
    public MiddleClickBuildingToolPacket.Handler handler() {
       return new MiddleClickBuildingToolPacket.Handler();
@@ -39,8 +39,8 @@ public record MiddleClickBuildingToolPacket(InteractionHand hand, @Nullable Bloc
          return new MiddleClickBuildingToolPacket(hand, pos);
       }
 
-      public void handler(MiddleClickBuildingToolPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(MiddleClickBuildingToolPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             ServerPlayer sender = this.serverPlayer(context);
             if (sender != null) {
                ItemStack stack = sender.getItemInHand(packet.hand);

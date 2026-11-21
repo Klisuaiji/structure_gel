@@ -110,10 +110,10 @@ public class GridStructurePlacement extends StructurePlacement {
       Optional<ChunkPos> opGenPos = this.getFeatureChunk(chunkGenState, chunkX, chunkZ);
       if (!opGenPos.isPresent()) {
          return false;
-      } else {
-         ChunkPos genPos = opGenPos.get();
-         return genPos.x == chunkX && genPos.z == chunkZ;
       }
+
+      ChunkPos genPos = opGenPos.get();
+      return genPos.x == chunkX && genPos.z == chunkZ;
    }
 
    public Optional<ChunkPos> getFeatureChunk(ChunkGeneratorStructureState chunkGenState, int chunkX, int chunkZ) {
@@ -233,7 +233,7 @@ public class GridStructurePlacement extends StructurePlacement {
       int radius,
       boolean skipKnown,
       ChunkGenerator chunkGen,
-      @Nullable Pair<BlockPos, Holder<Structure>> oldNearest
+      Pair<BlockPos, Holder<Structure>> oldNearest
    ) {
       Set<Holder<Biome>> structureBiomes = structureHolders.stream().flatMap(csf -> ((Structure)csf.value()).biomes().stream()).collect(Collectors.toSet());
       if (!structureBiomes.isEmpty()) {

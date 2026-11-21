@@ -117,17 +117,17 @@ public class ToolModeProperty<T> {
    public static <E extends StringRepresentable> ToolModeProperty.SelectionProp<E> selectionProperty(String key, E defaultValue, E... values) {
       if (values.length < 1) {
          throw new IllegalArgumentException("Cannot create a ToolModeProperty for an enum without any values. Key = " + key);
-      } else {
-         Map<String, E> nameMap = new HashMap<>();
-
-         for (E e : values) {
-            nameMap.put(e.getSerializedName(), e);
-         }
-
-         return new ToolModeProperty.SelectionProp<>(
-            key, nameMap::get, StringRepresentable::getSerializedName, nameMap::containsValue, () -> defaultValue, List.of(values)
-         );
       }
+
+      Map<String, E> nameMap = new HashMap<>();
+
+      for (E e : values) {
+         nameMap.put(e.getSerializedName(), e);
+      }
+
+      return new ToolModeProperty.SelectionProp<>(
+         key, nameMap::get, StringRepresentable::getSerializedName, nameMap::containsValue, () -> defaultValue, List.of(values)
+      );
    }
 
    public String getKey() {
@@ -175,7 +175,7 @@ public class ToolModeProperty<T> {
       return this.descKey;
    }
 
-   public Component getValueComponent(@Nullable T value) {
+   public Component getValueComponent(T value) {
       return Component.literal(value == null ? "null" : value.toString());
    }
 
@@ -253,7 +253,7 @@ public class ToolModeProperty<T> {
       }
    }
 
-   public static enum Replace implements StringRepresentable {
+   public enum Replace implements StringRepresentable {
       ALL("all", true) {
          @Override
          public boolean shouldReplace(Level level, BlockState clickedState, BlockPos pos) {
@@ -290,7 +290,7 @@ public class ToolModeProperty<T> {
       private final String key;
       public final boolean usePlaceMessage;
 
-      private Replace(String key, boolean usePlaceMessage) {
+      Replace(String key, boolean usePlaceMessage) {
          this.key = key;
          this.usePlaceMessage = usePlaceMessage;
       }
@@ -302,7 +302,7 @@ public class ToolModeProperty<T> {
       }
    }
 
-   public static enum SGMirror implements StringRepresentable {
+   public enum SGMirror implements StringRepresentable {
       NONE("none", r -> Mirror.NONE),
       Z("z", r -> Mirror.FRONT_BACK),
       X("x", r -> Mirror.LEFT_RIGHT),
@@ -311,7 +311,7 @@ public class ToolModeProperty<T> {
       private final String key;
       private final Function<RandomSource, Mirror> vanilla;
 
-      private SGMirror(String key, Function<RandomSource, Mirror> vanilla) {
+      SGMirror(String key, Function<RandomSource, Mirror> vanilla) {
          this.key = key;
          this.vanilla = vanilla;
       }
@@ -325,7 +325,7 @@ public class ToolModeProperty<T> {
       }
    }
 
-   public static enum SGRotation implements StringRepresentable {
+   public enum SGRotation implements StringRepresentable {
       R_0("r_0", r -> Rotation.NONE),
       R_90("r_90", r -> Rotation.CLOCKWISE_90),
       R_180("r_180", r -> Rotation.CLOCKWISE_180),
@@ -335,7 +335,7 @@ public class ToolModeProperty<T> {
       private final String key;
       private final Function<RandomSource, Rotation> vanilla;
 
-      private SGRotation(String key, Function<RandomSource, Rotation> vanilla) {
+      SGRotation(String key, Function<RandomSource, Rotation> vanilla) {
          this.key = key;
          this.vanilla = vanilla;
       }
@@ -366,12 +366,12 @@ public class ToolModeProperty<T> {
          return this.allValues;
       }
 
-      public Component getValueComponent(@Nullable T value) {
+      public Component getValueComponent(T value) {
          return (Component)(value == null ? Component.literal("null") : this.valueComponents.apply(value));
       }
    }
 
-   public static enum Shape implements ToolModeProperty.IPanelSelection {
+   public enum Shape implements ToolModeProperty.IPanelSelection {
       CUBE("cube") {
          @Override
          public boolean isInside(Vec3 vec, double dx, double dy, double dz) {
@@ -550,7 +550,7 @@ public class ToolModeProperty<T> {
 
       private final String key;
 
-      private Shape(String key) {
+      Shape(String key) {
          this.key = key;
       }
 

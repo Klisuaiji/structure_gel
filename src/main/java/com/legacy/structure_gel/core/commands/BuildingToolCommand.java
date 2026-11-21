@@ -105,30 +105,29 @@ public class BuildingToolCommand {
       if (history.isEmpty()) {
          ((CommandSourceStack)context.getSource()).sendFailure(Component.literal(playerName + " has no action history."));
          return 0;
+      }
+
+      String doing = undo ? "undo" : "redo";
+      Consumer<ServerPlayer> action = undo ? history::undo : history::redo;
+      if (amount > 1) {
+         ((CommandSourceStack)context.getSource())
+            .sendSuccess(() -> Component.literal("Attempting to " + doing + " " + amount + " actions from " + playerName), true);
       } else {
-         String doing = undo ? "undo" : "redo";
-         Consumer<ServerPlayer> action = undo ? history::undo : history::redo;
-         if (amount > 1) {
-            ((CommandSourceStack)context.getSource())
-               .sendSuccess(() -> Component.literal("Attempting to " + doing + " " + amount + " actions from " + playerName), true);
-         } else {
-            ((CommandSourceStack)context.getSource())
-               .sendSuccess(() -> Component.literal("Attempting to " + doing + " " + playerName + "'s last action"), true);
+         ((CommandSourceStack)context.getSource()).sendSuccess(() -> Component.literal("Attempting to " + doing + " " + playerName + "'s last action"), true);
+      }
+
+      try {
+         ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+
+         for (int i = 0; i < amount; i++) {
+            action.accept(player);
          }
 
-         try {
-            ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
-
-            for (int i = 0; i < amount; i++) {
-               action.accept(player);
-            }
-
-            return 1;
-         } catch (CommandSyntaxException var9) {
-            ((CommandSourceStack)context.getSource())
-               .sendFailure(Component.literal("This command must be ran by a player since they need to be in the dimension of the action."));
-            return 0;
-         }
+         return 1;
+      } catch (CommandSyntaxException e) {
+         ((CommandSourceStack)context.getSource())
+            .sendFailure(Component.literal("This command must be ran by a player since they need to be in the dimension of the action."));
+         return 0;
       }
    }
 

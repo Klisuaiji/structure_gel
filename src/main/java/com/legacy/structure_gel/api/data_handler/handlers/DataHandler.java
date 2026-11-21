@@ -39,8 +39,9 @@ public abstract class DataHandler<T extends DataHandler<T>> {
    protected abstract void handle(DataHandler.Context var1);
 
    protected BlockState createState(BlockState dataHandler, BlockState state) {
+      BlockState newState = state;
       var facing = (Direction & Comparable)dataHandler.getValue(BlockStateProperties.FACING);
-      BlockState newState = this.mergeProperty(facing, state, BlockStateProperties.FACING);
+      newState = this.mergeProperty(facing, newState, BlockStateProperties.FACING);
       newState = this.mergeProperty(facing, newState, BlockStateProperties.HORIZONTAL_FACING);
       newState = this.mergeProperty(facing, newState, BlockStateProperties.FACING_HOPPER);
       Axis axis = facing.getAxis();
@@ -57,7 +58,7 @@ public abstract class DataHandler<T extends DataHandler<T>> {
       RandomSource rand,
       BlockPos pos,
       ResourceLocation lootTable,
-      @Nullable BlockState chestState
+      BlockState chestState
    ) {
       return SGAccessor.STRUCTURE_PIECE_CREATE_CHEST.invoke(piece, level, bounds, rand, pos, lootTable, chestState);
    }
@@ -97,9 +98,9 @@ public abstract class DataHandler<T extends DataHandler<T>> {
                   DataHandlerBlockEntity.loadMarkPostProcessing(tag)
                );
                handler.process(context, alwaysGenerate);
-            } catch (Exception var11) {
-               StructureGelMod.LOGGER.error("Failed to process DataHandlerBlockEntity", var11);
-               var11.printStackTrace();
+            } catch (Exception e) {
+               StructureGelMod.LOGGER.error("Failed to process DataHandlerBlockEntity", e);
+               e.printStackTrace();
             }
          }
       }

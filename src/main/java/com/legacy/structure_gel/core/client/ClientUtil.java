@@ -69,7 +69,7 @@ public class ClientUtil {
       float sinYaw = Mth.sin(-yaw - pi);
       float cosPitch = -Mth.cos(-pitch);
       float sinPitch = Mth.sin(-pitch);
-      double playerReach = player.getAttribute((Attribute)NeoForgeMod.BLOCK_REACH.value()).getValue();
+      double playerReach = player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.BLOCK_INTERACTION_RANGE);
       Vec3 endPos = eyePos.add(sinYaw * cosPitch * playerReach, sinPitch * playerReach, cosYaw * cosPitch * playerReach);
       return level.clip(new ClipContext(eyePos, endPos, Block.COLLIDER, Fluid.NONE, player));
    }

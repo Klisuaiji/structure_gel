@@ -124,10 +124,10 @@ public class StructureAccessHelper {
    public static boolean isValidDimension(Optional<? extends ResourceKey<? extends Structure>> structureKey, ResourceKey<Level> levelKey) {
       if (!structureKey.isPresent()) {
          return false;
-      } else {
-         Set<ResourceKey<Level>> dimKeys = STRUCTURE_DIM_FILTERS.get(structureKey.get());
-         return dimKeys == null || dimKeys.isEmpty() || dimKeys.contains(levelKey);
       }
+
+      Set<ResourceKey<Level>> dimKeys = STRUCTURE_DIM_FILTERS.get(structureKey.get());
+      return dimKeys == null || dimKeys.isEmpty() || dimKeys.contains(levelKey);
    }
 
    public static void addValidDimensions(ResourceKey<? extends Structure> structureKey, Collection<ResourceKey<Level>> levelKeys) {

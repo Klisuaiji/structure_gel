@@ -36,8 +36,8 @@ public class NetworkUtil {
       try {
          NbtIo.writeCompressed(tag, hasingOutputStream);
          bytes = byteArrayOutput.toByteArray();
-      } catch (IOException var7) {
-         var7.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
          bytes = new byte[0];
       }
 
@@ -61,8 +61,8 @@ public class NetworkUtil {
 
          try {
             return NbtIo.readCompressed(hasingInput, NbtAccounter.unlimitedHeap());
-         } catch (IOException var8) {
-            var8.printStackTrace();
+         } catch (IOException e) {
+            e.printStackTrace();
          }
       }
 

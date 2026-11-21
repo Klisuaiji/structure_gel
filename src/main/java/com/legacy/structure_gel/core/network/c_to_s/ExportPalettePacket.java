@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ExportPalettePacket implements SGPacketHandler.ModPacket<ExportPalettePacket, ExportPalettePacket.Handler> {
    final ItemStack palette;
@@ -35,8 +35,8 @@ public class ExportPalettePacket implements SGPacketHandler.ModPacket<ExportPale
          return new ExportPalettePacket(buff.readItem());
       }
 
-      public void handler(ExportPalettePacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(ExportPalettePacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             ServerPlayer player = this.serverPlayer(context);
             if (player != null && !context.level().isEmpty()) {
                if (BuildingToolItem.hasToolPermission(SGRegistry.Items.BUILDING_TOOL.getDefaultInstance(), player)) {

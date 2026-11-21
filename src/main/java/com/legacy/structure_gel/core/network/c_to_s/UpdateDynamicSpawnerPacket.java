@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class UpdateDynamicSpawnerPacket implements SGPacketHandler.ModPacket<UpdateDynamicSpawnerPacket, UpdateDynamicSpawnerPacket.Handler> {
    final BlockPos pos;
@@ -50,12 +50,12 @@ public class UpdateDynamicSpawnerPacket implements SGPacketHandler.ModPacket<Upd
             ResourceLocation type = buff.readResourceLocation();
             DynamicSpawnerBlockEntity.ExpRange range = new DynamicSpawnerBlockEntity.ExpRange(buff.readInt(), buff.readInt());
             return new UpdateDynamicSpawnerPacket(pos, type, range);
-         } catch (Throwable var5) {
+         } catch (Throwable t) {
             return new UpdateDynamicSpawnerPacket(BlockPos.ZERO, ERRORED, DynamicSpawnerBlockEntity.ExpRange.VANILLA);
          }
       }
 
-      public void handler(UpdateDynamicSpawnerPacket packet, PlayPayloadContext context) {
+      public void handler(UpdateDynamicSpawnerPacket packet, IPayloadContext context) {
          if (packet.type.equals(ERRORED) && packet.pos.equals(BlockPos.ZERO)) {
             ServerPlayer sender = this.serverPlayer(context);
             StructureGelMod.LOGGER
@@ -67,7 +67,7 @@ public class UpdateDynamicSpawnerPacket implements SGPacketHandler.ModPacket<Upd
                   sender.level().dimension().location()
                );
          } else {
-            context.workHandler().submitAsync(() -> {
+            context.enqueueWork(() -> {
                ServerLevel level = this.serverLevel(context);
                BlockPos pos = packet.pos;
                BlockState state = level.getBlockState(pos);

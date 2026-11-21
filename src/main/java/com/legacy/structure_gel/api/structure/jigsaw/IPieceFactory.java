@@ -14,7 +14,7 @@ public interface IPieceFactory {
 
    PoolElementStructurePiece create(IPieceFactory.Context var1);
 
-   public record Context(
+   record Context(
       StructureTemplateManager structureManager,
       StructurePoolElement poolElement,
       BlockPos pos,

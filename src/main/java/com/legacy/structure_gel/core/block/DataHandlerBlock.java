@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.block;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.block_entity.DataHandlerBlockEntity;
 import com.legacy.structure_gel.core.util.SGText;
@@ -171,7 +172,7 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
       } else {
          lore.add(SGText.applyKeybindFilter(Component.translatable("info.structure_gel.hold_shift")));
          String beTagKey = "BlockEntityTag";
-         CompoundTag tag = stack.getTag();
+         CompoundTag tag = LegacyNbt.get(stack);
          if (tag != null && tag.contains(beTagKey, 10)) {
             CompoundTag beTag = tag.getCompound(beTagKey);
             if (beTag.contains("handlers", 9)) {

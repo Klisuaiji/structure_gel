@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.events;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.block.GelPortalBlock;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.capability.entity.GelEntity;
@@ -39,8 +40,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.common.Mod.EventBusSubscriber;
-import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent;
@@ -50,20 +51,15 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderer
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent.Stage;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent.GatherComponents;
 import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
-import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
+import com.legacy.blue_skies.compat.LegacyGuiOverlay;
 import net.neoforged.neoforge.common.util.Lazy;
-import net.neoforged.neoforge.event.TickEvent.Phase;
-import net.neoforged.neoforge.event.TickEvent.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import org.joml.Matrix4f;
 
 @Internal
 public class SGClientEvents {
-   @EventBusSubscriber(
-      modid = "structure_gel",
-      bus = Bus.FORGE,
-      value = {Dist.CLIENT}
-   )
+   @EventBusSubscriber(modid = "structure_gel", bus = Bus.FORGE, value = Dist.CLIENT)
    protected static class ForgeBus {
       @SubscribeEvent
       protected static void onPlaySound(PlaySoundEvent event) {
@@ -87,8 +83,8 @@ public class SGClientEvents {
       }
 
       @SubscribeEvent
-      protected static void clientPlayerTick(PlayerTickEvent event) {
-         if (event.phase == Phase.END && event.side == LogicalSide.CLIENT) {
+      protected static void clientPlayerTick(PlayerTickEvent.Post event) {
+         if (event.getEntity().level().isClientSide()) {
             GelEntity.clientTick();
          }
       }
@@ -143,18 +139,14 @@ public class SGClientEvents {
       }
    }
 
-   @EventBusSubscriber(
-      modid = "structure_gel",
-      bus = Bus.MOD,
-      value = {Dist.CLIENT}
-   )
+   @EventBusSubscriber(modid = "structure_gel", bus = Bus.MOD, value = Dist.CLIENT)
    protected static class ModBus {
       @SubscribeEvent
       protected static void clientInit(FMLClientSetupEvent event) {
          event.enqueueWork(
             () -> {
                ItemProperties.register(Items.STRUCTURE_BLOCK, StructureGelMod.locate("mode"), (stack, level, entity, layer) -> {
-                  CompoundTag tag = stack.getTag();
+                  CompoundTag tag = LegacyNbt.get(stack);
                   if (tag != null && tag.contains("BlockEntityTag", 10)) {
                      CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
                      if (blockEntityTag.contains("mode", 8)) {
@@ -189,7 +181,7 @@ public class SGClientEvents {
 
       @SubscribeEvent
       protected static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-         event.registerAbove(VanillaGuiOverlay.ITEM_NAME.id(), StructureGelMod.locate("building_tool_overlay"), BuildingToolOverlay::render);
+         event.registerAbove(LegacyGuiOverlay.ITEM_NAME.id(), StructureGelMod.locate("building_tool_overlay"), BuildingToolOverlay::render);
       }
 
       @SubscribeEvent

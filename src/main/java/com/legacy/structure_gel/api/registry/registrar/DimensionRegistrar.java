@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -25,9 +25,9 @@ public class DimensionRegistrar {
 
    public DimensionRegistrar(
       ResourceLocation registryName,
-      Function<BootstapContext<?>, DimensionType> dimensionType,
-      Function<BootstapContext<?>, NoiseGeneratorSettings> noiseSettings,
-      Function<BootstapContext<?>, ChunkGenerator> chunkGeneratorFactory
+      Function<BootstrapContext<?>, DimensionType> dimensionType,
+      Function<BootstrapContext<?>, NoiseGeneratorSettings> noiseSettings,
+      Function<BootstrapContext<?>, ChunkGenerator> chunkGeneratorFactory
    ) {
       String modID = registryName.getNamespace();
       RegistrarHandler<DimensionType> dimTypeHandler = RegistrarHandler.getOrCreate(Registries.DIMENSION_TYPE, modID);

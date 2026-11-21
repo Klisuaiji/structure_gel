@@ -87,57 +87,57 @@ public class ReplaceTool extends BuildingToolMode {
       BlockState state = level.getBlockState(clickedPos);
       if (state.isAir()) {
          return Collections.emptySet();
-      } else {
-         Block clickedBlock = state.getBlock();
-         Set<BlockPos> allPositions = new HashSet<>();
-         Set<BlockPos> posesToSearch = new HashSet<>();
-         posesToSearch.add(clickedPos);
-         Vec3i[] offsets;
-         if (fuzzy) {
-            int r = 1;
-            int d = r * 2 + 1;
-            List<Vec3i> o = new ArrayList<>(d * d * d - 1);
-
-            for (int x = -r; x <= r; x++) {
-               for (int y = -r; y <= r; y++) {
-                  for (int z = -r; z <= r; z++) {
-                     if (x != 0 || y != 0 || z != 0) {
-                        o.add(new Vec3i(x, y, z));
-                     }
-                  }
-               }
-            }
-
-            offsets = o.toArray(Vec3i[]::new);
-         } else {
-            Direction[] dirs = Direction.values();
-            offsets = new Vec3i[dirs.length];
-
-            for (int i = 0; i < dirs.length; i++) {
-               offsets[i] = dirs[i].getNormal();
-            }
-         }
-
-         while (!posesToSearch.isEmpty()) {
-            Set<BlockPos> newPoses = new HashSet<>();
-
-            for (BlockPos pos : posesToSearch) {
-               if (pos.distManhattan(clickedPos) <= radius) {
-                  allPositions.add(pos);
-
-                  for (Vec3i delta : offsets) {
-                     BlockPos offset = pos.offset(delta);
-                     if (!allPositions.contains(offset) && level.getBlockState(offset).is(clickedBlock)) {
-                        newPoses.add(offset);
-                     }
-                  }
-               }
-            }
-
-            posesToSearch = newPoses;
-         }
-
-         return allPositions;
       }
+
+      Block clickedBlock = state.getBlock();
+      Set<BlockPos> allPositions = new HashSet<>();
+      Set<BlockPos> posesToSearch = new HashSet<>();
+      posesToSearch.add(clickedPos);
+      Vec3i[] offsets;
+      if (fuzzy) {
+         int r = 1;
+         int d = r * 2 + 1;
+         List<Vec3i> o = new ArrayList<>(d * d * d - 1);
+
+         for (int x = -r; x <= r; x++) {
+            for (int y = -r; y <= r; y++) {
+               for (int z = -r; z <= r; z++) {
+                  if (x != 0 || y != 0 || z != 0) {
+                     o.add(new Vec3i(x, y, z));
+                  }
+               }
+            }
+         }
+
+         offsets = o.toArray(Vec3i[]::new);
+      } else {
+         Direction[] dirs = Direction.values();
+         offsets = new Vec3i[dirs.length];
+
+         for (int i = 0; i < dirs.length; i++) {
+            offsets[i] = dirs[i].getNormal();
+         }
+      }
+
+      while (!posesToSearch.isEmpty()) {
+         Set<BlockPos> newPoses = new HashSet<>();
+
+         for (BlockPos pos : posesToSearch) {
+            if (pos.distManhattan(clickedPos) <= radius) {
+               allPositions.add(pos);
+
+               for (Vec3i delta : offsets) {
+                  BlockPos offset = pos.offset(delta);
+                  if (!allPositions.contains(offset) && level.getBlockState(offset).is(clickedBlock)) {
+                     newPoses.add(offset);
+                  }
+               }
+            }
+         }
+
+         posesToSearch = newPoses;
+      }
+
+      return allPositions;
    }
 }

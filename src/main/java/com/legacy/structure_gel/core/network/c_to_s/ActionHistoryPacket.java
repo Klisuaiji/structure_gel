@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ActionHistoryPacket implements SGPacketHandler.ModPacket<ActionHistoryPacket, ActionHistoryPacket.Handler> {
    private final ActionHistoryPacket.Action action;
@@ -47,7 +47,7 @@ public class ActionHistoryPacket implements SGPacketHandler.ModPacket<ActionHist
       return new ActionHistoryPacket.Handler();
    }
 
-   public static enum Action {
+   public enum Action {
       NONE,
       UNDO,
       REDO,
@@ -78,8 +78,8 @@ public class ActionHistoryPacket implements SGPacketHandler.ModPacket<ActionHist
          );
       }
 
-      public void handler(ActionHistoryPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(ActionHistoryPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             ServerPlayer player = this.serverPlayer(context);
             ActionHistory history = ActionHistory.get(player);
             ItemStack item = player.getItemInHand(packet.hand);

@@ -225,12 +225,12 @@ public class BuildingToolRenderers {
                         }
 
                         IRenderBase.makeLineBox(poseStack, buffBuilder, destBB, -0.01, 0.75F, 0.0F, 0.75F, 0.3F);
-                     } catch (NullPointerException var19) {
+                     } catch (NullPointerException e) {
                         if (this.capturedBlocksCache == null) {
                            return;
                         }
 
-                        throw var19;
+                        throw e;
                      }
                   }
                }
@@ -265,8 +265,8 @@ public class BuildingToolRenderers {
                            this.destFutureRender = null;
                            VertexBuffer.unbind();
                            this.destLastRenderInfo = result.renderInfo();
-                        } catch (Throwable var14) {
-                           var14.printStackTrace();
+                        } catch (Throwable t) {
+                           t.printStackTrace();
                         }
                      }
                   } else {
@@ -295,7 +295,7 @@ public class BuildingToolRenderers {
                protected void render(
                   Minecraft mc, LocalPlayer player, ItemStack stack, PoseStack poseStack, Matrix4f projectionMatrix, double camX, double camY, double camZ
                ) {
-                  super.render(mc, player, stack, poseStack, projectionMatrix, camX, camY, camZ);
+                  super.render(mc, player, stack, poseStack, -1);
                   if (this.destBuffer != null && this.hitPos != null && this.capturedBlocksCache != null) {
                      poseStack.pushPose();
                      RenderSystem.setShader(GameRenderer::getPositionColorShader);

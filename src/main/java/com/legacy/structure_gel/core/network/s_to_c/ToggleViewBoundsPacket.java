@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ToggleViewBoundsPacket implements SGPacketHandler.ModPacket<ToggleViewBoundsPacket, ToggleViewBoundsPacket.Handler> {
    private final boolean shouldViewBounds;
@@ -34,9 +34,9 @@ public class ToggleViewBoundsPacket implements SGPacketHandler.ModPacket<ToggleV
          return new ToggleViewBoundsPacket(shouldViewBounds);
       }
 
-      public void handler(ToggleViewBoundsPacket packet, PlayPayloadContext context) {
+      public void handler(ToggleViewBoundsPacket packet, IPayloadContext context) {
          if (FMLEnvironment.dist == Dist.CLIENT) {
-            context.workHandler().submitAsync(() -> StructureGelMod.proxy.setViewBounds(packet.shouldViewBounds));
+            context.enqueueWork(() -> StructureGelMod.proxy.setViewBounds(packet.shouldViewBounds));
          }
       }
    }

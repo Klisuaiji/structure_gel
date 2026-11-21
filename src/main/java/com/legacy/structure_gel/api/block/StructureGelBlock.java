@@ -90,23 +90,23 @@ public class StructureGelBlock extends Block implements IStructureGel {
          BlockState hookState = this.onHandPlaceHook(context);
          if (hookState != null) {
             return hookState;
-         } else {
-            int count = 50;
-            if (player.isShiftKeyDown()) {
-               count = 0;
-               if (this.behaviors.contains(IStructureGel.Behavior.DYNAMIC_SPREAD_DIST)) {
-                  count = Math.min(Math.max(50 - context.getItemInHand().getCount(), 0), 50);
-               }
-            }
-
-            return (BlockState)this.defaultBlockState().setValue(COUNT, count);
          }
+
+         int count = 50;
+         if (player.isShiftKeyDown()) {
+            count = 0;
+            if (this.behaviors.contains(IStructureGel.Behavior.DYNAMIC_SPREAD_DIST)) {
+               count = Math.min(Math.max(50 - context.getItemInHand().getCount(), 0), 50);
+            }
+         }
+
+         return (BlockState)this.defaultBlockState().setValue(COUNT, count);
       } else {
          return Blocks.AIR.defaultBlockState();
       }
    }
 
-   public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+   public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
       level.scheduleTick(pos, this, 2);
    }
 
@@ -137,12 +137,12 @@ public class StructureGelBlock extends Block implements IStructureGel {
             return;
          }
 
-         for (Direction dx : Direction.values()) {
-            BlockPos offset = pos.relative(dx);
+         for (Direction d : Direction.values()) {
+            BlockPos offset = pos.relative(d);
             this.removeGel(state, level, offset);
             if (this.behaviors.contains(IStructureGel.Behavior.DIAGONAL_SPREAD)) {
-               if (dx != Direction.UP && dx != Direction.DOWN) {
-                  this.removeGel(state, level, offset.relative(dx.getClockWise()));
+               if (d != Direction.UP && d != Direction.DOWN) {
+                  this.removeGel(state, level, offset.relative(d.getClockWise()));
                } else {
                   for (int i = 0; i < 4; i++) {
                      this.removeGel(state, level, offset.relative(Direction.from2DDataValue(i)));
@@ -198,17 +198,19 @@ public class StructureGelBlock extends Block implements IStructureGel {
    public boolean checkAbove(Level level, BlockPos pos) {
       if (!this.behaviors.contains(IStructureGel.Behavior.PHOTOSENSITIVE)) {
          return true;
-      } else if (!level.canSeeSky(pos)) {
-         return true;
-      } else {
-         for (int dy = 1; pos.above(dy).getY() < 256; dy++) {
-            if (!level.isEmptyBlock(pos.above(dy))) {
-               return true;
-            }
-         }
-
-         return false;
       }
+
+      if (!level.canSeeSky(pos)) {
+         return true;
+      }
+
+      for (int dy = 1; pos.above(dy).getY() < 256; dy++) {
+         if (!level.isEmptyBlock(pos.above(dy))) {
+            return true;
+         }
+      }
+
+      return false;
    }
 
    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
@@ -238,17 +240,17 @@ public class StructureGelBlock extends Block implements IStructureGel {
    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
       if (!SGConfig.COMMON.advancedGelBehavior()) {
          return false;
-      } else {
-         Player player = context.getPlayer();
-         if (player != null) {
-            Item item = context.getItemInHand().getItem();
-            if (player.isShiftKeyDown() || ((Set)ITEMS.get()).contains(item)) {
-               return false;
-            }
-         }
-
-         return true;
       }
+
+      Player player = context.getPlayer();
+      if (player != null) {
+         Item item = context.getItemInHand().getItem();
+         if (player.isShiftKeyDown() || ((Set)ITEMS.get()).contains(item)) {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block oldBlock, BlockPos neighborPos, boolean flag) {

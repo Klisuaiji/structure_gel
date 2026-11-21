@@ -41,7 +41,7 @@ public class MultiWidget implements Renderable, GuiEventListener, NarratableEntr
    public void setFocused(boolean isFocused) {
    }
 
-   public void setFocused(@Nullable GuiEventListener listener) {
+   public void setFocused(GuiEventListener listener) {
       for (GuiEventListener l : this.listeners) {
          l.setFocused(l == listener);
       }

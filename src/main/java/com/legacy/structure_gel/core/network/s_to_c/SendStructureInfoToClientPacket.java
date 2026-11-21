@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SendStructureInfoToClientPacket implements SGPacketHandler.ModPacket<SendStructureInfoToClientPacket, SendStructureInfoToClientPacket.Handler> {
    private final StructureInfo structureInfo;
@@ -74,9 +74,9 @@ public class SendStructureInfoToClientPacket implements SGPacketHandler.ModPacke
          return new BoundingBox(buff.readInt(), buff.readInt(), buff.readInt(), buff.readInt(), buff.readInt(), buff.readInt());
       }
 
-      public void handler(SendStructureInfoToClientPacket packet, PlayPayloadContext context) {
+      public void handler(SendStructureInfoToClientPacket packet, IPayloadContext context) {
          if (FMLEnvironment.dist == Dist.CLIENT) {
-            context.workHandler().submitAsync(() -> StructureBoundsRenderer.addInfo(packet.structureInfo));
+            context.enqueueWork(() -> StructureBoundsRenderer.addInfo(packet.structureInfo));
          }
       }
    }

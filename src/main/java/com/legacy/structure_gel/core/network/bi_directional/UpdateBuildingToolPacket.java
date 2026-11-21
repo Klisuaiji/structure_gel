@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UpdateBuildingToolPacket(
    boolean toServer,
@@ -220,15 +220,15 @@ public record UpdateBuildingToolPacket(
          );
       }
 
-      public void handler(UpdateBuildingToolPacket packet, PlayPayloadContext context) {
+      public void handler(UpdateBuildingToolPacket packet, IPayloadContext context) {
       }
 
-      public void handleClientbound(UpdateBuildingToolPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> handleClient(packet));
+      public void handleClientbound(UpdateBuildingToolPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> handleClient(packet));
       }
 
-      public void handleServerbound(UpdateBuildingToolPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> handle(packet, (Player)context.player().get()));
+      public void handleServerbound(UpdateBuildingToolPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> handle(packet, (Player)context.player().get()));
       }
 
       @OnlyIn(Dist.CLIENT)

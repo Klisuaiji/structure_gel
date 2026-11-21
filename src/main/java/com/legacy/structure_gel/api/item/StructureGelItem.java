@@ -21,7 +21,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 public class StructureGelItem extends GameMasterBlockItem {
-   public StructureGelItem(StructureGelBlock structureGelBlock, @Nullable Properties properties) {
+   public StructureGelItem(StructureGelBlock structureGelBlock, Properties properties) {
       super(
          structureGelBlock,
          properties == null

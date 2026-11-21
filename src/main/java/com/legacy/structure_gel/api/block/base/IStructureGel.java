@@ -38,7 +38,7 @@ public interface IStructureGel {
       return Blocks.AIR.defaultBlockState();
    }
 
-   public static enum Behavior implements StringRepresentable {
+   enum Behavior implements StringRepresentable {
       DEFAULT("default"),
       PHOTOSENSITIVE("photosensitive"),
       DIAGONAL_SPREAD("diagonal_spread"),
@@ -49,7 +49,7 @@ public interface IStructureGel {
       private final String name;
       private final String translation;
 
-      private Behavior(String name) {
+      Behavior(String name) {
          this.name = name;
          this.translation = String.format("info.%s.%s", "structure_gel", name);
       }

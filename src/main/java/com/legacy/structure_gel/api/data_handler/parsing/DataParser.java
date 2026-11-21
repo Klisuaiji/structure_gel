@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.api.data_handler.parsing;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data_handler.DataHandlerType;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.core.client.ClientUtil;
@@ -101,23 +102,23 @@ public class DataParser {
       return this.add(key, (s, l) -> Boolean.valueOf(s), defaultVal, Boolean.class, "boolean");
    }
 
-   public DataParser.Parser<String> add(String key, @Nullable String defaultVal) {
+   public DataParser.Parser<String> add(String key, String defaultVal) {
       return this.add(key, (s, l) -> s, defaultVal, String.class, "String");
    }
 
-   public DataParser.Parser<ResourceLocation> add(String key, @Nullable ResourceLocation defaultVal) {
+   public DataParser.Parser<ResourceLocation> add(String key, ResourceLocation defaultVal) {
       return this.add(key, (s, l) -> parseResourceLocation(s), defaultVal, ResourceLocation.class, "ResourceLocation");
    }
 
-   public DataParser.Parser<Direction> add(String key, @Nullable Direction defaultVal) {
+   public DataParser.Parser<Direction> add(String key, Direction defaultVal) {
       return this.addEnum(key, Direction.class, defaultVal);
    }
 
-   public DataParser.Parser<Axis> add(String key, @Nullable Axis defaultVal) {
+   public DataParser.Parser<Axis> add(String key, Axis defaultVal) {
       return this.addEnum(key, Axis.class, defaultVal);
    }
 
-   public <T extends Enum<T> & StringRepresentable> DataParser.Parser<T> addEnum(String key, Class<T> clazz, @Nullable T defaultVal) {
+   public <T extends Enum<T> & StringRepresentable> DataParser.Parser<T> addEnum(String key, Class<T> clazz, T defaultVal) {
       return this.<T>add(key, (s, l) -> {
          for (T v : (Enum[])clazz.getEnumConstants()) {
             if (s.equals(v.getSerializedName())) {
@@ -129,7 +130,7 @@ public class DataParser {
       }, defaultVal, clazz, clazz.getSimpleName()).setDefaultValName(defaultVal != null ? defaultVal.getSerializedName() : null);
    }
 
-   public DataParser.Parser<BlockState> add(String key, @Nullable BlockState defaultVal) {
+   public DataParser.Parser<BlockState> add(String key, BlockState defaultVal) {
       String defaultValName = null;
       if (defaultVal != null) {
          defaultValName = BlockStateParser.serialize(defaultVal);
@@ -140,7 +141,7 @@ public class DataParser {
          .setExample("minecraft:chest[facing=east]");
    }
 
-   public DataParser.Parser<ItemStack> add(String key, @Nullable ItemStack defaultVal) {
+   public DataParser.Parser<ItemStack> add(String key, ItemStack defaultVal) {
       ItemStack defaultClone = null;
       String defaultValName = null;
       if (defaultVal != null) {
@@ -152,7 +153,7 @@ public class DataParser {
             defaultValName = registryName.toString() + (tag.isEmpty() ? "" : tag.getAsString());
          }
 
-         defaultClone.getOrCreateTag().putByte("Count", (byte)defaultClone.getCount());
+         LegacyNbt.getOrCreate(defaultClone).putByte("Count", (byte)defaultClone.getCount());
       }
 
       return this.add(key, DataParser::parseItemStack, defaultClone, ItemStack.class, "ItemStack")
@@ -160,7 +161,7 @@ public class DataParser {
          .setExample("minecraft:diamond{Count:1b}");
    }
 
-   public DataParser.Parser<CompoundTag> add(String key, @Nullable CompoundTag defaultVal) {
+   public DataParser.Parser<CompoundTag> add(String key, CompoundTag defaultVal) {
       return this.<CompoundTag>add(key, (s, l) -> parseTag(s), defaultVal, CompoundTag.class, "CompoundTag")
          .setDefaultValName(defaultVal != null ? defaultVal.getAsString() : null)
          .setExample("{key:\"value\", id:0, list:[0, 1, 2]}");
@@ -171,18 +172,18 @@ public class DataParser {
          throw new NullPointerException(
             "defaultVal cannot be null for " + this.dataHandlerType + "." + key + " use add(String, ResourceKey<T>, ResourceKey<Registry<T>>)"
          );
-      } else {
-         ResourceKey<Registry<T>> registry = ResourceKey.createRegistryKey(defaultVal.registry());
-         DataParser.ResourceKeyParser<T> parser = new DataParser.ResourceKeyParser<>(
-            this.dataHandlerType, key, (s, l) -> parseResourceKey(registry, s), defaultVal, registry
-         );
-         parser.setDefaultValName(defaultVal != null ? defaultVal.location().toString() : null);
-         this.add(parser);
-         return parser;
       }
+
+      ResourceKey<Registry<T>> registry = ResourceKey.createRegistryKey(defaultVal.registry());
+      DataParser.ResourceKeyParser<T> parser = new DataParser.ResourceKeyParser<>(
+         this.dataHandlerType, key, (s, l) -> parseResourceKey(registry, s), defaultVal, registry
+      );
+      parser.setDefaultValName(defaultVal != null ? defaultVal.location().toString() : null);
+      this.add(parser);
+      return parser;
    }
 
-   public <T> DataParser.ResourceKeyParser<ResourceKey<T>> add(String key, @Nonnull ResourceKey<Registry<T>> registryKey, @Nullable T defaultVal) throws NullPointerException {
+   public <T> DataParser.ResourceKeyParser<ResourceKey<T>> add(String key, @Nonnull ResourceKey<Registry<T>> registryKey, T defaultVal) throws NullPointerException {
       Registry registry = (Registry)BuiltInRegistries.REGISTRY.get(registryKey);
       if (registry != null) {
          Optional<ResourceKey> resourceKey = registry.getResourceKey(defaultVal);
@@ -197,19 +198,19 @@ public class DataParser {
    }
 
    public <T> DataParser.Parser<T> add(
-      String key, DataParser.ParseFunc<T> parser, @Nullable T defaultVal, Class<T> type, String typeName, DataParser.ParseValidator validator
+      String key, DataParser.ParseFunc<T> parser, T defaultVal, Class<T> type, String typeName, DataParser.ParseValidator validator
    ) {
       DataParser.Parser<T> dataParser = new DataParser.Parser<>(this.dataHandlerType, key, parser, defaultVal, type, typeName, validator);
       this.add(dataParser);
       return dataParser;
    }
 
-   public <T> DataParser.Parser<T> add(String key, DataParser.ParseFunc<T> parser, @Nullable T defaultVal, Class<T> type, String typeName) {
+   public <T> DataParser.Parser<T> add(String key, DataParser.ParseFunc<T> parser, T defaultVal, Class<T> type, String typeName) {
       return this.add(key, parser, defaultVal, type, typeName, (s, l) -> Objects.nonNull(parser.parse(s, l)));
    }
 
    public <T extends Number> DataParser.NumberParser<T> addNumber(
-      String key, Function<String, T> parser, @Nullable T defaultVal, Class<T> type, String typeName, T minVal, T maxVal, BiPredicate<T, Pair<T, T>> rangeTest
+      String key, Function<String, T> parser, T defaultVal, Class<T> type, String typeName, T minVal, T maxVal, BiPredicate<T, Pair<T, T>> rangeTest
    ) {
       DataParser.NumberParser<T> numParser = new DataParser.NumberParser<>(
          this.dataHandlerType, key, parser, defaultVal, type, typeName, minVal, maxVal, rangeTest
@@ -255,7 +256,7 @@ public class DataParser {
 
    @Nullable
    private static ResourceLocation parseResourceLocation(String key) {
-      return ResourceLocation.isValidResourceLocation(key) ? new ResourceLocation(key) : null;
+      return LegacyRL.isValid(key) ? ResourceLocation.parse(key) : null;
    }
 
    @Nullable
@@ -263,7 +264,7 @@ public class DataParser {
       try {
          BlockState state = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(key), false).blockState();
          return state.getBlock().isEnabled(level.enabledFeatures()) ? state : null;
-      } catch (CommandSyntaxException var3) {
+      } catch (CommandSyntaxException e) {
          return null;
       }
    }
@@ -282,7 +283,7 @@ public class DataParser {
          }
 
          return itemStack.isItemEnabled(level.enabledFeatures()) ? itemStack : null;
-      } catch (CommandSyntaxException var5) {
+      } catch (CommandSyntaxException e) {
          return null;
       }
    }
@@ -291,14 +292,14 @@ public class DataParser {
    private static CompoundTag parseTag(String key) {
       try {
          return new TagParser(new StringReader(key)).readStruct();
-      } catch (CommandSyntaxException var2) {
+      } catch (CommandSyntaxException e) {
          return null;
       }
    }
 
    @Nullable
    public static <T> ResourceKey<T> parseResourceKey(ResourceKey<Registry<T>> registry, String key) {
-      return ResourceLocation.isValidResourceLocation(key) ? ResourceKey.create(registry, new ResourceLocation(key)) : null;
+      return LegacyRL.isValid(key) ? ResourceKey.create(registry, ResourceLocation.parse(key)) : null;
    }
 
    public interface DefaultValue {
@@ -342,7 +343,7 @@ public class DataParser {
             try {
                T val = func.parse(s, l);
                return rangeTest.test(val, Pair.of(minVal, maxVal));
-            } catch (Exception var7) {
+            } catch (Exception e) {
                return false;
             }
          };
@@ -378,7 +379,7 @@ public class DataParser {
          ResourceLocation dataHandlerType,
          String key,
          DataParser.ParseFunc<T> parseFunc,
-         @Nullable T defaultVal,
+         T defaultVal,
          Class<T> type,
          String typeName,
          DataParser.ParseValidator validator
@@ -406,16 +407,16 @@ public class DataParser {
          return this.toStringFunc;
       }
 
-      public DataParser.Parser<T> setExample(@Nullable String example) {
+      public DataParser.Parser<T> setExample(String example) {
          this.example = example;
          return this;
       }
 
-      public DataParser.Parser<T> setDefaultValName(@Nullable String defaultValName) throws IllegalArgumentException {
+      public DataParser.Parser<T> setDefaultValName(String defaultValName) throws IllegalArgumentException {
          return this.setDefaultValName(defaultValName, (a, b) -> a.equals(b));
       }
 
-      public DataParser.Parser<T> setDefaultValName(@Nullable String defaultValName, BiPredicate<T, T> equalsFunc) throws IllegalArgumentException {
+      public DataParser.Parser<T> setDefaultValName(String defaultValName, BiPredicate<T, T> equalsFunc) throws IllegalArgumentException {
          if (defaultValName == null && this.defaultVal == null) {
             this.defaultValName = l -> "null";
          } else {
@@ -463,7 +464,7 @@ public class DataParser {
          try {
             T ret = this.parseFunc.parse(value, level);
             return ret != null ? ret : this.defaultVal;
-         } catch (Exception var4) {
+         } catch (Exception e) {
             return this.defaultVal;
          }
       }
@@ -485,7 +486,7 @@ public class DataParser {
          ResourceLocation dataHandlerType,
          String key,
          DataParser.ParseFunc<ResourceKey<T>> parseFunc,
-         @Nullable ResourceKey<T> defaultVal,
+         ResourceKey<T> defaultVal,
          ResourceKey<Registry<T>> registry
       ) {
          super(
@@ -511,7 +512,7 @@ public class DataParser {
             SGPacketHandler.sendToServer(new RequestRegistryKeysPacket(this.registry));
          }
 
-         return (Collection<ResourceKey<T>>)(suggestions == null ? super.getSuggestions() : suggestions);
+         return suggestions == null ? super.getSuggestions() : suggestions;
       }
    }
 }

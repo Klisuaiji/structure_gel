@@ -25,7 +25,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Holder.Reference;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
@@ -61,7 +61,7 @@ public class StructureRegistrar<S extends Structure> {
       RegistrarHandler<StructurePieceType> pieceHandler = RegistrarHandler.getOrCreate(Registries.STRUCTURE_PIECE, modID);
       RegistrarHandler<Structure> structureHandler = RegistrarHandler.getOrCreate(Registries.STRUCTURE, modID);
       RegistrarHandler<StructureSet> setHandler = RegistrarHandler.getOrCreate(Registries.STRUCTURE_SET, modID);
-      this.structureType = (Supplier<StructureType<S>>)(!builder.existingType ? typeHandler.createStatic(this.registryName, builder.type) : builder.type);
+      this.structureType = !builder.existingType ? typeHandler.createStatic(this.registryName, builder.type) : builder.type;
       this.pieceTypes = builder.pieceTypes
          .entrySet()
          .stream()
@@ -195,7 +195,7 @@ public class StructureRegistrar<S extends Structure> {
    }
 
    private static ResourceLocation createName(ResourceLocation name, String suffix) {
-      return suffix.isEmpty() ? name : new ResourceLocation(name.getNamespace(), name.getPath() + "_" + suffix);
+      return suffix.isEmpty() ? name : ResourceLocation.fromNamespaceAndPath(name.getNamespace(), name.getPath() + "_" + suffix);
    }
 
    public static class Builder<S extends Structure> {
@@ -205,31 +205,31 @@ public class StructureRegistrar<S extends Structure> {
       private final boolean existingType;
       private final Map<String, StructureRegistrar.StructureBuilder<S>> structureBuilders = new HashMap<>();
       private final Map<String, Supplier<StructurePieceType>> pieceTypes = new HashMap<>();
-      private Function<BootstapContext<?>, StructurePlacement> structurePlacement;
+      private Function<BootstrapContext<?>, StructurePlacement> structurePlacement;
 
-      private Builder(ResourceLocation registryName, @Nullable Supplier<StructureType<S>> type, boolean existingType) {
+      private Builder(ResourceLocation registryName, Supplier<StructureType<S>> type, boolean existingType) {
          this.registryName = registryName;
          this.type = type;
          this.existingType = existingType;
          this.structurePlacement = c -> GridStructurePlacement.builder(16, 0.8F).build(this.registryName);
       }
 
-      public StructureRegistrar.StructureBuilder<S> pushStructure(BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory) {
+      public StructureRegistrar.StructureBuilder<S> pushStructure(BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory) {
          return this.pushStructure("", structureFactory);
       }
 
-      public StructureRegistrar.StructureBuilder<S> pushStructure(String name, BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory) {
+      public StructureRegistrar.StructureBuilder<S> pushStructure(String name, BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory) {
          return new StructureRegistrar.StructureBuilder<>(this, structureFactory, name);
       }
 
       public StructureRegistrar.StructureBuilder<S> pushStructure(
-         BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory, Consumer<StructureRegistrar.StructureBuilder<S>> builderConsumer
+         BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory, Consumer<StructureRegistrar.StructureBuilder<S>> builderConsumer
       ) {
          return this.pushStructure("", structureFactory, builderConsumer);
       }
 
       public StructureRegistrar.StructureBuilder<S> pushStructure(
-         String name, BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory, Consumer<StructureRegistrar.StructureBuilder<S>> builderConsumer
+         String name, BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory, Consumer<StructureRegistrar.StructureBuilder<S>> builderConsumer
       ) {
          StructureRegistrar.StructureBuilder<S> structureBuilder = this.pushStructure(name, structureFactory);
          builderConsumer.accept(structureBuilder);
@@ -280,7 +280,7 @@ public class StructureRegistrar<S extends Structure> {
          return this.placement(c -> structurePlacement.get());
       }
 
-      public StructureRegistrar.Builder<S> placement(Function<BootstapContext<?>, StructurePlacement> structurePlacement) {
+      public StructureRegistrar.Builder<S> placement(Function<BootstrapContext<?>, StructurePlacement> structurePlacement) {
          this.structurePlacement = structurePlacement;
          return this;
       }
@@ -301,8 +301,8 @@ public class StructureRegistrar<S extends Structure> {
    public static class StructureBuilder<S extends Structure> {
       private final StructureRegistrar.Builder<S> parentBuilder;
       private final String name;
-      private final BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory;
-      private Function<BootstapContext<?>, HolderSet<Biome>> biomes = c -> c.lookup(Registries.BIOME).getOrThrow(BiomeTags.IS_OVERWORLD);
+      private final BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory;
+      private Function<BootstrapContext<?>, HolderSet<Biome>> biomes = c -> c.lookup(Registries.BIOME).getOrThrow(BiomeTags.IS_OVERWORLD);
       private TerrainAdjustment terrainAdjustment = TerrainAdjustment.NONE;
       private Decoration generationStep = Decoration.SURFACE_STRUCTURES;
       private Map<MobCategory, Supplier<StructureSpawnOverride>> spawns = new HashMap<>();
@@ -311,30 +311,28 @@ public class StructureRegistrar<S extends Structure> {
       private Collection<ResourceKey<Level>> dimensions = null;
       private boolean lakeProof = true;
 
-      private StructureBuilder(StructureRegistrar.Builder<S> parentBuilder, BiFunction<BootstapContext<?>, StructureSettings, S> structureFactory, String name) {
+      private StructureBuilder(StructureRegistrar.Builder<S> parentBuilder, BiFunction<BootstrapContext<?>, StructureSettings, S> structureFactory, String name) {
          this.parentBuilder = parentBuilder;
          this.structureFactory = structureFactory;
          this.name = name;
       }
 
-      public final StructureRegistrar.StructureBuilder<S> biomes(Function<BootstapContext<?>, HolderSet<Biome>> biomes) {
+      public final StructureRegistrar.StructureBuilder<S> biomes(Function<BootstrapContext<?>, HolderSet<Biome>> biomes) {
          this.biomes = biomes;
          return this;
       }
 
       public final StructureRegistrar.StructureBuilder<S> biomes(Supplier<FilterHolderSet.Builder<Biome>> biomes) {
-         return this.biomes((Function<BootstapContext<?>, HolderSet<Biome>>)(c -> biomes.get().build(c.lookup(Registries.BIOME))));
+         return this.biomes(c -> biomes.get().build(c.lookup(Registries.BIOME)));
       }
 
       @SafeVarargs
       public final StructureRegistrar.StructureBuilder<S> biomes(ResourceKey<Biome>... biomes) {
-         return this.biomes(
-            (Function<BootstapContext<?>, HolderSet<Biome>>)(c -> HolderSet.direct(Arrays.stream(biomes).map(c.lookup(Registries.BIOME)::getOrThrow).toList()))
-         );
+         return this.biomes(c -> HolderSet.direct(Arrays.stream(biomes).map(c.lookup(Registries.BIOME)::getOrThrow).toList()));
       }
 
       public final StructureRegistrar.StructureBuilder<S> biomes(TagKey<Biome> tagKey) {
-         return this.biomes((Function<BootstapContext<?>, HolderSet<Biome>>)(c -> c.lookup(Registries.BIOME).getOrThrow(tagKey)));
+         return this.biomes(c -> c.lookup(Registries.BIOME).getOrThrow(tagKey));
       }
 
       public final StructureRegistrar.StructureBuilder<S> spawns(MobCategory category, Supplier<StructureSpawnOverride> spawnPool) {
@@ -385,7 +383,7 @@ public class StructureRegistrar<S extends Structure> {
          return this.parentBuilder;
       }
 
-      private S build(BootstapContext<?> context) {
+      private S build(BootstrapContext<?> context) {
          return this.structureFactory
             .apply(
                context,

@@ -131,7 +131,7 @@ public class BuildingToolPlayerData extends SavedData {
             "action_history",
             (Tag)ActionHistory.CODEC
                .encodeStart(NbtOps.INSTANCE, this.actionHistory)
-               .getOrThrow(false, s -> StructureGelMod.LOGGER.error("couldn't serialize action history for " + this.playerName + ": " + s))
+               .getOrThrow(s -> new RuntimeException("couldn't serialize action history for " + this.playerName + ": " + s))
          );
       }
 
@@ -159,7 +159,7 @@ public class BuildingToolPlayerData extends SavedData {
       ActionHistory actionHistory = tag.contains("action_history", 10)
          ? (ActionHistory)((Pair)ActionHistory.CODEC
                .decode(NbtOps.INSTANCE, tag.getCompound("action_history"))
-               .getOrThrow(false, s -> StructureGelMod.LOGGER.error("couldn't deserialize action history: " + s)))
+               .getOrThrow(s -> new RuntimeException("couldn't deserialize action history: " + s)))
             .getFirst()
          : new ActionHistory(playerName);
       Object2ObjectLinkedOpenHashMap<BoundingBox, CapturedBlocks> clipboard = new Object2ObjectLinkedOpenHashMap();

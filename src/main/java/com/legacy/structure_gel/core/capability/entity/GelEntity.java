@@ -27,7 +27,7 @@ public class GelEntity {
       return this.portal;
    }
 
-   public void setPortal(@Nullable GelPortalBlock portal) {
+   public void setPortal(GelPortalBlock portal) {
       this.portal = portal;
    }
 
@@ -81,9 +81,9 @@ public class GelEntity {
          return tag;
       }
 
-      public GelEntity read(@Nullable IAttachmentHolder holder, CompoundTag tag) {
+      public GelEntity read(IAttachmentHolder holder, CompoundTag tag) {
          GelEntity gelEntity = new GelEntity();
-         ResourceLocation portal = new ResourceLocation(tag.getString("portal"));
+         ResourceLocation portal = ResourceLocation.parse(tag.getString("portal"));
          gelEntity.portal = !portal.equals(EMPTY)
                && BuiltInRegistries.BLOCK.containsKey(portal)
                && BuiltInRegistries.BLOCK.get(portal) instanceof GelPortalBlock gelPortalBlock

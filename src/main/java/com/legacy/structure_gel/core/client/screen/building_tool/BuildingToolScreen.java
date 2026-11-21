@@ -415,13 +415,15 @@ public class BuildingToolScreen extends LayeredScreen {
       float mixedTick = this.tick + this.minecraft.getFrameTime();
       float animationTime = 2.5F;
       int r = 30;
+      int g = r;
+      int b = r;
       int a = 150;
       int alpha = mixedTick < animationTime ? (int)(a * mixedTick / animationTime) : a;
-      int rgb = ((alpha << 8 | r) << 8 | r) << 8 | r;
-      int var13 = r / 3;
-      int var14 = r / 3;
-      int var15 = r / 3;
-      int rgb2 = ((alpha << 8 | var13) << 8 | var14) << 8 | var15;
+      int rgb = ((alpha << 8 | r) << 8 | g) << 8 | b;
+      r /= 3;
+      g /= 3;
+      b /= 3;
+      int rgb2 = ((alpha << 8 | r) << 8 | g) << 8 | b;
       graphics.fillGradient(0, 0, width, height, rgb, rgb2);
    }
 
@@ -573,7 +575,7 @@ public class BuildingToolScreen extends LayeredScreen {
                BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), val, false).blockState(), Minecraft.getInstance().level
             )
          );
-      } catch (Exception var3) {
+      } catch (Exception e) {
          return Optional.empty();
       }
    }
@@ -583,33 +585,37 @@ public class BuildingToolScreen extends LayeredScreen {
       if (Screen.hasControlDown() && ((KeyMapping)ClientProxy.UNDO_KEY.get()).getKey().getValue() == clickType) {
          SGPacketHandler.sendToServer(ActionHistoryPacket.undo(true));
          return true;
-      } else if (Screen.hasControlDown() && ((KeyMapping)ClientProxy.REDO_KEY.get()).getKey().getValue() == clickType) {
+      }
+
+      if (Screen.hasControlDown() && ((KeyMapping)ClientProxy.REDO_KEY.get()).getKey().getValue() == clickType) {
          SGPacketHandler.sendToServer(ActionHistoryPacket.redo(true));
          return true;
-      } else if (((KeyMapping)ClientProxy.BUILDING_TOOL_KEY.get()).getKey().getValue() == clickType) {
+      }
+
+      if (((KeyMapping)ClientProxy.BUILDING_TOOL_KEY.get()).getKey().getValue() == clickType) {
          this.close();
          return true;
-      } else {
-         if (this.hoveredRadial == -2 && this.mode.hasBlockPalette()) {
-            if (clickType == 0) {
-               playClickSound();
-               this.minecraft.setScreen(new EditPaletteScreen(this));
-               return true;
-            }
+      }
 
-            if (clickType == 2) {
-               playClickSound();
-               this.setPalette(WeightedRandomList.create());
-               this.updateRenderStack();
-               return true;
-            }
-         } else if (this.hoveredRadial > -1) {
-            this.setMode(this.hoveredRadial);
+      if (this.hoveredRadial == -2 && this.mode.hasBlockPalette()) {
+         if (clickType == 0) {
+            playClickSound();
+            this.minecraft.setScreen(new EditPaletteScreen(this));
             return true;
          }
 
-         return super.mouseClicked(mouseX, mouseY, clickType);
+         if (clickType == 2) {
+            playClickSound();
+            this.setPalette(WeightedRandomList.create());
+            this.updateRenderStack();
+            return true;
+         }
+      } else if (this.hoveredRadial > -1) {
+         this.setMode(this.hoveredRadial);
+         return true;
       }
+
+      return super.mouseClicked(mouseX, mouseY, clickType);
    }
 
    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -618,24 +624,26 @@ public class BuildingToolScreen extends LayeredScreen {
       if (((KeyMapping)ClientProxy.UNDO_KEY.get()).isActiveAndMatches(key)) {
          SGPacketHandler.sendToServer(ActionHistoryPacket.undo(true));
          return true;
-      } else if (((KeyMapping)ClientProxy.REDO_KEY.get()).isActiveAndMatches(key)) {
+      }
+
+      if (((KeyMapping)ClientProxy.REDO_KEY.get()).isActiveAndMatches(key)) {
          SGPacketHandler.sendToServer(ActionHistoryPacket.redo(true));
          return true;
-      } else {
-         if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
-            playClickSound();
-            this.minecraft.setScreen(new EditSelectionScreen(this));
-         }
-
-         if (!this.minecraft.options.keyInventory.isActiveAndMatches(key)
-            && !((KeyMapping)ClientProxy.BUILDING_TOOL_KEY.get()).isActiveAndMatches(key)
-            && !pressedEnter) {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-         } else {
-            this.close();
-            return true;
-         }
       }
+
+      if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
+         playClickSound();
+         this.minecraft.setScreen(new EditSelectionScreen(this));
+      }
+
+      if (!this.minecraft.options.keyInventory.isActiveAndMatches(key)
+         && !((KeyMapping)ClientProxy.BUILDING_TOOL_KEY.get()).isActiveAndMatches(key)
+         && !pressedEnter) {
+         return super.keyPressed(keyCode, scanCode, modifiers);
+      }
+
+      this.close();
+      return true;
    }
 
    public void setMode(int radial) {
@@ -722,7 +730,7 @@ public class BuildingToolScreen extends LayeredScreen {
       return this.palette.orElse(WeightedRandomList.create());
    }
 
-   public void setPalette(@Nullable WeightedRandomList<Wrapper<BlockState>> palette) {
+   public void setPalette(WeightedRandomList<Wrapper<BlockState>> palette) {
       this.palette = Optional.ofNullable(palette);
    }
 

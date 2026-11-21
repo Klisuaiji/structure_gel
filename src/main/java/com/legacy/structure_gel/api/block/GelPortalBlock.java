@@ -63,9 +63,9 @@ public abstract class GelPortalBlock extends Block {
 
    public abstract MapCodec<? extends GelPortalBlock> codec();
 
-   public abstract GelTeleporter getTeleporter(@Nullable ServerLevel var1, GelPortalBlock var2);
+   public abstract GelTeleporter getTeleporter(ServerLevel var1, GelPortalBlock var2);
 
-   public GelTeleporter getTeleporter(@Nullable ServerLevel serverLevel) {
+   public GelTeleporter getTeleporter(ServerLevel serverLevel) {
       return this.getTeleporter(serverLevel, this);
    }
 

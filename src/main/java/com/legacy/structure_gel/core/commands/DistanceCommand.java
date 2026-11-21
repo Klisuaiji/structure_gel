@@ -131,71 +131,71 @@ public class DistanceCommand {
       if (holderSet.size() < 1) {
          source.sendFailure(Component.literal(searchFor + " contains no values or does not exist."));
          return 0;
-      } else {
-         RandomSource rand = level.getRandom();
-         int totalDistance = 0;
-         int maxDistance = 0;
-         int actuallyFound = 0;
-         List<Pair<Integer, BlockPos>> failedSearches = new ArrayList<>();
-         source.sendSuccess(
-            () -> Component.literal(String.format("Started search for %s with a sample size of %d. This may take a while.", searchFor, sampleSize)), true
-         );
+      }
 
-         for (int i = 0; i < sampleSize; i++) {
-            BlockPos searchPos = new BlockPos(rand.nextInt(r * 2) - r, y, rand.nextInt(r * 2) - r);
-            Integer loggedIndex = i + 1;
+      RandomSource rand = level.getRandom();
+      int totalDistance = 0;
+      int maxDistance = 0;
+      int actuallyFound = 0;
+      List<Pair<Integer, BlockPos>> failedSearches = new ArrayList<>();
+      source.sendSuccess(
+         () -> Component.literal(String.format("Started search for %s with a sample size of %d. This may take a while.", searchFor, sampleSize)), true
+      );
+
+      for (int i = 0; i < sampleSize; i++) {
+         BlockPos searchPos = new BlockPos(rand.nextInt(r * 2) - r, y, rand.nextInt(r * 2) - r);
+         Integer loggedIndex = i + 1;
+         source.sendSuccess(
+            () -> Component.literal(
+                  String.format("Search %d/%d at (%d, %d, %d)", loggedIndex, sampleSize, searchPos.getX(), searchPos.getY(), searchPos.getZ())
+               )
+               .withStyle(ChatFormatting.GRAY),
+            false
+         );
+         Optional<Pair<BlockPos, Holder<T>>> pair = search.search(level, searchPos, holderSet);
+         if (pair.isPresent()) {
+            actuallyFound++;
+            BlockPos p = (BlockPos)pair.get().getFirst();
+            int distance = (int)Math.sqrt(new Vec2(searchPos.getX(), searchPos.getZ()).distanceToSqr(new Vec2(p.getX(), p.getZ())));
+            totalDistance += distance;
+            if (distance > maxDistance) {
+               maxDistance = distance;
+            }
+         } else {
+            failedSearches.add(Pair.of(i + 1, searchPos));
+         }
+      }
+
+      int averageDist = actuallyFound > 0 ? totalDistance / actuallyFound : 0;
+      source.sendSuccess(() -> Component.literal("Results for " + searchFor).withStyle(ChatFormatting.GREEN), false);
+      source.sendSuccess(() -> Component.literal("- Average Distance: ").append(Component.literal(averageDist + "").withStyle(ChatFormatting.GRAY)), false);
+      Integer loggedMaxDistance = maxDistance;
+      source.sendSuccess(() -> Component.literal("- Max Distance: ").append(Component.literal(loggedMaxDistance + "").withStyle(ChatFormatting.GRAY)), false);
+      Integer loggedActuallyFound = actuallyFound;
+      source.sendSuccess(
+         () -> Component.literal("- Found: ").append(Component.literal(loggedActuallyFound + "/" + sampleSize).withStyle(ChatFormatting.GRAY)), false
+      );
+      if (failedSearches.size() > 0) {
+         source.sendSuccess(() -> Component.literal("Failed searches").withStyle(ChatFormatting.RED), false);
+
+         for (Pair<Integer, BlockPos> fail : failedSearches) {
+            BlockPos pos = (BlockPos)fail.getSecond();
             source.sendSuccess(
-               () -> Component.literal(
-                     String.format("Search %d/%d at (%d, %d, %d)", loggedIndex, sampleSize, searchPos.getX(), searchPos.getY(), searchPos.getZ())
-                  )
-                  .withStyle(ChatFormatting.GRAY),
+               () -> Component.literal("- Search: ")
+                  .append(Component.literal(fail.getFirst() + "").withStyle(ChatFormatting.GRAY))
+                  .append(Component.literal(", Pos: "))
+                  .append(Component.literal(String.format("(%d, %d, %d)", pos.getX(), pos.getY(), pos.getZ())).withStyle(ChatFormatting.GRAY)),
                false
             );
-            Optional<Pair<BlockPos, Holder<T>>> pair = search.search(level, searchPos, holderSet);
-            if (pair.isPresent()) {
-               actuallyFound++;
-               BlockPos p = (BlockPos)pair.get().getFirst();
-               int distance = (int)Math.sqrt(new Vec2(searchPos.getX(), searchPos.getZ()).distanceToSqr(new Vec2(p.getX(), p.getZ())));
-               totalDistance += distance;
-               if (distance > maxDistance) {
-                  maxDistance = distance;
-               }
-            } else {
-               failedSearches.add(Pair.of(i + 1, searchPos));
-            }
          }
-
-         int averageDist = actuallyFound > 0 ? totalDistance / actuallyFound : 0;
-         source.sendSuccess(() -> Component.literal("Results for " + searchFor).withStyle(ChatFormatting.GREEN), false);
-         source.sendSuccess(() -> Component.literal("- Average Distance: ").append(Component.literal(averageDist + "").withStyle(ChatFormatting.GRAY)), false);
-         Integer loggedMaxDistance = maxDistance;
-         source.sendSuccess(() -> Component.literal("- Max Distance: ").append(Component.literal(loggedMaxDistance + "").withStyle(ChatFormatting.GRAY)), false);
-         Integer loggedActuallyFound = actuallyFound;
-         source.sendSuccess(
-            () -> Component.literal("- Found: ").append(Component.literal(loggedActuallyFound + "/" + sampleSize).withStyle(ChatFormatting.GRAY)), false
-         );
-         if (failedSearches.size() > 0) {
-            source.sendSuccess(() -> Component.literal("Failed searches").withStyle(ChatFormatting.RED), false);
-
-            for (Pair<Integer, BlockPos> fail : failedSearches) {
-               BlockPos pos = (BlockPos)fail.getSecond();
-               source.sendSuccess(
-                  () -> Component.literal("- Search: ")
-                     .append(Component.literal(fail.getFirst() + "").withStyle(ChatFormatting.GRAY))
-                     .append(Component.literal(", Pos: "))
-                     .append(Component.literal(String.format("(%d, %d, %d)", pos.getX(), pos.getY(), pos.getZ())).withStyle(ChatFormatting.GRAY)),
-                  false
-               );
-            }
-         }
-
-         Player player = source.getPlayer();
-         if (player != null) {
-            player.playNotifySound((SoundEvent)SoundEvents.NOTE_BLOCK_HARP.value(), SoundSource.MASTER, 1.0F, 1.5F);
-         }
-
-         return averageDist;
       }
+
+      Player player = source.getPlayer();
+      if (player != null) {
+         player.playNotifySound((SoundEvent)SoundEvents.NOTE_BLOCK_HARP, SoundSource.MASTER, 1.0F, 1.5F);
+      }
+
+      return averageDist;
    }
 
    private static int printVanillaStats(CommandContext<CommandSourceStack> context) {

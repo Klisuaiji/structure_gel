@@ -78,12 +78,12 @@ public class MoveTool extends BuildingToolMode.ForCorners {
             }
          }
 
-         for (CapturedBlocks.EntityInfo infox : captured.getEntityInfos()) {
-            Entity entity = infox.createEntity(level, placePos.relative(facing, dist), Mirror.NONE, Rotation.NONE);
+         for (CapturedBlocks.EntityInfo info : captured.getEntityInfos()) {
+            Entity entity = info.createEntity(level, placePos.relative(facing, dist), Mirror.NONE, Rotation.NONE);
             if (entity != null) {
                this.addEntity(level, entity, action);
                if (cut) {
-                  this.removeEntity(serverLevel, infox.original(), action);
+                  this.removeEntity(serverLevel, info.original(), action);
                }
             }
          }

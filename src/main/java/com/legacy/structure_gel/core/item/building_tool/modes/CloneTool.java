@@ -83,12 +83,12 @@ public class CloneTool extends BuildingToolMode.ForCorners {
                }
             }
 
-            for (CapturedBlocks.EntityInfo infox : captured.getEntityInfos()) {
-               Entity entity = infox.createEntity(level, startPos, mirror, rotation);
+            for (CapturedBlocks.EntityInfo info : captured.getEntityInfos()) {
+               Entity entity = info.createEntity(level, startPos, mirror, rotation);
                if (entity != null) {
                   this.addEntity(level, entity, action);
                   if (cut) {
-                     this.removeEntity(serverLevel, infox.original(), action);
+                     this.removeEntity(serverLevel, info.original(), action);
                   }
                }
             }

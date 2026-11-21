@@ -51,10 +51,10 @@ public class GetFeaturesCommand {
       Optional<Reference<Biome>> opBiome = source.getLevel().registryAccess().registryOrThrow(Registries.BIOME).getHolder(biomeKey);
       if (opBiome.isPresent()) {
          return biome(context, (Holder<Biome>)opBiome.get());
-      } else {
-         source.sendFailure(Component.literal("The biome you're targeting is unregistered."));
-         return 0;
       }
+
+      source.sendFailure(Component.literal("The biome you're targeting is unregistered."));
+      return 0;
    }
 
    private static int biome(CommandContext<CommandSourceStack> context, Holder<Biome> biome) {

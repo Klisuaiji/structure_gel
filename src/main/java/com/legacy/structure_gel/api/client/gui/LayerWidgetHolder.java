@@ -13,7 +13,7 @@ public interface LayerWidgetHolder extends ContainerEventHandler {
    List<LayerWidgetHolder.LayerAwareWidget> getLayerAwareWidgets();
 
    @Nullable
-   default LayerWidgetHolder.LayerAwareWidget getLayerAwareWidget(@Nullable GuiEventListener widget) {
+   default LayerWidgetHolder.LayerAwareWidget getLayerAwareWidget(GuiEventListener widget) {
       if (widget != null) {
          for (LayerWidgetHolder.LayerAwareWidget v : this.getLayerAwareWidgets()) {
             if (v.widget == widget) {
@@ -25,7 +25,7 @@ public interface LayerWidgetHolder extends ContainerEventHandler {
       return null;
    }
 
-   default void forLayerAware(@Nullable GuiEventListener widget, Consumer<LayerWidgetHolder.LayerAwareWidget> action) {
+   default void forLayerAware(GuiEventListener widget, Consumer<LayerWidgetHolder.LayerAwareWidget> action) {
       LayerWidgetHolder.LayerAwareWidget layerAware = this.getLayerAwareWidget(widget);
       if (layerAware != null) {
          action.accept(layerAware);
@@ -91,7 +91,7 @@ public interface LayerWidgetHolder extends ContainerEventHandler {
       }
    }
 
-   public static class LayerAwareWidget {
+   class LayerAwareWidget {
       @Nullable
       public static GuiEventListener topHovered = null;
       protected int layer;

@@ -24,7 +24,7 @@ public class JigsawPoolBuilder {
    private final JigsawRegistryHelper jigsawRegistryHelper;
    private Map<ResourceLocation, Integer> names = ImmutableMap.of();
    private int weight = 1;
-   private ResourceKey<StructureProcessorList> processors = ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation("empty"));
+   private ResourceKey<StructureProcessorList> processors = ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.parse("empty"));
    private boolean maintainWater = true;
 
    public JigsawPoolBuilder(JigsawRegistryHelper jigsawRegistryHelper) {

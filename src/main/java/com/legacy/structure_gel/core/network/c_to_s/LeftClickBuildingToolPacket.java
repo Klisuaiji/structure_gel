@@ -11,9 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record LeftClickBuildingToolPacket(InteractionHand hand, @Nullable BlockPos pos, Direction clickedFace, boolean isHolding)
+public record LeftClickBuildingToolPacket(InteractionHand hand, BlockPos pos, Direction clickedFace, boolean isHolding)
    implements SGPacketHandler.ModPacket<LeftClickBuildingToolPacket, LeftClickBuildingToolPacket.Handler> {
    public LeftClickBuildingToolPacket.Handler handler() {
       return new LeftClickBuildingToolPacket.Handler();
@@ -45,8 +45,8 @@ public record LeftClickBuildingToolPacket(InteractionHand hand, @Nullable BlockP
          return new LeftClickBuildingToolPacket(hand, pos, clickedFace, isHolding);
       }
 
-      public void handler(LeftClickBuildingToolPacket packet, PlayPayloadContext context) {
-         context.workHandler().submitAsync(() -> {
+      public void handler(LeftClickBuildingToolPacket packet, IPayloadContext context) {
+         context.enqueueWork(() -> {
             if (packet.pos != null) {
                ServerPlayer sender = this.serverPlayer(context);
                if (sender != null) {

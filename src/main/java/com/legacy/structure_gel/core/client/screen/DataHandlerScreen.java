@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.client.screen;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data_handler.DataHandlerType;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.core.StructureGelMod;
@@ -105,7 +106,7 @@ public class DataHandlerScreen extends Screen {
          offsetVec = new Vec3(
             Double.valueOf(this.xOffsetEdit.getValue()), Double.valueOf(this.yOffsetEdit.getValue()), Double.valueOf(this.zOffsetEdit.getValue())
          );
-      } catch (NumberFormatException var4) {
+      } catch (NumberFormatException e) {
          offsetVec = Vec3.ZERO;
       }
 
@@ -385,12 +386,12 @@ public class DataHandlerScreen extends Screen {
    }
 
    public boolean allowDoneButton() {
-      return ResourceLocation.isValidResourceLocation(this.typeEdit.getValue()) && this.dataParamsList.isValid() && this.isWeightValid();
+      return LegacyRL.isValid(this.typeEdit.getValue()) && this.dataParamsList.isValid() && this.isWeightValid();
    }
 
    public boolean allowGenerateButton() {
       return this.allowDoneButton()
-         && StructureGelRegistries.DATA_HANDLER_TYPE.get(new ResourceLocation(this.typeEdit.getValue())) != null
+         && StructureGelRegistries.DATA_HANDLER_TYPE.get(ResourceLocation.parse(this.typeEdit.getValue())) != null
          && this.dataParamsList.isValid()
          && this.isWeightValid()
          && !this.nameEdit.isVisible();
@@ -400,14 +401,14 @@ public class DataHandlerScreen extends Screen {
       try {
          int weight = Integer.parseInt(this.weightEdit.getValue());
          return weight >= 1;
-      } catch (Exception var2) {
+      } catch (Exception e) {
          return false;
       }
    }
 
    private void beforePageChange() {
       Weight weight = Weight.of(Integer.parseInt(this.weightEdit.getValue()));
-      ResourceLocation typeName = new ResourceLocation(this.typeEdit.getValue());
+      ResourceLocation typeName = ResourceLocation.parse(this.typeEdit.getValue());
       LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
 
       for (DataParamsList.Entry entry : this.dataParamsList.children()) {
@@ -439,14 +440,14 @@ public class DataHandlerScreen extends Screen {
    private void updateWidgets() {
       this.weightEdit.setTextColor(this.isWeightValid() ? 14737632 : 14703708);
       String typeStr = this.typeEdit.getValue();
-      boolean typeFlag = ResourceLocation.isValidResourceLocation(this.typeEdit.getValue());
+      boolean typeFlag = LegacyRL.isValid(this.typeEdit.getValue());
       this.typeEdit.setTextColor(typeFlag ? 14737632 : 14703708);
       this.doneButton.active = this.allowDoneButton();
       this.generateButton.active = this.allowGenerateButton();
       if (!typeFlag) {
          this.dataParamsList.setEntries(null);
       } else {
-         ResourceLocation typeName = new ResourceLocation(typeStr);
+         ResourceLocation typeName = ResourceLocation.parse(typeStr);
          DataHandlerType<?> type = (DataHandlerType<?>)StructureGelRegistries.DATA_HANDLER_TYPE.get(typeName);
          if (type != null) {
             Map<ResourceLocation, List<DataParamsList.Entry>> cache = this.dataParamsCache.get(this.visibleIndex);
@@ -545,21 +546,23 @@ public class DataHandlerScreen extends Screen {
    public boolean keyPressed(int keyCode, int keyB, int modifiers) {
       if (this.typeEdit.isFocused() && this.typeEdit.keyPressed(keyCode, keyB, modifiers)) {
          return true;
-      } else {
-         for (DataParamsList.Entry entry : this.dataParamsList.children()) {
-            if (entry.widget.isFocused() && entry.widget.keyPressed(keyCode, keyB, modifiers)) {
-               return true;
-            }
-         }
+      }
 
-         if (super.keyPressed(keyCode, keyB, modifiers)) {
-            return true;
-         } else if (!this.doneButton.active || keyCode != 257 && keyCode != 335) {
-            return false;
-         } else {
-            this.onDone((byte)0);
+      for (DataParamsList.Entry entry : this.dataParamsList.children()) {
+         if (entry.widget.isFocused() && entry.widget.keyPressed(keyCode, keyB, modifiers)) {
             return true;
          }
       }
+
+      if (super.keyPressed(keyCode, keyB, modifiers)) {
+         return true;
+      }
+
+      if (!this.doneButton.active || keyCode != 257 && keyCode != 335) {
+         return false;
+      }
+
+      this.onDone((byte)0);
+      return true;
    }
 }

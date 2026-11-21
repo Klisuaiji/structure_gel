@@ -89,7 +89,7 @@ public class StructureGelCommand {
    }
 
    public static LiteralArgumentBuilder<CommandSourceStack> addChild(
-      LiteralArgumentBuilder<CommandSourceStack> parent, LiteralArgumentBuilder<CommandSourceStack> child, @Nullable MutableComponent childHelp
+      LiteralArgumentBuilder<CommandSourceStack> parent, LiteralArgumentBuilder<CommandSourceStack> child, MutableComponent childHelp
    ) {
       if (childHelp != null) {
          parent.then(

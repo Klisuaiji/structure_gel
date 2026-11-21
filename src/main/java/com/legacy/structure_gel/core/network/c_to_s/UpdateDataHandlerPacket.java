@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.network.c_to_s;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data_handler.handlers.DataHandler;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.block.DataHandlerBlock;
@@ -35,7 +36,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UpdateDataHandlerPacket(
    byte mode,
@@ -132,12 +133,12 @@ public record UpdateDataHandlerPacket(
             boolean connectToBlocks = buff.readBoolean();
             boolean markPostProcessing = buff.readBoolean();
             return new UpdateDataHandlerPacket(mode, pos, handlers, name, useGravity, waterlogged, offset, connectToBlocks, markPostProcessing);
-         } catch (Throwable var12) {
+         } catch (Throwable t) {
             return new UpdateDataHandlerPacket((byte)-1, BlockPos.ZERO, Collections.emptyList(), "", false, false, Vec3.ZERO, false, false);
          }
       }
 
-      public void handler(UpdateDataHandlerPacket packet, PlayPayloadContext context) {
+      public void handler(UpdateDataHandlerPacket packet, IPayloadContext context) {
          if (packet.mode == -1) {
             ServerPlayer sender = this.serverPlayer(context);
             StructureGelMod.LOGGER
@@ -178,7 +179,7 @@ public record UpdateDataHandlerPacket(
                            for (ItemStack invStack : player.getInventory().items) {
                               if (!invStack.isEmpty() && invStack.is(SGRegistry.Blocks.DATA_HANDLER.asItem())) {
                                  ItemStack cloneInvStack = invStack.copy();
-                                 CompoundTag tag = cloneInvStack.getTag();
+                                 CompoundTag tag = LegacyNbt.get(cloneInvStack);
                                  if (tag != null && tag.contains("display", 10)) {
                                     tag.remove("display");
                                  }

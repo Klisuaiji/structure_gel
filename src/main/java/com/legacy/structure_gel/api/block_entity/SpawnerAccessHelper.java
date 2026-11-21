@@ -21,35 +21,35 @@ import net.minecraft.world.level.SpawnData.CustomSpawnRules;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 public class SpawnerAccessHelper {
-   public static void setMinSpawnDelay(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int minSpawnelay) {
+   public static void setMinSpawnDelay(SpawnerBlockEntity tile, Level level, BlockPos pos, int minSpawnelay) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MinSpawnDelay", (short)minSpawnelay));
    }
 
-   public static void setMaxSpawnDelay(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int maxSpawnDelay) {
+   public static void setMaxSpawnDelay(SpawnerBlockEntity tile, Level level, BlockPos pos, int maxSpawnDelay) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MaxSpawnDelay", (short)maxSpawnDelay));
    }
 
-   public static void setSpawnCount(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int spawnCount) {
+   public static void setSpawnCount(SpawnerBlockEntity tile, Level level, BlockPos pos, int spawnCount) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("SpawnCount", (short)spawnCount));
    }
 
-   public static void setMaxNearbyEntities(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int maxNearbyEntities) {
+   public static void setMaxNearbyEntities(SpawnerBlockEntity tile, Level level, BlockPos pos, int maxNearbyEntities) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MaxNearbyEntities", (short)maxNearbyEntities));
    }
 
-   public static void setRequiredPlayerRange(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int requiredPlayerRange) {
+   public static void setRequiredPlayerRange(SpawnerBlockEntity tile, Level level, BlockPos pos, int requiredPlayerRange) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("RequiredPlayerRange", (short)requiredPlayerRange));
    }
 
-   public static void setSpawnRange(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, int spawnRange) {
+   public static void setSpawnRange(SpawnerBlockEntity tile, Level level, BlockPos pos, int spawnRange) {
       modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("SpawnRange", (short)spawnRange));
    }
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, EntityType<?> entityType) {
+   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, EntityType<?> entityType) {
       setSpawnPotentials(tile, level, pos, createSpawnerEntity(entityType));
    }
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, SpawnData... spawnDatas) {
+   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, SpawnData... spawnDatas) {
       SimpleWeightedRandomList<SpawnData> list = ((Builder)Util.make(new Builder(), builder -> {
          for (SpawnData data : spawnDatas) {
             builder.add(data, 1);
@@ -58,7 +58,7 @@ public class SpawnerAccessHelper {
       setSpawnPotentials(tile, level, pos, list);
    }
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, @Nullable Level level, BlockPos pos, SimpleWeightedRandomList<SpawnData> spawnDatas) {
+   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, SimpleWeightedRandomList<SpawnData> spawnDatas) {
       modifySpawnerNBT(
          tile,
          level,
@@ -91,7 +91,7 @@ public class SpawnerAccessHelper {
       return new SpawnData(nbt, customSpawnRules);
    }
 
-   public static void modifySpawnerNBT(SpawnerBlockEntity spawner, @Nullable Level level, BlockPos pos, Consumer<CompoundTag> nbtConsumer) {
+   public static void modifySpawnerNBT(SpawnerBlockEntity spawner, Level level, BlockPos pos, Consumer<CompoundTag> nbtConsumer) {
       CompoundTag nbt = new CompoundTag();
       spawner.getSpawner().save(nbt);
       nbtConsumer.accept(nbt);

@@ -52,7 +52,7 @@ public class ChestHandler extends ProbabilityDataHandler<ChestHandler> {
 
       try {
          this.createChest(piece, level, bounds, rand, pos, loot, chest);
-      } catch (Exception var12) {
+      } catch (Exception e) {
          level.setBlock(pos, chest, 2);
       }
 

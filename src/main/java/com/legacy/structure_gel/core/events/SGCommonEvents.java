@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.events;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data.providers.NestedDataProvider;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.api.registry.registrar.RegistrarHandler;
@@ -40,8 +41,8 @@ import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.bus.api.Event.Result;
-import net.neoforged.fml.common.Mod.EventBusSubscriber;
-import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -56,14 +57,11 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 
 @Internal
 public class SGCommonEvents {
-   @EventBusSubscriber(
-      modid = "structure_gel",
-      bus = Bus.FORGE
-   )
+   @EventBusSubscriber(modid = "structure_gel", bus = Bus.FORGE)
    protected static class ForgeBus {
       @SubscribeEvent
       protected static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-         if (event.getEntity() instanceof var serverPlayer) {
+         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             GelCapability.ifPresent(serverPlayer, gelPlayer -> gelPlayer.sendToClient(serverPlayer));
          }
       }
@@ -81,10 +79,7 @@ public class SGCommonEvents {
       }
    }
 
-   @EventBusSubscriber(
-      modid = "structure_gel",
-      bus = Bus.MOD
-   )
+   @EventBusSubscriber(modid = "structure_gel", bus = Bus.MOD)
    protected static class ModBus {
       @SubscribeEvent
       protected static void newRegistries(NewRegistryEvent event) {
@@ -94,9 +89,7 @@ public class SGCommonEvents {
          event.register(StructureGelRegistries.JIGSAW_TYPE);
       }
 
-      @SubscribeEvent(
-         priority = EventPriority.HIGHEST
-      )
+      @SubscribeEvent(priority = EventPriority.HIGHEST)
       protected static void onRegistry(RegisterEvent event) {
          RegistrarLoader.loadRegistrars();
       }
@@ -114,7 +107,7 @@ public class SGCommonEvents {
 
             for (StructureMode mode : StructureMode.values()) {
                ItemStack stack = new ItemStack(Blocks.STRUCTURE_BLOCK);
-               CompoundTag tag = stack.getOrCreateTag();
+               CompoundTag tag = LegacyNbt.getOrCreate(stack);
                CompoundTag blockEntityTag = new CompoundTag();
                blockEntityTag.putString("mode", mode.name());
                tag.put("BlockEntityTag", blockEntityTag);

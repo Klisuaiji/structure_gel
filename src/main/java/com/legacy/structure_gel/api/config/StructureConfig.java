@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.api.config;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.data.tags.FilterHolderSet;
 import com.legacy.structure_gel.api.registry.registrar.Registrar;
 import com.legacy.structure_gel.core.StructureGelMod;
@@ -44,34 +45,34 @@ public class StructureConfig {
          List<? extends String> biomeStrings = (List<? extends String>)this.biomeFilter.get().get();
          if (biomeStrings.isEmpty()) {
             return Optional.empty();
-         } else {
-            for (String s : biomeStrings) {
-               boolean whitelist = true;
-               boolean isTag = false;
-               if (s.startsWith("#!")) {
-                  s = s.replaceFirst("#!", "!#");
-               }
+         }
 
-               if (s.startsWith("!")) {
-                  whitelist = false;
-                  s = s.replaceFirst("!", "");
-               }
-
-               if (s.startsWith("#")) {
-                  isTag = true;
-                  s = s.replaceFirst("#", "");
-               }
-
-               ResourceLocation rl = new ResourceLocation(s);
-               if (isTag) {
-                  builder.tags(whitelist, TagKey.create(Registries.BIOME, rl));
-               } else {
-                  builder.values(whitelist, ResourceKey.create(Registries.BIOME, rl));
-               }
+         for (String s : biomeStrings) {
+            boolean whitelist = true;
+            boolean isTag = false;
+            if (s.startsWith("#!")) {
+               s = s.replaceFirst("#!", "!#");
             }
 
-            return Optional.of(builder.build(biomeRegistry));
+            if (s.startsWith("!")) {
+               whitelist = false;
+               s = s.replaceFirst("!", "");
+            }
+
+            if (s.startsWith("#")) {
+               isTag = true;
+               s = s.replaceFirst("#", "");
+            }
+
+            ResourceLocation rl = ResourceLocation.parse(s);
+            if (isTag) {
+               builder.tags(whitelist, TagKey.create(Registries.BIOME, rl));
+            } else {
+               builder.values(whitelist, ResourceKey.create(Registries.BIOME, rl));
+            }
          }
+
+         return Optional.of(builder.build(biomeRegistry));
       } else {
          return Optional.empty();
       }
@@ -120,15 +121,15 @@ public class StructureConfig {
          StructureConfig ret = new StructureConfig(this.structure, biomeConfig);
          if (StructureConfigModifier.CONFIGS.put(this.structure, ret) != null) {
             throw new IllegalStateException("Cannot assign multiple configs to the same structure. Structure: " + this.structure.location());
-         } else {
-            configBuilder.pop();
-            return ret;
          }
+
+         configBuilder.pop();
+         return ret;
       }
 
       private boolean validateBiomeString(String s) {
          String original = s;
-         if (s.startsWith("#!")) {
+         if (original.startsWith("#!")) {
             s = s.replaceFirst("#!", "!#");
          }
 
@@ -140,7 +141,7 @@ public class StructureConfig {
             s = s.replaceFirst("#", "");
          }
 
-         return !ResourceLocation.isValidResourceLocation(s)
+         return !LegacyRL.isValid(s)
             ? this.logBiomeErr(original, s + " is not a valid resource location. It contains invalid characters.")
             : true;
       }

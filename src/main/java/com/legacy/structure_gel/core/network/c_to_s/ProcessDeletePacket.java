@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ProcessDeletePacket implements SGPacketHandler.ModPacket<ProcessDeletePacket, ProcessDeletePacket.Handler> {
    public ProcessDeletePacket.Handler handler() {
@@ -31,7 +31,7 @@ public class ProcessDeletePacket implements SGPacketHandler.ModPacket<ProcessDel
          return new ProcessDeletePacket();
       }
 
-      public void handler(ProcessDeletePacket packet, PlayPayloadContext context) {
+      public void handler(ProcessDeletePacket packet, IPayloadContext context) {
          context.workHandler()
             .submitAsync(
                () -> {

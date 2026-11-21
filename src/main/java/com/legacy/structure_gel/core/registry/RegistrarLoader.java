@@ -63,12 +63,12 @@ public class RegistrarLoader {
                      RegistrarHandler<?> handler = RegistrarHandler.class.cast(field.get(null));
                      String modID = handler.getModID();
                      handlers.computeIfAbsent(modID, m -> new LinkedList<>()).add(handler);
-                  } catch (IllegalAccessException | IllegalArgumentException var15) {
+                  } catch (IllegalArgumentException | IllegalAccessException e) {
                      throw new IllegalStateException("Failed to get " + handlerStr() + " field " + field + " from class " + className);
                   }
                }
             }
-         } catch (ClassNotFoundException var16) {
+         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Failed to locate " + annStr(annotation) + " class " + className);
          }
       }

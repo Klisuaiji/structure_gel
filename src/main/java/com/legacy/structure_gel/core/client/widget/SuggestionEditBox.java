@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.client.widget;
 
+import com.legacy.blue_skies.compat.*;
 import com.legacy.structure_gel.api.client.gui.LayerWidgetHolder;
 import com.legacy.structure_gel.core.util.SGText;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -158,8 +159,8 @@ public class SuggestionEditBox extends EditBox {
 
          for (int i = 0; i < size; i++) {
             String s = this.currentOptions.get(i);
-            if (ResourceLocation.isValidResourceLocation(s)) {
-               ResourceLocation loc = new ResourceLocation(s);
+            if (LegacyRL.isValid(s)) {
+               ResourceLocation loc = ResourceLocation.parse(s);
                if (loc.getPath().startsWith(input) || loc.getPath().equals(input) || s.equals(input)) {
                   putToTop.add(putToTop.size(), s);
                }

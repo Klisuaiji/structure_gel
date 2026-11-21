@@ -1,5 +1,6 @@
 package com.legacy.structure_gel.core.item.building_tool;
 
+import com.legacy.blue_skies.compat.*;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
@@ -94,10 +95,9 @@ import net.neoforged.neoforge.client.event.InputEvent.MouseButton.Pre;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.util.Lazy;
-import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
-import net.neoforged.neoforge.event.TickEvent.Phase;
-import net.neoforged.neoforge.event.TickEvent.PlayerTickEvent;
-import net.neoforged.neoforge.event.TickEvent.RenderTickEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickEmpty;
@@ -152,9 +152,9 @@ public final class BuildingToolItem extends Item {
       bus.addListener(Pre.class, event -> this.interceptMousePress(event));
       bus.addListener(Post.class, event -> this.processMousePress(event));
       bus.addListener(MouseScrollingEvent.class, event -> this.onMouseScroll(event));
-      bus.addListener(PlayerTickEvent.class, event -> this.tick(event));
-      bus.addListener(ClientTickEvent.class, event -> this.clientTick(event));
-      bus.addListener(RenderTickEvent.class, event -> this.renderTick(event));
+      bus.addListener(PlayerTickEvent.Post.class, event -> this.tick(event));
+      bus.addListener(ClientTickEvent.Post.class, event -> this.clientTick(event));
+      bus.addListener(RenderFrameEvent.Post.class, event -> this.renderTick(event));
    }
 
    @Nullable
@@ -162,10 +162,10 @@ public final class BuildingToolItem extends Item {
       ItemStack stack = player.getMainHandItem();
       if (stack.is(SGRegistry.Items.BUILDING_TOOL.get())) {
          return Pair.of(InteractionHand.MAIN_HAND, stack);
-      } else {
-         stack = player.getOffhandItem();
-         return stack.is(SGRegistry.Items.BUILDING_TOOL.get()) ? Pair.of(InteractionHand.OFF_HAND, stack) : null;
       }
+
+      stack = player.getOffhandItem();
+      return stack.is(SGRegistry.Items.BUILDING_TOOL.get()) ? Pair.of(InteractionHand.OFF_HAND, stack) : null;
    }
 
    public BuildingToolItem(Properties properties) {
@@ -178,17 +178,15 @@ public final class BuildingToolItem extends Item {
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
       if (slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND) {
          return ImmutableMultimap.of();
-      } else {
-         int reach = getReachDistanceModifier(stack) + getMode(stack).getReachDistance(stack);
-         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-         builder.put(
-            (Attribute)NeoForgeMod.BLOCK_REACH.value(), new AttributeModifier(BLOCK_REACH_UUID, "building_tool_block_reach", reach, Operation.ADDITION)
-         );
-         builder.put(
-            (Attribute)NeoForgeMod.ENTITY_REACH.value(), new AttributeModifier(ENTITY_REACH_UUID, "building_tool_entity_reach", reach, Operation.ADDITION)
-         );
-         return builder.build();
       }
+
+      int reach = getReachDistanceModifier(stack) + getMode(stack).getReachDistance(stack);
+      Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+      builder.put((Attribute)NeoForgeMod.BLOCK_REACH.value(), LegacyAttrs.modifier(BLOCK_REACH_UUID, "building_tool_block_reach", reach, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+      builder.put(
+         (Attribute)NeoForgeMod.ENTITY_REACH.value(), LegacyAttrs.modifier(ENTITY_REACH_UUID, "building_tool_entity_reach", reach, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE)
+      );
+      return builder.build();
    }
 
    public boolean canAttackBlock(BlockState state, Level level, BlockPos pos, Player player) {
@@ -348,24 +346,23 @@ public final class BuildingToolItem extends Item {
       }
    }
 
-   public void tick(PlayerTickEvent event) {
-      if (event.player != null && event.phase == Phase.START) {
-         Pair<InteractionHand, ItemStack> tool = getBuildingTool(event.player);
+   public void tick(PlayerTickEvent.Post event) {
+      if (event.getEntity() != null) {
+         Pair<InteractionHand, ItemStack> tool = getBuildingTool(event.getEntity());
          if (tool == null) {
             return;
          }
 
          ItemStack stack = (ItemStack)tool.getSecond();
-         if (BuildingToolBounds.tick(stack, event.player)) {
+         if (BuildingToolBounds.tick(stack, event.getEntity())) {
             return;
          }
       }
    }
 
    @OnlyIn(Dist.CLIENT)
-   private void clientTick(ClientTickEvent event) {
-      if (event.phase != Phase.START) {
-         if (Minecraft.getInstance().options.keyAttack.isDown()) {
+   private void clientTick(ClientTickEvent.Post event) {
+               if (Minecraft.getInstance().options.keyAttack.isDown()) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player.isCreative() && this.hasPermission(player.getMainHandItem(), player)) {
                leftClickHoldTime++;
@@ -382,13 +379,11 @@ public final class BuildingToolItem extends Item {
          } else if (rightClickHoldTime > 0) {
             rightClickHoldTime = 0;
          }
-      }
    }
 
    @OnlyIn(Dist.CLIENT)
-   private void renderTick(RenderTickEvent event) {
-      if (event.phase != Phase.START) {
-         if (leftClickHoldTime >= 5 || rightClickHoldTime >= 5) {
+   private void renderTick(RenderFrameEvent.Post event) {
+               if (leftClickHoldTime >= 5 || rightClickHoldTime >= 5) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player.isCreative() && Minecraft.getInstance().hitResult instanceof BlockHitResult blockHit) {
                BlockPos pos = blockHit.getBlockPos();
@@ -413,7 +408,6 @@ public final class BuildingToolItem extends Item {
                }
             }
          }
-      }
    }
 
    public boolean onRightClick(ItemStack stack, InteractionHand hand, Player player, BlockPos clickedPos, Direction clickedFace, boolean isHolding) {
@@ -423,21 +417,21 @@ public final class BuildingToolItem extends Item {
          player.swing(hand);
          if (!isHolding && BuildingToolBounds.handleBoundingBoxClick(stack, player)) {
             return true;
-         } else {
-            if (level.getBlockState(clickedPos).isAir()) {
-               mode.onRightClickAir(level, player, clickedPos, stack);
-            } else {
-               mode.onRightClickBlock(level, player, clickedPos, stack, clickedFace);
-            }
-
-            return true;
          }
+
+         if (level.getBlockState(clickedPos).isAir()) {
+            mode.onRightClickAir(level, player, clickedPos, stack);
+         } else {
+            mode.onRightClickBlock(level, player, clickedPos, stack, clickedFace);
+         }
+
+         return true;
       } else {
          return false;
       }
    }
 
-   private void onRightClickEvent(PlayerInteractEvent event, @Nullable BlockPos pos) {
+   private void onRightClickEvent(PlayerInteractEvent event, BlockPos pos) {
       if (pos != null) {
          Player player = event.getEntity();
          ItemStack stack = event.getItemStack();
@@ -461,16 +455,16 @@ public final class BuildingToolItem extends Item {
       if (this.hasPermission(stack, player)) {
          if (getSelectedCorner(stack) != null) {
             return false;
-         } else {
-            getMode(stack).onLeftClick(player.level(), player, clickedPos, stack, clickedFace);
-            return true;
          }
+
+         getMode(stack).onLeftClick(player.level(), player, clickedPos, stack, clickedFace);
+         return true;
       } else {
          return false;
       }
    }
 
-   private void onLeftClickEvent(PlayerInteractEvent event, @Nullable BlockPos pos) {
+   private void onLeftClickEvent(PlayerInteractEvent event, BlockPos pos) {
       if (pos != null) {
          Player player = event.getEntity();
          ItemStack stack = event.getItemStack();
@@ -618,11 +612,11 @@ public final class BuildingToolItem extends Item {
    }
 
    public static BuildingToolMode getMode(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("tool_mode", 8)) {
          String modeS = tag.getString("tool_mode");
-         if (ResourceLocation.isValidResourceLocation(modeS)) {
-            BuildingToolMode mode = BuildingToolModes.REGISTRY.get(new ResourceLocation(modeS));
+         if (LegacyRL.isValid(modeS)) {
+            BuildingToolMode mode = BuildingToolModes.REGISTRY.get(ResourceLocation.parse(modeS));
             if (mode != null) {
                return mode;
             }
@@ -633,13 +627,13 @@ public final class BuildingToolItem extends Item {
    }
 
    public static void setMode(ItemStack stack, BuildingToolMode mode) {
-      CompoundTag tag = stack.getOrCreateTag();
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
       tag.putString("tool_mode", mode.getName().toString());
       tag.remove("properties");
    }
 
    public static Optional<BlockPos> getPos(ItemStack stack, int index) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("poses", 10)) {
          CompoundTag poses = tag.getCompound("poses");
          String indexKey = Integer.toString(index);
@@ -661,17 +655,17 @@ public final class BuildingToolItem extends Item {
    public static boolean setPos(ItemStack stack, int index, Vec3i pos) {
       if (getPos(stack, index).equals(Optional.of(pos))) {
          return false;
-      } else {
-         CompoundTag tag = stack.getOrCreateTag();
-         CompoundTag posesTag = tag.getCompound("poses");
-         posesTag.putIntArray(Integer.toString(index), new int[]{pos.getX(), pos.getY(), pos.getZ()});
-         tag.put("poses", posesTag);
-         return true;
       }
+
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
+      CompoundTag posesTag = tag.getCompound("poses");
+      posesTag.putIntArray(Integer.toString(index), new int[]{pos.getX(), pos.getY(), pos.getZ()});
+      tag.put("poses", posesTag);
+      return true;
    }
 
    public static void clearPoses(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("poses", 10)) {
          tag.put("poses", new CompoundTag());
       }
@@ -681,7 +675,7 @@ public final class BuildingToolItem extends Item {
 
    public static WeightedRandomList<Wrapper<BlockState>> getPalette(ItemStack stack, LevelReader level) {
       WeightedRandomList<Wrapper<BlockState>> ret = WeightedRandomList.create();
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("pallete", 9)) {
          ListTag paletteTag = tag.getList("pallete", 10);
          net.minecraft.util.random.SimpleWeightedRandomList.Builder<BlockState> builder = SimpleWeightedRandomList.builder();
@@ -695,7 +689,7 @@ public final class BuildingToolItem extends Item {
                      int weight = stateTag.getInt("weight");
                      builder.add(state, weight);
                   }
-               } catch (Exception var12) {
+               } catch (Exception e) {
                   StructureGelMod.LOGGER.error("Couldn't read block state from tag.", stateTag.getAsString());
                }
             }
@@ -721,7 +715,7 @@ public final class BuildingToolItem extends Item {
          paletteList.add(stateTag);
       }
 
-      stack.getOrCreateTag().put("pallete", paletteList);
+      LegacyNbt.getOrCreate(stack).put("pallete", paletteList);
    }
 
    public static WeightedRandomList<Wrapper<BlockState>> readPaletteFrom(Level level, BlockPos pos) {
@@ -747,34 +741,34 @@ public final class BuildingToolItem extends Item {
    public static WeightedRandomList<Wrapper<BlockState>> readPaletteFrom(ItemStack readFrom, LevelReader level) {
       if (readFrom.is(SGRegistry.Items.BLOCK_PALETTE.get())) {
          return getPalette(readFrom, level);
-      } else {
-         CompoundTag tag = BlockItem.getBlockEntityData(readFrom);
-         if (tag != null) {
-            Map<Item, Integer> stacks = new HashMap<>();
-            if (tag.contains("Items", 9)) {
-               NonNullList<ItemStack> contents = NonNullList.withSize(27, ItemStack.EMPTY);
-               ContainerHelper.loadAllItems(tag, contents);
-               if (contents.isEmpty()) {
-                  return readPaletteFrom(Map.of(readFrom.getItem(), readFrom.getCount()), level);
-               }
+      }
 
-               for (ItemStack stack : contents) {
-                  int count = stack.getCount();
-                  stacks.compute(stack.getItem(), (i, c) -> c == null ? count : c + count);
-               }
+      CompoundTag tag = BlockItem.getBlockEntityData(readFrom);
+      if (tag != null) {
+         Map<Item, Integer> stacks = new HashMap<>();
+         if (tag.contains("Items", 9)) {
+            NonNullList<ItemStack> contents = NonNullList.withSize(27, ItemStack.EMPTY);
+            ContainerHelper.loadAllItems(tag, contents);
+            if (contents.isEmpty()) {
+               return readPaletteFrom(Map.of(readFrom.getItem(), readFrom.getCount()), level);
             }
 
-            WeightedRandomList<Wrapper<BlockState>> palette = readPaletteFrom(stacks, level);
-            if (!palette.isEmpty()) {
-               return palette;
+            for (ItemStack stack : contents) {
+               int count = stack.getCount();
+               stacks.compute(stack.getItem(), (i, c) -> c == null ? count : c + count);
             }
          }
 
-         Optional<BlockState> opState = getStateForItem(readFrom.getItem(), level, true);
-         return (WeightedRandomList<Wrapper<BlockState>>)(opState.isPresent()
-            ? SimpleWeightedRandomList.builder().add(opState.get(), 1).build()
-            : WeightedRandomList.create());
+         WeightedRandomList<Wrapper<BlockState>> palette = readPaletteFrom(stacks, level);
+         if (!palette.isEmpty()) {
+            return palette;
+         }
       }
+
+      Optional<BlockState> opState = getStateForItem(readFrom.getItem(), level, true);
+      return (WeightedRandomList<Wrapper<BlockState>>)(opState.isPresent()
+         ? SimpleWeightedRandomList.builder().add(opState.get(), 1).build()
+         : WeightedRandomList.create());
    }
 
    public static WeightedRandomList<Wrapper<BlockState>> readPaletteFrom(Map<Item, Integer> items, LevelReader level) {
@@ -822,14 +816,14 @@ public final class BuildingToolItem extends Item {
    }
 
    public static void clearPalette(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("pallete", 9)) {
          tag.remove("pallete");
       }
    }
 
    public static <T> T getProperty(ItemStack stack, ToolModeProperty<T> property) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("properties", 10)) {
          CompoundTag propertiesTag = tag.getCompound("properties");
          String key = property.getKey();
@@ -842,35 +836,35 @@ public final class BuildingToolItem extends Item {
    }
 
    public static <T> void setProperty(ItemStack stack, ToolModeProperty<T> property, T value) {
-      CompoundTag tag = stack.getOrCreateTag();
+      CompoundTag tag = LegacyNbt.getOrCreate(stack);
       CompoundTag propertiesTag = tag.getCompound("properties");
       propertiesTag.putString(property.getKey(), property.write(value));
       tag.put("properties", propertiesTag);
    }
 
    public static int getReachDistanceModifier(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       return tag != null && tag.contains("reach_distance", 3) ? tag.getInt("reach_distance") : 0;
    }
 
    public static int setReachDistanceModifier(ItemStack stack, int reachDistanceModifier) {
       reachDistanceModifier = Mth.clamp(reachDistanceModifier, ToolModeProperty.REACH_DISTANCE.min(), ToolModeProperty.REACH_DISTANCE.max());
-      stack.getOrCreateTag().putInt("reach_distance", reachDistanceModifier);
+      LegacyNbt.getOrCreate(stack).putInt("reach_distance", reachDistanceModifier);
       return reachDistanceModifier;
    }
 
    public static boolean causesBlockUpdates(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       return tag != null && tag.contains("cause_block_updates", 1) ? tag.getBoolean("cause_block_updates") : false;
    }
 
    public static void setCausesBlockUpdates(ItemStack stack, boolean causeBlockUpdates) {
-      stack.getOrCreateTag().putBoolean("cause_block_updates", causeBlockUpdates);
+      LegacyNbt.getOrCreate(stack).putBoolean("cause_block_updates", causeBlockUpdates);
    }
 
    @Nullable
    public static SmartBoundingBox.CornerType getSelectedCorner(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("selected_corner", 3)) {
          int cornerID = tag.getInt("selected_corner");
          SmartBoundingBox.CornerType[] types = SmartBoundingBox.CornerType.values();
@@ -882,33 +876,33 @@ public final class BuildingToolItem extends Item {
       return null;
    }
 
-   public static void setSelectedCorner(ItemStack stack, @Nullable SmartBoundingBox.CornerType cornerType) {
-      stack.getOrCreateTag().putInt("selected_corner", cornerType == null ? -1 : cornerType.ordinal());
+   public static void setSelectedCorner(ItemStack stack, SmartBoundingBox.CornerType cornerType) {
+      LegacyNbt.getOrCreate(stack).putInt("selected_corner", cornerType == null ? -1 : cornerType.ordinal());
    }
 
    public static float getSelectedCornerDistance(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       return tag != null && tag.contains("selected_corner_distance", 5) ? tag.getFloat("selected_corner_distance") : 3.0F;
    }
 
    public static float setSelectedCornerDistance(ItemStack stack, float cornerDistance) {
       cornerDistance = Mth.clamp(cornerDistance, 1.0F, ToolModeProperty.REACH_DISTANCE.max().intValue());
-      stack.getOrCreateTag().putFloat("selected_corner_distance", cornerDistance);
+      LegacyNbt.getOrCreate(stack).putFloat("selected_corner_distance", cornerDistance);
       return cornerDistance;
    }
 
    public static boolean isMovingBounds(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       return tag != null && tag.contains("move_bounds", 1) ? tag.getBoolean("move_bounds") : false;
    }
 
    public static void setMovingBounds(ItemStack stack, boolean moveBounds) {
-      stack.getOrCreateTag().putBoolean("move_bounds", moveBounds);
+      LegacyNbt.getOrCreate(stack).putBoolean("move_bounds", moveBounds);
    }
 
    @Nullable
    public static CapturedBlocks getCapturedBlocks(ItemStack stack, Level level, Player player) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = LegacyNbt.get(stack);
       if (tag != null && tag.contains("captured_blocks", 8)) {
          String boundsStr = tag.getString("captured_blocks");
          int[] corners = Stream.of(boundsStr.split(",")).mapToInt(s -> Integer.parseInt(s)).toArray();
@@ -929,9 +923,9 @@ public final class BuildingToolItem extends Item {
       }
    }
 
-   public static void setCapturedBlocks(ItemStack stack, Level level, Player player, @Nullable Pair<BoundingBox, CapturedBlocks> clipboard) {
+   public static void setCapturedBlocks(ItemStack stack, Level level, Player player, Pair<BoundingBox, CapturedBlocks> clipboard) {
       if (level instanceof ServerLevel serverLevel) {
-         CompoundTag tag = stack.getOrCreateTag();
+         CompoundTag tag = LegacyNbt.getOrCreate(stack);
          if (clipboard == null) {
             tag.remove("captured_blocks");
          } else {
