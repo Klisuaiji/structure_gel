@@ -8,13 +8,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 
 public class SGText
 {
 	public static final int WHITE = 14737632;
 	public static final int LABEL_COLOR = 10526880;
-	public static final int TRANSPARENT_GRAY = ARGB.color(128, 128, 128, 128);
+	public static final int TRANSPARENT_GRAY = FastColor.ARGB32.color(128, 128, 128, 128);
 	public static final int INVALID_TEXT_COLOR = 14703708;
 
 	public static final Style KEYBIND_STYLE = Style.EMPTY.withColor(parseHex("#5FBABF"));

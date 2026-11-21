@@ -23,7 +23,7 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.neoforged.neoforge.common.util.Lazy;
 
 public class SuggestionEditBox extends EditBox
@@ -252,7 +252,7 @@ public class SuggestionEditBox extends EditBox
 				poseStack.pushPose();
 				poseStack.translate(0, 0, 10);
 				// Black box
-				graphics.fill(this.x, this.y, this.x + this.width, this.y + this.height, ARGB.color(200, 10, 10, 10));
+				graphics.fill(this.x, this.y, this.x + this.width, this.y + this.height, FastColor.ARGB32.color(200, 10, 10, 10));
 
 				// Options
 				Font font = this.mc.font;

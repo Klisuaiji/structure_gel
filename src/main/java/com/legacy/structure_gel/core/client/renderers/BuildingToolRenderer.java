@@ -23,7 +23,6 @@ import com.legacy.structure_gel.core.item.building_tool.BuildingToolModes;
 import com.legacy.structure_gel.core.item.building_tool.SmartBoundingBox;
 import com.legacy.structure_gel.core.item.building_tool.SmartBoundingBox.CornerType;
 import com.legacy.structure_gel.core.registry.SGRegistry;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -37,7 +36,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -70,7 +69,7 @@ public abstract class BuildingToolRenderer implements IRenderBase
 	 * If a block is being targeted
 	 */
 	protected boolean hitBlock = false;
-	private final VertexBuffer lineBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
+	private final VertexBuffer lineBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 	protected boolean needsCompiled = true;
 	private boolean lineBufferEmpty = true;
 	/**
@@ -242,17 +241,17 @@ public abstract class BuildingToolRenderer implements IRenderBase
 	protected void drawWithRenderType(RenderType renderType, VertexBuffer buffer, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float xOffset, float yOffset, float zOffset)
 	{
 		renderType.setupRenderState();
-		CompiledShaderProgram shader = RenderSystem.getShader();
+		ShaderInstance shader = RenderSystem.getShader();
 		if (shader != null)
 		{
-			if (shader.MODEL_OFFSET != null)
-				shader.MODEL_OFFSET.set(xOffset, yOffset, zOffset);
+			if (shader.getUniform("ModelOffset") != null)
+				shader.getUniform("ModelOffset").set(xOffset, yOffset, zOffset);
 			buffer.bind();
 
 			buffer.drawWithShader(modelViewMatrix, projectionMatrix, shader);
 
-			if (shader.MODEL_OFFSET != null)
-				shader.MODEL_OFFSET.set(0.0F, 0.0F, 0.0F);
+			if (shader.getUniform("ModelOffset") != null)
+				shader.getUniform("ModelOffset").set(0.0F, 0.0F, 0.0F);
 			VertexBuffer.unbind();
 		}
 		renderType.clearRenderState();
@@ -348,7 +347,7 @@ public abstract class BuildingToolRenderer implements IRenderBase
 		CornerType oldCorner = null;
 		@Nullable
 		protected BlockPos secondPos;
-		private final VertexBuffer targetBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
+		private final VertexBuffer targetBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 		private boolean targetBufferEmpty = true;
 
 		@Override

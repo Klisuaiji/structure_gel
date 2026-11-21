@@ -34,7 +34,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -107,7 +107,7 @@ public class StructureGelBlock extends Block
 	}
 
 	@Override
-	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccess, BlockPos pos, Direction updateDir, BlockPos updatePos, BlockState updateState, RandomSource rand)
+	protected BlockState updateShape(BlockState state, Direction updateDir, BlockState updateState, LevelAccessor level, BlockPos pos, BlockPos updatePos)
 	{
 		EnumProperty<Neighbor> prop = NEIGHBORS.get(updateDir);
 		Neighbor oldNeighbor = state.getValue(prop);
@@ -115,7 +115,7 @@ public class StructureGelBlock extends Block
 		if (oldNeighbor == Neighbor.BLOCK && newNeighbor == Neighbor.EMPTY)
 		{
 			newNeighbor = Neighbor.SPREAD;
-			tickAccess.scheduleTick(pos, this, 0);
+			level.scheduleTick(pos, this, 0);
 		}
 		return state.setValue(prop, newNeighbor);
 	}

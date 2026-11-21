@@ -13,7 +13,6 @@ import com.mojang.serialization.MapCodec;
 
 import net.minecraft.BlockUtil;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,11 +20,10 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.Relative;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +31,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
@@ -46,7 +44,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.portal.PortalShape;
-import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -152,9 +150,12 @@ public abstract class GelPortalBlock extends Block implements Portal
 			alpha *= alpha;
 			alpha = alpha * 0.8F + 0.2F;
 		}
-		int i = ARGB.white(alpha);
 		TextureAtlasSprite textureatlassprite = this.getPortalTexture();
-		graphics.blitSprite(RenderType::guiTexturedOverlay, textureatlassprite, 0, 0, graphics.guiWidth(), graphics.guiHeight(), i);
+		graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
+		graphics.blit(0, 0, graphics.guiWidth(), graphics.guiHeight(), textureatlassprite,
+				textureatlassprite.getU0(), textureatlassprite.getV0(),
+				textureatlassprite.getU1(), textureatlassprite.getV1());
+		graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	/**
@@ -218,7 +219,7 @@ public abstract class GelPortalBlock extends Block implements Portal
 	
 	@Nullable
 	@Override
-	public TeleportTransition getPortalDestination(ServerLevel level, Entity entity, BlockPos entryPos)
+	public DimensionTransition getPortalDestination(ServerLevel level, Entity entity, BlockPos entryPos)
 	{
 		BlockState portal = level.getBlockState(entryPos);
 		Vec3i exitOffset = portal.is(this) ? this.getExitOffset(portal, entryPos, level, entity) : Vec3i.ZERO;
@@ -241,17 +242,17 @@ public abstract class GelPortalBlock extends Block implements Portal
 	}
 	
 	@Nullable
-	protected static TeleportTransition getExitPortal(ServerLevel level, Entity entity, BlockPos entryPos, BlockPos exitPos, int searchRadius, WorldBorder worldBorder, GelPortalForcer portalForcer)
+	protected static DimensionTransition getExitPortal(ServerLevel level, Entity entity, BlockPos entryPos, BlockPos exitPos, int searchRadius, WorldBorder worldBorder, GelPortalForcer portalForcer)
 	{
 		Optional<BlockPos> closetPortal = portalForcer.findClosestPortalPosition(exitPos, searchRadius, worldBorder);
 		BlockUtil.FoundRectangle rectangle;
-		TeleportTransition.PostTeleportTransition postTeleport;
+		DimensionTransition.PostDimensionTransition postTeleport;
 		if (closetPortal.isPresent())
 		{
 			BlockPos blockpos = closetPortal.get();
 			BlockState portalState = level.getBlockState(blockpos);
 			rectangle = BlockUtil.getLargestRectangleAround(blockpos, portalState.getValue(AXIS), 21, Direction.Axis.Y, 21, p -> level.getBlockState(p) == portalState);
-			postTeleport = TeleportTransition.PLAY_PORTAL_SOUND.then(e -> e.placePortalTicket(blockpos));
+			postTeleport = DimensionTransition.PLAY_PORTAL_SOUND.then(e -> e.placePortalTicket(blockpos));
 		}
 		else
 		{
@@ -264,13 +265,13 @@ public abstract class GelPortalBlock extends Block implements Portal
 			}
 
 			rectangle = createdPortal.get();
-			postTeleport = TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET);
+			postTeleport = DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET);
 		}
 
 		return getDimensionTransitionFromExit(entity, entryPos, rectangle, level, postTeleport);
 	}
 	
-	protected static TeleportTransition getDimensionTransitionFromExit(Entity entity, BlockPos entryPos, BlockUtil.FoundRectangle rect, ServerLevel level, TeleportTransition.PostTeleportTransition postTeleport)
+	protected static DimensionTransition getDimensionTransitionFromExit(Entity entity, BlockPos entryPos, BlockUtil.FoundRectangle rect, ServerLevel level, DimensionTransition.PostDimensionTransition postTeleport)
 	{
 		BlockState state = entity.level().getBlockState(entryPos);
 		Direction.Axis axis;
@@ -290,7 +291,7 @@ public abstract class GelPortalBlock extends Block implements Portal
 		return createDimensionTransition(level, rect, axis, relativePos, entity, postTeleport);
 	}
 
-	protected static TeleportTransition createDimensionTransition(ServerLevel level, BlockUtil.FoundRectangle rect, Direction.Axis axis, Vec3 relativePos, Entity entity, TeleportTransition.PostTeleportTransition postTeleport)
+	protected static DimensionTransition createDimensionTransition(ServerLevel level, BlockUtil.FoundRectangle rect, Direction.Axis axis, Vec3 relativePos, Entity entity, DimensionTransition.PostDimensionTransition postTeleport)
 	{
 		BlockPos blockpos = rect.minCorner;
 		BlockState blockstate = level.getBlockState(blockpos);
@@ -305,7 +306,7 @@ public abstract class GelPortalBlock extends Block implements Portal
 		boolean flag = direction$axis == Direction.Axis.X;
 		Vec3 vec3 = new Vec3((double) blockpos.getX() + (flag ? d2 : d4), (double) blockpos.getY() + d3, (double) blockpos.getZ() + (flag ? d4 : d2));
 		Vec3 vec31 = PortalShape.findCollisionFreePosition(vec3, level, entity, entitydimensions);
-		return new TeleportTransition(level, vec31, Vec3.ZERO, (float) i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), postTeleport);
+		return new DimensionTransition(level, vec31, Vec3.ZERO, (float) i, 0.0F, postTeleport);
 	}
 
 	@Override
@@ -315,12 +316,12 @@ public abstract class GelPortalBlock extends Block implements Portal
 	}
 
 	@Override
-	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccss, BlockPos pos, Direction updateDir, BlockPos updatePos, BlockState updateState, RandomSource rand)
+	protected BlockState updateShape(BlockState state, Direction updateDir, BlockState updateState, LevelAccessor level, BlockPos pos, BlockPos updatePos)
 	{
 		Direction.Axis updateAxis = updateDir.getAxis();
 		Direction.Axis axis = state.getValue(AXIS);
 		boolean flag = axis != updateAxis && updateAxis.isHorizontal();
-		return !flag && !updateState.is(this) && !this.getPortalFinder().findAnyShape(level, pos, axis).isComplete() ? Blocks.AIR.defaultBlockState() : super.updateShape(state, level, tickAccss, pos, updateDir, updatePos, updateState, rand);
+		return !flag && !updateState.is(this) && !this.getPortalFinder().findAnyShape(level, pos, axis).isComplete() ? Blocks.AIR.defaultBlockState() : super.updateShape(state, updateDir, updateState, level, pos, updatePos);
 	}
 
 	@Override

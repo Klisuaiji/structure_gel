@@ -34,7 +34,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.GameMasterBlock;
@@ -155,10 +155,10 @@ public class DataHandlerBlock extends Block implements SimpleWaterloggedBlock, E
 	}
 
 	@Override
-	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccess, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource rand)
+	protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
 	{
 		if (state.getValue(WATERLOGGED))
-			tickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+			level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 
 		return state;
 	}

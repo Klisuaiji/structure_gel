@@ -26,7 +26,6 @@ import com.legacy.structure_gel.core.item.building_tool.modes.ExtendTool;
 import com.legacy.structure_gel.core.item.building_tool.modes.FloodTool;
 import com.legacy.structure_gel.core.item.building_tool.modes.LineTool;
 import com.legacy.structure_gel.core.item.building_tool.modes.ReplaceTool;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
@@ -210,7 +209,7 @@ public class BuildingToolRenderers
 				}
 			}
 
-			private final VertexBuffer destBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
+			private final VertexBuffer destBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 			private boolean destBufferEmpty = true;
 			private final Tesselator destTesselator = new Tesselator();
 			@Nullable

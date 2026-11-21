@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 
 public class SGRenderType extends RenderType
 {
-	public static final RenderStateShard.ShaderStateShard WORLD_WIREFRAME_SHADER = new RenderStateShard.ShaderStateShard(SGShaders.WORLD_WIREFRAME);
+	public static final RenderStateShard.ShaderStateShard WORLD_WIREFRAME_SHADER = new RenderStateShard.ShaderStateShard(() -> SGShaders.WORLD_WIREFRAME);
 
 	//@formatter:off
 	private static final BiFunction<Boolean, Boolean, RenderType> WORLD_WIREFRAME = Util.memoize((transparent, fabulous) -> create(

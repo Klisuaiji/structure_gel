@@ -16,7 +16,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.random.WeightedEntry.Wrapper;
 import net.minecraft.util.random.WeightedRandomList;
@@ -36,7 +35,7 @@ public class BuildingToolOverlay
 			Pair<InteractionHand, ItemStack> tool = BuildingToolItem.getBuildingTool(mc.player);
 			if (tool != null)
 			{
-				final ProfilerFiller profilerfiller = Profiler.get();
+				final ProfilerFiller profilerfiller = mc.getProfiler();
 				profilerfiller.push("building_tool_overlay");
 				ItemStack stack = tool.getSecond();
 				Font font = mc.font;

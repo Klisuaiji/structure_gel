@@ -150,7 +150,7 @@ public class SGCommonEvents
 		}
 
 		@SubscribeEvent
-		protected static void gatherData(final GatherDataEvent.Client event)
+		protected static void gatherData(final GatherDataEvent event)
 		{
 			DataGenerator dataGen = event.getGenerator();
 			PackOutput packOutput = dataGen.getPackOutput();

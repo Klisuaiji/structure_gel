@@ -43,7 +43,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -315,7 +315,7 @@ public class BuildingToolScreen extends LayeredScreen
 		float mixedTick = this.tick + this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		float animationTime = 2.5F;
 
-		RenderSystem.setShader(CoreShaders.POSITION_TEX);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
 		int centerX = this.width / 2;

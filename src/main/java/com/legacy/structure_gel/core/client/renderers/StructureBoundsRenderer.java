@@ -14,7 +14,6 @@ import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.client.SGRenderType;
 import com.legacy.structure_gel.core.client.SGShaders;
 import com.legacy.structure_gel.core.structure.StructureInfo;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
@@ -24,7 +23,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -41,7 +40,7 @@ public class StructureBoundsRenderer implements IRenderBase
 	private static boolean shouldClear = false;
 	private final BlockPos pos;
 	private final StructureInfo structureInfo;
-	private final VertexBuffer vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
+	private final VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 	private boolean needsUpdated = true;
 	private boolean vertexBufferEmpty = true;
 
@@ -116,17 +115,17 @@ public class StructureBoundsRenderer implements IRenderBase
 	protected void drawWithRenderType(RenderType renderType, VertexBuffer buffer, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float xOffset, float yOffset, float zOffset)
 	{
 		renderType.setupRenderState();
-		CompiledShaderProgram shader = RenderSystem.getShader();
+		ShaderInstance shader = RenderSystem.getShader();
 		if (shader != null)
 		{
-			if (shader.MODEL_OFFSET != null)
-				shader.MODEL_OFFSET.set(xOffset, yOffset, zOffset);
+			if (shader.getUniform("ModelOffset") != null)
+				shader.getUniform("ModelOffset").set(xOffset, yOffset, zOffset);
 			buffer.bind();
 
 			buffer.drawWithShader(modelViewMatrix, projectionMatrix, shader);
 
-			if (shader.MODEL_OFFSET != null)
-				shader.MODEL_OFFSET.set(0.0F, 0.0F, 0.0F);
+			if (shader.getUniform("ModelOffset") != null)
+				shader.getUniform("ModelOffset").set(0.0F, 0.0F, 0.0F);
 			VertexBuffer.unbind();
 		}
 		renderType.clearRenderState();
