@@ -1,6 +1,6 @@
 {
-    "vertex": "structure_gel:core/world_wireframe",
-    "fragment": "structure_gel:core/world_wireframe",
+    "vertex": "world_wireframe",
+    "fragment": "world_wireframe",
     "samplers": [
     ],
     "uniforms": [
