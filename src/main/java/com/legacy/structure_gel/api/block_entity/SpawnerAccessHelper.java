@@ -1,100 +1,124 @@
 package com.legacy.structure_gel.api.block_entity;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import javax.annotation.Nullable;
+
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
-import net.minecraft.util.random.SimpleWeightedRandomList.Builder;
-import net.minecraft.util.random.WeightedEntry.Wrapper;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.EquipmentTable;
+import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
-import net.minecraft.world.level.SpawnData.CustomSpawnRules;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
-public class SpawnerAccessHelper {
-   public static void setMinSpawnDelay(SpawnerBlockEntity tile, Level level, BlockPos pos, int minSpawnelay) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MinSpawnDelay", (short)minSpawnelay));
-   }
+/**
+ * Contains helper methods for modifying the various fields within a mob spawner
+ * through it's NBT.
+ *
+ * @author Silver_David
+ */
+public class SpawnerAccessHelper
+{
+	/**
+	 * The minimum time a spawner should wait before spawning a mob
+	 */
+	public static void setMinSpawnDelay(BaseSpawner spawner, int minSpawnDelay)
+	{
+		spawner.minSpawnDelay = minSpawnDelay;
+	}
 
-   public static void setMaxSpawnDelay(SpawnerBlockEntity tile, Level level, BlockPos pos, int maxSpawnDelay) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MaxSpawnDelay", (short)maxSpawnDelay));
-   }
+	/**
+	 * The maximum time a spawner should wait before spawning a mob
+	 */
+	public static void setMaxSpawnDelay(BaseSpawner spawner, int maxSpawnDelay)
+	{
+		spawner.maxSpawnDelay = maxSpawnDelay;
+	}
 
-   public static void setSpawnCount(SpawnerBlockEntity tile, Level level, BlockPos pos, int spawnCount) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("SpawnCount", (short)spawnCount));
-   }
+	/**
+	 * The maximum amount of mobs that can spawn from this spawner at a time
+	 */
+	public static void setSpawnCount(BaseSpawner spawner, int spawnCount)
+	{
+		spawner.spawnCount = spawnCount;
+	}
 
-   public static void setMaxNearbyEntities(SpawnerBlockEntity tile, Level level, BlockPos pos, int maxNearbyEntities) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("MaxNearbyEntities", (short)maxNearbyEntities));
-   }
+	/**
+	 * How many entities can be around the spawner before it stops spawning mobs
+	 */
+	public static void setMaxNearbyEntities(BaseSpawner spawner, int maxNearbyEntities)
+	{
+		spawner.maxNearbyEntities = maxNearbyEntities;
+	}
 
-   public static void setRequiredPlayerRange(SpawnerBlockEntity tile, Level level, BlockPos pos, int requiredPlayerRange) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("RequiredPlayerRange", (short)requiredPlayerRange));
-   }
+	/**
+	 * How far the player can be from the spawner for it to spawn mobs
+	 */
+	public static void setRequiredPlayerRange(BaseSpawner spawner, int requiredPlayerRange)
+	{
+		spawner.requiredPlayerRange = requiredPlayerRange;
+	}
 
-   public static void setSpawnRange(SpawnerBlockEntity tile, Level level, BlockPos pos, int spawnRange) {
-      modifySpawnerNBT(tile, level, pos, nbt -> nbt.putShort("SpawnRange", (short)spawnRange));
-   }
+	/**
+	 * The horizontal area a spawner will search to try placing mobs. The vertical
+	 * area is between the y level below the spawner and the y level above it (3
+	 * blocks high)
+	 */
+	public static void setSpawnRange(BaseSpawner spawner, int spawnRange)
+	{
+		spawner.spawnRange = spawnRange;
+	}
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, EntityType<?> entityType) {
-      setSpawnPotentials(tile, level, pos, createSpawnerEntity(entityType));
-   }
+	/**
+	 * Sets the passed entity as the mob that the spawner should spawn
+	 */
+	public static void setSpawnPotentials(BaseSpawner spawner, EntityType<?> entityType)
+	{
+		setSpawnPotentials(spawner, createSpawnerEntity(entityType));
+	}
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, SpawnData... spawnDatas) {
-      SimpleWeightedRandomList<SpawnData> list = ((Builder)Util.make(new Builder(), builder -> {
-         for (SpawnData data : spawnDatas) {
-            builder.add(data, 1);
-         }
-      })).build();
-      setSpawnPotentials(tile, level, pos, list);
-   }
+	/**
+	 * Sets the mobs that will spawn
+	 */
+	public static void setSpawnPotentials(BaseSpawner spawner, SpawnData... spawnData)
+	{
+		SimpleWeightedRandomList<SpawnData> list = Util.make(new SimpleWeightedRandomList.Builder<SpawnData>(), builder ->
+		{
+			for (SpawnData data : spawnData)
+				builder.add(data, 1);
+		}).build();
+		setSpawnPotentials(spawner, list);
+	}
 
-   public static void setSpawnPotentials(SpawnerBlockEntity tile, Level level, BlockPos pos, SimpleWeightedRandomList<SpawnData> spawnDatas) {
-      modifySpawnerNBT(
-         tile,
-         level,
-         pos,
-         nbt -> {
-            if (!spawnDatas.isEmpty()) {
-               nbt.put(
-                  "SpawnData",
-                  (Tag)SpawnData.CODEC
-                     .encodeStart(
-                        NbtOps.INSTANCE, (SpawnData)((Wrapper)spawnDatas.getRandom(level != null ? level.random : RandomSource.create()).get()).getData()
-                     )
-                     .result()
-                     .orElseThrow(() -> new IllegalStateException("Invalid SpawnData"))
-               );
-               nbt.put("SpawnPotentials", (Tag)SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, spawnDatas).result().orElseThrow());
-            }
-         }
-      );
-   }
+	/**
+	 * Takes the input spawner entities and puts it into the mob spawner's data
+	 */
+	public static void setSpawnPotentials(BaseSpawner spawner, SimpleWeightedRandomList<SpawnData> spawnData)
+	{
+		spawner.spawnPotentials = spawnData;
+	}
 
-   public static SpawnData createSpawnerEntity(EntityType<?> entity) {
-      return createSpawnerEntity(entity, new CompoundTag(), Optional.empty());
-   }
+	/**
+	 * @param entity
+	 * @return Spawn data for the entity passed
+	 */
+	public static SpawnData createSpawnerEntity(EntityType<?> entity)
+	{
+		return createSpawnerEntity(entity, new CompoundTag(), Optional.empty(), Optional.empty());
+	}
 
-   public static SpawnData createSpawnerEntity(EntityType<?> entity, CompoundTag entityTag, Optional<CustomSpawnRules> customSpawnRules) {
-      CompoundTag nbt = entityTag.copy();
-      ResourceLocation name = BuiltInRegistries.ENTITY_TYPE.getKey(entity);
-      nbt.putString("id", name != null ? BuiltInRegistries.ENTITY_TYPE.getKey(entity).toString() : "pig");
-      return new SpawnData(nbt, customSpawnRules);
-   }
-
-   public static void modifySpawnerNBT(SpawnerBlockEntity spawner, Level level, BlockPos pos, Consumer<CompoundTag> nbtConsumer) {
-      CompoundTag nbt = new CompoundTag();
-      spawner.getSpawner().save(nbt);
-      nbtConsumer.accept(nbt);
-      spawner.getSpawner().load(null, pos, nbt);
-   }
+	/**
+	 * @param entity
+	 * @param entityTag
+	 * @param customSpawnRules
+	 * @return Spawn data for the entity passed
+	 */
+	public static SpawnData createSpawnerEntity(EntityType<?> entity, CompoundTag entityTag, Optional<SpawnData.CustomSpawnRules> customSpawnRules, Optional<EquipmentTable> equipment)
+	{
+		CompoundTag nbt = entityTag.copy();
+		ResourceLocation name = BuiltInRegistries.ENTITY_TYPE.getKey(entity);
+		nbt.putString("id", name != null ? BuiltInRegistries.ENTITY_TYPE.getKey(entity).toString() : "pig");
+		return new SpawnData(nbt, customSpawnRules, equipment);
+	}
 }

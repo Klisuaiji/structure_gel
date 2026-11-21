@@ -1,0 +1,75 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_none"
+        },
+        "when": "structure_gel:none"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_replace"
+        },
+        "when": "structure_gel:replace"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_fill"
+        },
+        "when": "structure_gel:fill"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_clone"
+        },
+        "when": "structure_gel:clone"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_flood"
+        },
+        "when": "structure_gel:flood"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_extend"
+        },
+        "when": "structure_gel:extend"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_move"
+        },
+        "when": "structure_gel:move"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_line"
+        },
+        "when": "structure_gel:line"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "structure_gel:item/building_tool_shape"
+        },
+        "when": "structure_gel:shape"
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "structure_gel:item/building_tool_none"
+    },
+    "property": "structure_gel:building_tool_mode"
+  }
+}

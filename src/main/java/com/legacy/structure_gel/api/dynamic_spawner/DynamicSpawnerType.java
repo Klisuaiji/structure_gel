@@ -1,47 +1,36 @@
 package com.legacy.structure_gel.api.dynamic_spawner;
 
-import com.legacy.structure_gel.core.block.DynamicSpawnerBlock;
 import com.legacy.structure_gel.core.dynamic_spawner.DynamicSpawner;
-import com.legacy.structure_gel.core.registry.SGRegistry;
-import com.legacy.structure_gel.core.util.Internal;
-import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
-public class DynamicSpawnerType {
-   private final DynamicSpawnerType.SpawnerMaker spawnerMaker;
+import net.minecraft.core.HolderLookup;
 
-   public DynamicSpawnerType(DynamicSpawnerType.SpawnerModifier spawnerModifier) {
-      this.spawnerMaker = (level, pos) -> DynamicSpawnerType.SpawnerMaker.makeSpawner(spawnerModifier, level, pos);
-   }
+/**
+ * Used by Dynamic Spawner blocks to determine what they spawn. Dynamic spawners
+ * differ from vanilla spawners in that they do now save their mob spawn logic
+ * in the spawner block entity. Instead, it's a registered logic that gets
+ * assigned to the dynamic spawner block when it loads.<br>
+ * <br>
+ * Differences with vanilla mob spawners: <br>
+ * 1) The settings of a spawner that already exists in the world can be modified
+ * by changing what the DynamicSpawnerType produces.<br>
+ * 2) Spawners created can reference data that may not be consistent when mods
+ * update or get added, such as item tags.<br>
+ * <br>
+ * Disadvantages: <br>
+ * 1) This type of spawner may not work with mods that modify spawners since it
+ * uses a separate block entirely.
+ * 
+ * @author Silver_David
+ *
+ */
+public interface DynamicSpawnerType
+{
+	void buildSpawner(DynamicSpawner.Builder builder, HolderLookup.Provider registryAccess);
 
-   @Internal
-   public DynamicSpawner createSpawner(Level level, BlockPos pos) {
-      return this.spawnerMaker.make(level, pos);
-   }
-
-   private interface SpawnerMaker {
-      DynamicSpawner make(Level var1, BlockPos var2);
-
-      private static DynamicSpawner makeSpawner(DynamicSpawnerType.SpawnerModifier modifier, Level level, BlockPos pos) {
-         BlockState state = level != null ? level.getBlockState(pos) : ((DynamicSpawnerBlock)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()).defaultBlockState();
-         if (!state.is((Block)SGRegistry.Blocks.DYNAMIC_SPAWNER.get())) {
-            state = ((DynamicSpawnerBlock)SGRegistry.Blocks.DYNAMIC_SPAWNER.get()).defaultBlockState();
-         }
-
-         SpawnerBlockEntity spawnerBE = new SpawnerBlockEntity(pos, state);
-         modifier.modify(spawnerBE, level, pos);
-         DynamicSpawner spawner = new DynamicSpawner();
-         spawner.load(level, pos, spawnerBE.getSpawner().save(new CompoundTag()));
-         return spawner;
-      }
-   }
-
-   public interface SpawnerModifier {
-      void modify(SpawnerBlockEntity var1, Level var2, BlockPos var3);
-   }
+	default DynamicSpawner.Builder create(HolderLookup.Provider registryAccess)
+	{
+		DynamicSpawner.Builder builder = new DynamicSpawner.Builder(registryAccess);
+		this.buildSpawner(builder, registryAccess);
+		return builder;
+	}
 }

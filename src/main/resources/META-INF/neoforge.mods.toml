@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+issueTrackerURL="https://gitlab.com/modding-legacy/structure-gel-api/-/issues"
+license="https://www.gnu.org/licenses/gpl-3.0.en.html"
+[[mods]]
+	modId="structure_gel"
+	version="2.20.0-port0.1.0"
+	displayName="Structure Gel API"
+	updateJSONURL="http://changelogs.moddinglegacy.com/structure-gel.json"
+	displayURL="https://moddinglegacy.com/"
+	logoFile="banner.png"
+	authors="Silver_David, KingPhygieBoo, Jonathing"
+	description="An API mod to improve the developer side of structure gen."
+	license="https://www.gnu.org/licenses/gpl-3.0.en.html"
+[[dependencies.structure_gel]]
+	modId="neoforge"
+	type="required"
+	versionRange="[21.1.265,)"
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.structure_gel]]
+	modId="minecraft"
+	type="required"
+	versionRange="[1.21.1]"
+	ordering="NONE"
+	side="BOTH"
+
+[[mixins]]
+	config="structure_gel.mixins.json"
+
+[modproperties.structure_gel]
+	catalogueImageIcon="logo.png"

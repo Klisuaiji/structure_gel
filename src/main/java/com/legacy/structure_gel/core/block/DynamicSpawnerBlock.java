@@ -1,124 +1,127 @@
 package com.legacy.structure_gel.core.block;
 
-import com.legacy.blue_skies.compat.*;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.block_entity.DynamicSpawnerBlockEntity;
+import com.legacy.structure_gel.core.block_entity.DynamicSpawnerBlockEntity.ExpRange;
 import com.legacy.structure_gel.core.registry.SGRegistry;
 import com.legacy.structure_gel.core.util.SGText;
 import com.mojang.serialization.MapCodec;
-import java.util.List;
+
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class DynamicSpawnerBlock extends BaseEntityBlock {
-   public static final MapCodec<DynamicSpawnerBlock> CODEC = simpleCodec(DynamicSpawnerBlock::new);
+public class DynamicSpawnerBlock extends BaseEntityBlock
+{
+	public static final MapCodec<DynamicSpawnerBlock> CODEC = simpleCodec(DynamicSpawnerBlock::new);
 
-   public DynamicSpawnerBlock(Properties properties) {
-      super(properties);
-   }
+	public DynamicSpawnerBlock(Properties properties)
+	{
+		super(properties);
+	}
 
-   protected MapCodec<? extends BaseEntityBlock> codec() {
-      return CODEC;
-   }
+	@Override
+	protected MapCodec<? extends BaseEntityBlock> codec()
+	{
+		return CODEC;
+	}
 
-   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-      return new DynamicSpawnerBlockEntity(pos, state);
-   }
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+	{
+		return new DynamicSpawnerBlockEntity(pos, state);
+	}
 
-   public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-      if (level.getBlockEntity(pos) instanceof DynamicSpawnerBlockEntity spawner && player.canUseGameMasterBlocks()) {
-         if (level.isClientSide) {
-            StructureGelMod.proxy.openDynamicSpawnerScreen(spawner);
-         }
+	@Override
+	public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
+	{	
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity instanceof DynamicSpawnerBlockEntity spawner && player.canUseGameMasterBlocks())
+		{
+			if (level.isClientSide)
+			{
+				StructureGelMod.proxy.openDynamicSpawnerScreen(spawner);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		else
+		{
+			return InteractionResult.PASS;
+		}
+	}
 
-         return InteractionResult.sidedSuccess(level.isClientSide);
-      } else {
-         return InteractionResult.PASS;
-      }
-   }
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+	{
+		return createTickerHelper(type, SGRegistry.BlockEntities.DYNAMIC_SPAWNER.get(), level.isClientSide ? DynamicSpawnerBlockEntity::clientTick : DynamicSpawnerBlockEntity::serverTick);
+	}
 
-   public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-      return createTickerHelper(
-         type,
-         SGRegistry.BlockEntities.DYNAMIC_SPAWNER.get(),
-         level.isClientSide ? DynamicSpawnerBlockEntity::clientTick : DynamicSpawnerBlockEntity::serverTick
-      );
-   }
+	@Override
+	public int getExpDrop(BlockState state, LevelAccessor level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool)
+	{
+		if (level.getBlockEntity(pos) instanceof DynamicSpawnerBlockEntity spawner)
+		{
+			ExpRange range = spawner.getExpRange();
+			int min = range.min;
+			int max = range.max;
 
-   public int getExpDrop(BlockState state, LevelReader level, RandomSource rand, BlockPos pos, int fortune, int silktouch) {
-      if (level.getBlockEntity(pos) instanceof DynamicSpawnerBlockEntity spawner) {
-         DynamicSpawnerBlockEntity.ExpRange range = spawner.getExpRange();
-         int min = range.min;
-         int max = range.max;
-         int r = (max - min) / 2 + 1;
-         return min + rand.nextInt(r) + rand.nextInt(r);
-      } else {
-         return Blocks.SPAWNER.getExpDrop(Blocks.SPAWNER.defaultBlockState(), level, rand, pos, fortune, silktouch);
-      }
-   }
+			int r = (max - min) / 2 + 1;
+			RandomSource rand = level.getRandom();
+			return min + rand.nextInt(r) + rand.nextInt(r);
+		}
+		return Blocks.SPAWNER.getExpDrop(Blocks.SPAWNER.defaultBlockState(), level, pos, blockEntity, breaker, tool);
+	}
 
-   public RenderShape getRenderShape(BlockState p_56794_) {
-      return RenderShape.MODEL;
-   }
+	@Override
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lore, TooltipFlag showAdvanced)
+	{
+		if (net.minecraft.client.gui.screens.Screen.hasShiftDown())
+		{
+			lore.add(Component.translatable("info.structure_gel.dynamic_spawner_description").withStyle(ChatFormatting.GRAY));
+		}
+		else
+		{
+			lore.add(SGText.applyKeybindFilter(Component.translatable("info.structure_gel.hold_shift")));
 
-   public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
-      return new ItemStack((ItemLike)SGRegistry.Blocks.DYNAMIC_SPAWNER.get());
-   }
+			CustomData beData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+			if (beData != null)
+			{
+				lore.add(SGText.NEW_LINE);
+				CompoundTag beTag = beData.copyTag();
+				String typeName = beTag.getString(DynamicSpawnerBlockEntity.SPAWNER_ID_KEY);
+				if (!typeName.isBlank())
+					lore.add(SGText.BULLET_POINT.copy().withStyle(ChatFormatting.GRAY).append(SGText.TYPE_LABEL.copy().withStyle(SGText.VALUE_LABEL_STYLE)).append(Component.literal(": " + typeName)));
 
-   public void appendHoverText(ItemStack stack, BlockGetter level, List<Component> lore, TooltipFlag showAdvanced) {
-      if (Screen.hasShiftDown()) {
-         lore.add(Component.translatable("info.structure_gel.dynamic_spawner_description").withStyle(ChatFormatting.GRAY));
-      } else {
-         lore.add(SGText.applyKeybindFilter(Component.translatable("info.structure_gel.hold_shift")));
-         String beTagKey = "BlockEntityTag";
-         CompoundTag tag = LegacyNbt.get(stack);
-         if (tag != null && tag.contains(beTagKey, 10)) {
-            lore.add(SGText.NEW_LINE);
-            CompoundTag beTag = tag.getCompound(beTagKey);
-            String typeName = beTag.getString("SpawnerID");
-            if (!typeName.isBlank()) {
-               lore.add(
-                  SGText.BULLET_POINT
-                     .copy()
-                     .withStyle(ChatFormatting.GRAY)
-                     .append(SGText.TYPE_LABEL.copy().withStyle(SGText.VALUE_LABEL_STYLE))
-                     .append(Component.literal(": " + typeName))
-               );
-            }
-
-            if (beTag.contains("exp_range", 10)) {
-               DynamicSpawnerBlockEntity.ExpRange range = DynamicSpawnerBlockEntity.ExpRange.load(tag.getCompound("exp_range"));
-               lore.add(
-                  SGText.BULLET_POINT
-                     .copy()
-                     .withStyle(ChatFormatting.GRAY)
-                     .append(Component.translatable("gui.structure_gel.dynamic_spawner.exp_range").withStyle(SGText.VALUE_LABEL_STYLE))
-                     .append(Component.literal(": " + range.min + " - " + range.max))
-               );
-            }
-         }
-      }
-   }
+				if (beTag.contains(DynamicSpawnerBlockEntity.EXP_RANGE_KEY, Tag.TAG_COMPOUND))
+				{
+					ExpRange range = ExpRange.load(beTag.getCompound(DynamicSpawnerBlockEntity.EXP_RANGE_KEY));
+					lore.add(SGText.BULLET_POINT.copy().withStyle(ChatFormatting.GRAY).append(Component.translatable("gui.structure_gel.dynamic_spawner.exp_range").withStyle(SGText.VALUE_LABEL_STYLE)).append(Component.literal(": " + range.min + " - " + range.max)));
+				}
+			}
+		}
+	}
 }

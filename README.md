@@ -1,47 +1,93 @@
-> **重要法律声明**：本仓库为教育性质的反编译 + 移植研究产物，**绝非** Structure Gel API 的官方仓库。所有原始代码的知识产权归 Modding Legacy 及原作者所有。本仓库仅供个人学习与研究。移植部分保留所有权益（All Rights Reserved）。详见 [LICENSE](LICENSE)（含上游 GPL-3.0 全文）。
+<h1 align="center">
+<img src="src/main/resources/banner.png" alt="Structure Gel API">
+</h1>
 
-# Structure Gel API — 1.21.1 NeoForge 移植源码存档
+## About
 
-> 这不是官方仓库。官方 Structure Gel API 由 Modding Legacy 开发并发布于 [GitLab](https://gitlab.com/modding-legacy/structure-gel-api)。本仓库保存从 1.20.4 版反编译源码迁移到 Minecraft 1.21.1 / NeoForge 的 API 源码，供 API 阅读、研究与复用参考。
+This library mod seeks to make handling world gen easier on developers. Its main features include:
 
-## 定位
+- Gel blocks that can be used to automatically fill a structure and replace with air using structure processors
+- Jigsaw registry shortcuts/builders
+- Data structure block handling within jigsaw structures
+- Configurable structure classes
+  - Placement separation values, mob spawns, data marker handling, etc
+- Dimension registry events
+- Extensible vanilla-like portal behavior
+- An extended biome dictionary with support for many popular biome mods
+- Registrars for holding registry data for dimensions and everything structure related
+- Registry utilities for structures, structure processors, points of interest, and configured features
 
-Structure Gel API 是一个面向结构生成 / 传送门 / 动态刷怪等功能的**前置 API 模组**，被 Blue Skies 等模组依赖。
+The code has been split into two packages: `com.legacy.structure_gel.core` and `com.legacy.structure_gel.api`. Anything in the api package is for developers to use, and will stay stable between updates. Anything in the core package or with the `@Internal` annotation is intended for internal use, and may have breaking changes at any time.
 
-本仓库作为**源码存档**提供：
+## Compatibility
 
-| 项目 | 内容 |
-| --- | --- |
-| 上游版本 | 1.20.4 / 2.19.1（反编译自发布 jar） |
-| 目标环境 | Minecraft 1.21.1 / NeoForge 21.1.234+ |
-| Java | 21 |
-| 源码数量 | 184 个 `.java` |
-| 仓库性质 | API 源码存档（非独立可编译工程） |
+The biome dictionary used in Structure Gel will automatically register biomes that haven't already been registered by using properties from biome. IE: Biomes with jungle in their name will be added to the jungle tag while biomes with snow get added to the snowy tag. This can be disabled in the config file.
 
-## 与 blue_skies 仓库的关系
+## Installing in Your Workspace
 
-- 完整、可编译的模组工程（含内嵌的本 API）位于 [blue_skies 仓库](https://github.com/Klisuaiji/blue_skies)。
-- 本仓库单独保存 `com.legacy.structure_gel` 包的 184 个源码，方便 API 阅读、比对与复用。
-- 两个包之间存在**双向引用**（本 API 中有 15 处引用 `com.legacy.blue_skies`），因此本仓库的源码不保证独立编译通过——请以 blue_skies 仓库的完整工程为准。
+Structure Gel can be downloaded from the Modding Legacy maven repository via the buildscript. To do so, follow these steps:
 
-## 目录结构
+1. In the `build.gradle` file for your mod, add the Modding Legacy maven repository to the `repositories` block (it is not in the `buildscript` block)
 
+```groovy
+repositories {
+    // ...
+
+    maven {
+        name "Modding Legacy Maven"
+        url "https://maven.moddinglegacy.com/maven"
+    }
+}
 ```
-src/main/java/com/legacy/structure_gel/
-├── api/            # 对外 API：方块、方块实体、生物群系、结构、传送门等
-├── core/           # 核心实现与工具
-├── mixins/         # Mixin 注入
-└── StructureGel.java 等入口类
+
+2. In the `build.gradle` file for your mod, add Structure Gel API as a dependency.
+
+```groovy
+dependencies {
+    // ...
+
+    implementation fg.deobf("com.legacy:structure-gel:1.19.2-2.6.1")
+}
 ```
 
-## 已知局限
+To view a list of all the available versions, go to [our maven](https://maven.moddinglegacy.com/artifactory/modding-legacy/com/legacy/structure-gel/) to browse the files.
 
-- 源码由反编译还原，局部变量名、lambda / 内部类命名带有编译器痕迹；
-- 泛型签名、注解参数、record/enum 结构与原始源码可能存在差异；
-- 本仓库不含构建脚本与资源文件，需配合 blue_skies 仓库的完整工程使用。
+3. If your project is **not** using Mixin (or using MixinGradle), you will need to manually ask Mixin to respect the development environment's mappings. To do so, add `all` to your `runs` so that Mixins use the proper remapped names. Using the `all` run will automatically put it in all other run types.
 
-## 版权声明 (Copyright)
+```groovy
+minecraft {
+    runs {
+        // ...
 
-所有 Structure Gel API 原始代码的版权归 Modding Legacy 及原作者（Silver_David、KingPhygieBoo、Jonathing）所有。上游 `mods.toml` 声明为 GPL-3.0，LICENSE 中保留其全文。移植工作 © 2026 Kulisaiji（保留所有权益）。
+        all {
+            def srgToMcpFile = project.tasks.createSrgToMcp.outputs.files[0].path
 
-本仓库仅供个人学习与研究。若您是版权持有人并希望移除本仓库，请提交 Issue，将立即处理。
+            property 'net.minecraftforge.gradle.GradleStart.srg.srg-mcp', srgToMcpFile
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', srgToMcpFile
+        }
+        
+        // ...
+    }
+}
+```
+
+4. Add Structure Gel as a dependency for your mod in its `mods.toml` file.
+
+```toml
+[[dependencies.examplemod]]
+    modId="structure_gel"
+    mandatory=true
+    versionRange="[2.6.1,)"
+    ordering="NONE"
+    side="BOTH"
+```
+
+5. Setup your workspace with the appropriate gradlew commands for your IDE.
+    - For Eclipse
+        - ``gradlew eclispe``
+        - ``gradlew genEclipseRuns``
+    - For IntelliJ
+        - ``gradlew genIntellijRuns``
+
+6. From here, assuming you see Structure Gel in your project's external dependencies, you should be able to use the API. If you do not see it, try refreshing your project as some IDEs won't do that automatically.

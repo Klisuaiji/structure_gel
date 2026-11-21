@@ -1,11 +1,13 @@
 package com.legacy.structure_gel.core.structure.jigsaw;
 
 import javax.annotation.Nullable;
+
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
-public interface SinglePoolElementExtension {
-   void structure_gel$setPiece(StructurePiece var1);
-
-   @Nullable
-   StructurePiece structure_gel$getPiece();
+public interface SinglePoolElementExtension
+{
+	void structure_gel$setPiece(@Nullable StructurePiece setPiece);
+	
+	@Nullable
+	StructurePiece structure_gel$getPiece();
 }

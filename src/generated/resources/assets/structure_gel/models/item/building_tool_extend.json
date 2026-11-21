@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "structure_gel:item/building_tool_extend"
+  }
+}

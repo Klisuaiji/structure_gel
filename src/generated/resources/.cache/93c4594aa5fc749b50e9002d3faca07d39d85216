@@ -1,0 +1,7 @@
+// 1.21.4	2025-01-26T15:18:26.3913787	Tags for minecraft:block mod id structure_gel
+7070ac3deccce26f9b315b774b27591252117ccc data/minecraft/tags/block/dragon_immune.json
+722b43038f388bbe96c2fb2a2935fbe804b16e7c data/minecraft/tags/block/features_cannot_replace.json
+722b43038f388bbe96c2fb2a2935fbe804b16e7c data/minecraft/tags/block/lava_pool_stone_cannot_replace.json
+722b43038f388bbe96c2fb2a2935fbe804b16e7c data/minecraft/tags/block/mineable/pickaxe.json
+7070ac3deccce26f9b315b774b27591252117ccc data/minecraft/tags/block/wither_immune.json
+914e5e3fb4ba28b7812fe10c7b49d6f8b9d1eae7 data/structure_gel/tags/block/gel.json

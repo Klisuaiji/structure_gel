@@ -1,16 +1,17 @@
 package com.legacy.structure_gel.api.registry.registrar;
 
-import com.legacy.structure_gel.api.util.LazyOptional;
-import com.legacy.structure_gel.core.util.Internal;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javax.annotation.Nullable;
+
+import com.legacy.structure_gel.core.util.Internal;
+
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.Holder.Reference;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -23,183 +24,309 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
-public abstract class Registrar<T> {
-   protected final ResourceKey<Registry<T>> registryKey;
-   protected final ResourceKey<T> key;
+/**
+ * Pointer to a registry object. Data is registered manually either manually by
+ * the user, or automatically with {@link RegistrarHandler}.
+ * <p>
+ * This class behaves similarly to an {@link Optional} and a {@link Supplier}.
+ *
+ * @author Silver_David
+ */
+public abstract class Registrar<T>
+{
+	protected final ResourceKey<T> key;
 
-   protected Registrar(ResourceKey<Registry<T>> registry, ResourceLocation name) {
-      this.registryKey = registry;
-      this.key = ResourceKey.create(registry, name);
-   }
+	public Registrar(ResourceKey<T> key)
+	{
+		this.key = key;
+	}
+	
+	/**
+	 * Used for objects that have data pack registries where obtaining a value from
+	 * current registry data is necessary, such as biomes. The value passed in is
+	 * only used for datagen.
+	 */
+	public static <T, V extends T> Registrar.Pointer<V> createPointer(ResourceKey<T> key, Supplier<V> value)
+	{
+		return createPointer(key, c -> value.get());
+	}
 
-   public static <T, V extends T> Registrar.Pointer<V> createPointer(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<V> value) {
-      return createPointer(registry, name, c -> value.get());
-   }
+	/**
+	 * Used for objects that have data pack registries where obtaining a value from
+	 * current registry data is necessary, such as biomes. The value passed in is
+	 * only used for datagen.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T, V extends T> Registrar.Pointer<V> createPointer(ResourceKey<T> key, Function<BootstrapContext<?>, V> value)
+	{
+		return DatagenModLoader.isRunningDataGen() ? new Registrar.DataGenPointer(key, value) : new Registrar.Pointer(key);
+	}
 
-   public static <T, V extends T> Registrar.Pointer<V> createPointer(
-      ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstrapContext<?>, V> value
-   ) {
-      return DatagenModLoader.isRunningDataGen() ? new Registrar.DataGenPointer<>(registry, name, value) : new Registrar.Pointer<>(registry, name);
-   }
+	/**
+	 * Used for objects that are created on startup and can safely be stored in a
+	 * static instance, such as blocks or entity types.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T, V extends T> Registrar.Static<V> createStatic(ResourceKey<T> key)
+	{
+		return new Registrar.Static(key);
+	}
 
-   public static <T, V extends T> Registrar.Static<V> createStatic(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<V> value) {
-      return new Registrar.Static<>(registry, name, value);
-   }
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T, V extends Block> Registrar.BlockRef<V> createBlockRef(ResourceKey<T> key)
+	{
+		return new Registrar.BlockRef(key);
+	}
 
-   public static <T, V extends Block> Registrar.BlockRef<V> createBlockRef(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<V> value) {
-      return new Registrar.BlockRef<>(registry, name, value);
-   }
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T, V extends Item> Registrar.ItemRef<V> createItemRef(ResourceKey<T> key)
+	{
+		return new Registrar.ItemRef(key);
+	}
 
-   public static <T, V extends Item> Registrar.ItemRef<V> createItemRef(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<V> value) {
-      return new Registrar.ItemRef<>(registry, name, value);
-   }
+	@Nullable
+	public T get(RegistryAccess registryAccess)
+	{
+		return this.get(registryAccess.lookupOrThrow(this.getRegistryKey()));
+	}
 
-   @Nullable
-   public T get(RegistryAccess registryAccess) {
-      return this.get(registryAccess.registryOrThrow(this.getRegistryKey()));
-   }
+	@Nullable
+	public T get(CommonLevelAccessor level)
+	{
+		return this.get(level.registryAccess());
+	}
 
-   @Nullable
-   public T get(CommonLevelAccessor level) {
-      return this.get(level.registryAccess());
-   }
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Nullable
+	public T get(Registry<?> registry)
+	{
+		return (T) registry.get((ResourceKey) this.getKey());
+	}
 
-   @Nullable
-   public T get(Registry<?> registry) {
-      return (T)registry.get(this.getKey());
-   }
+	@Nullable
+	public T orElseGet(Registry<?> registry, Supplier<T> orElse)
+	{
+		T val = this.get(registry);
+		return val != null ? val : orElse.get();
+	}
 
-   @Nullable
-   public T orElseGet(Registry<?> registry, Supplier<T> orElse) {
-      T val = this.get(registry);
-      return val != null ? val : orElse.get();
-   }
+	public boolean isPresent(Registry<?> registry)
+	{
+		return registry.containsKey(this.getName());
+	}
 
-   public boolean isPresent(Registry<?> registry) {
-      return registry.containsKey(this.getName());
-   }
+	@Nullable
+	public <R> R map(Registry<?> registry, Function<T, R> mapFunc)
+	{
+		if (this.isPresent(registry))
+			return mapFunc.apply(this.get(registry));
+		return null;
+	}
 
-   @Nullable
-   public <R> R map(Registry<?> registry, Function<T, R> mapFunc) {
-      return this.isPresent(registry) ? mapFunc.apply(this.get(registry)) : null;
-   }
+	public Optional<Holder<T>> getHolder(RegistryAccess registryAccess)
+	{
+		return this.getHolder(registryAccess.lookupOrThrow(this.getRegistryKey()));
+	}
 
-   public Optional<Holder<T>> getHolder(RegistryAccess registryAccess) {
-      return this.getHolder(registryAccess.registryOrThrow(this.getRegistryKey()));
-   }
+	public Optional<Holder<T>> getHolder(CommonLevelAccessor level)
+	{
+		return this.getHolder(level.registryAccess());
+	}
 
-   public Optional<Holder<T>> getHolder(CommonLevelAccessor level) {
-      return this.getHolder(level.registryAccess());
-   }
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Optional<Holder<T>> getHolder(Registry<?> registry)
+	{
+		return registry.get((ResourceKey) this.getKey());
+	}
 
-   public Optional<Holder<T>> getHolder(Registry<?> registry) {
-      return registry.getHolder(this.getKey());
-   }
+	public Optional<Holder.Reference<T>> getHolder(BootstrapContext<?> bootstrapContext)
+	{
+		return this.getHolder(bootstrapContext.lookup(this.getRegistryKey()));
+	}
 
-   public Optional<Reference<T>> getHolder(BootstrapContext<?> bootstrapContext) {
-      return this.getHolder(bootstrapContext.lookup(this.getRegistryKey()));
-   }
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Optional<Holder.Reference<T>> getHolder(HolderGetter<?> holderGetter)
+	{
+		return holderGetter.get((ResourceKey) this.getKey());
+	}
 
-   public Optional<Reference<T>> getHolder(HolderGetter<?> holderGetter) {
-      return holderGetter.get(this.getKey());
-   }
+	public ResourceKey<T> getKey()
+	{
+		return this.key;
+	}
 
-   public ResourceKey<? extends Registry<?>> getRegistryKey() {
-      return this.registryKey;
-   }
+	public ResourceKey<? extends Registry<?>> getRegistryKey()
+	{
+		return this.getKey().registryKey();
+	}
 
-   public ResourceKey<T> getKey() {
-      return this.key;
-   }
+	public ResourceLocation getName()
+	{
+		return this.getKey().location();
+	}
 
-   public ResourceLocation getName() {
-      return this.getKey().location();
-   }
+	@Override
+	public String toString()
+	{
+		return this.getClass().getSimpleName() + "[key=" + this.getKey() + "]";
+	}
 
-   @Override
-   public String toString() {
-      return this.getClass().getSimpleName() + "[registry=" + this.getRegistryKey().location() + ", key=" + this.getKey().location() + "]";
-   }
+	/**
+	 * A {@link Registrar} to be used by objects that have data pack registries
+	 * where obtaining a value from current registry data is necessary, such as
+	 * biomes.
+	 * 
+	 * @author Silver_David
+	 *
+	 * @param <T>
+	 */
+	public static class Pointer<T> extends Registrar<T>
+	{		
+		protected Pointer(ResourceKey<T> key)
+		{
+			super(key);
+		}
+	}
 
-   public static class BlockRef<T extends Block> extends Registrar.Static<T> implements ItemLike {
-      protected BlockRef(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<T> value) {
-         super(registry, name, value);
-      }
+	/**
+	 * Internal variation of Pointer used specifically for datagen
+	 * 
+	 * @param <T>
+	 */
+	@Internal
+	protected static class DataGenPointer<T> extends Pointer<T>
+	{
+		protected final Function<BootstrapContext<?>, T> valueFactory;
 
-      public Item asItem() {
-         return ((Block)this.get()).asItem();
-      }
+		protected DataGenPointer(ResourceKey<T> key, Function<BootstrapContext<?>, T> valueFactory)
+		{
+			super(key);
+			this.valueFactory = valueFactory;
+		}
 
-      public BlockState defaultBlockState() {
-         return ((Block)this.get()).defaultBlockState();
-      }
-   }
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public void registerData(BootstrapContext<?> context)
+		{
+			((BootstrapContext) context).register(this.getKey(), this.valueFactory.apply(context));
+		}
+	}
 
-   @Internal
-   protected static class DataGenPointer<T> extends Registrar.Pointer<T> {
-      protected final Function<BootstrapContext<?>, T> valueFactory;
+	/**
+	 * A {@link Registrar} to be used for objects that are created on startup and
+	 * can safely be stored in a static instance, such as blocks or entity types.
+	 * 
+	 * @author Silver_David
+	 *
+	 * @param <T>
+	 */
+	public static class Static<T> extends Registrar<T> implements Supplier<T>
+	{
+		@Nullable
+		protected Holder.Reference<T> holder;
 
-      protected DataGenPointer(ResourceKey<Registry<T>> registry, ResourceLocation name, Function<BootstrapContext<?>, T> valueFactory) {
-         super(registry, name);
-         this.valueFactory = valueFactory;
-      }
+		protected Static(ResourceKey<T> key)
+		{
+			super(key);
+		}
+		
+		protected void register(RegisterEvent event, Supplier<T> valueSupplier)
+		{
+			if (this.holder == null)
+			{
+				var registry = event.getRegistry(this.getKey().registryKey());
+				if (registry != null)
+				{
+					if (valueSupplier != null)
+					{
+						this.holder = Registry.registerForHolder(registry, this.getKey(), valueSupplier.get());
+					}
+					else
+						throw new IllegalStateException("The Static Registrar for " + key + " was not assigned a value");
+				}
+			}
+		}
 
-      public void registerData(BootstrapContext<?> context) {
-         context.register(this.getKey(), this.valueFactory.apply(context));
-      }
-   }
+		@Override
+		public ResourceKey<T> getKey()
+		{
+			return this.key;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public <R> ResourceKey<R> getKey(ResourceKey<Registry<R>> registryKey)
+		{
+			return (ResourceKey<R>) this.key;
+		}
+		
+		@Override
+		@Nullable
+		public T get()
+		{
+			return this.getHolder().value();
+		}
 
-   public static class ItemRef<T extends Item> extends Registrar.Static<T> implements ItemLike {
-      protected ItemRef(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<T> value) {
-         super(registry, name, value);
-      }
+		@Nullable
+		public Holder.Reference<T> getHolder()
+		{
+			if (this.holder == null)
+				throw new IllegalStateException("Attempted to get a holder before it was registered.");
+			return this.holder;
+		}
 
-      public Item asItem() {
-         return (Item)this.get();
-      }
+		public T orElseGet(Supplier<T> orElse)
+		{
+			return this.isPresent() ? this.get() : orElse.get();
+		}
 
-      public ItemStack getDefaultInstance() {
-         return ((Item)this.get()).getDefaultInstance();
-      }
-   }
+		public boolean isPresent()
+		{
+			return this.holder != null;
+		}
 
-   public static class Pointer<T> extends Registrar<T> {
-      protected Pointer(ResourceKey<Registry<T>> registry, ResourceLocation name) {
-         super(registry, name);
-      }
-   }
+		@Nullable
+		public <R> R map(Function<T, R> mapFunc)
+		{
+			if (this.isPresent())
+				return mapFunc.apply(this.get());
+			return null;
+		}
+	}
 
-   public static class Static<T> extends Registrar<T> implements Supplier<T> {
-      protected final LazyOptional<T> valueLazy;
+	public static class BlockRef<T extends Block> extends Registrar.Static<T> implements ItemLike
+	{
+		protected BlockRef(ResourceKey<T> key)
+		{
+			super(key);
+		}
 
-      protected Static(ResourceKey<Registry<T>> registry, ResourceLocation name, Supplier<T> value) {
-         super(registry, name);
-         this.valueLazy = LazyOptional.of(value);
-      }
+		@Override
+		public Item asItem()
+		{
+			return this.get().asItem();
+		}
 
-      public void register(RegisterEvent event) {
-         if (!this.valueLazy.isPresent()) {
-            event.register(this.registryKey, this.getName(), this.valueLazy);
-         }
-      }
+		public BlockState defaultBlockState()
+		{
+			return this.get().defaultBlockState();
+		}
+	}
 
-      @Nullable
-      @Override
-      public T get() {
-         return this.valueLazy.getOrThrow("Attempted to get a value from a Registrar before it was registered. " + this.getKey());
-      }
+	public static class ItemRef<T extends Item> extends Registrar.Static<T> implements ItemLike
+	{
+		protected ItemRef(ResourceKey<T> key)
+		{
+			super(key);
+		}
 
-      public T orElseGet(Supplier<T> orElse) {
-         return this.valueLazy.orElseGet(orElse);
-      }
+		@Override
+		public Item asItem()
+		{
+			return this.get();
+		}
 
-      public boolean isPresent() {
-         return this.valueLazy.isPresent();
-      }
-
-      @Nullable
-      public <R> R map(Function<T, R> mapFunc) {
-         return this.isPresent() ? mapFunc.apply(this.get()) : null;
-      }
-   }
+		public ItemStack getDefaultInstance()
+		{
+			return this.get().getDefaultInstance();
+		}
+	}
 }

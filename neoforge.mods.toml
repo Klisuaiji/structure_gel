@@ -1,0 +1,54 @@
+modLoader="javafml"
+loaderVersion="${mod_loader_version_range}"
+issueTrackerURL="${issues_url}"
+license="${license}"
+[[mods]]
+	modId="${mod_id}"
+	version="${mod_version}"
+	displayName="${mod_name}"
+	updateJSONURL="${update_json_url}"
+	displayURL="${display_url}"
+	logoFile="banner.png"
+	authors="${authors}"
+${requirement = credits}
+	credits="${credits}"
+${requirement = null}
+	description="${description}"
+	license="${license}"
+[[dependencies.${mod_id}]]
+	modId="neoforge"
+	type="required"
+${requirement = !neo_version_range}
+	versionRange="[${neo_version},)"
+${requirement = null}
+${requirement = neo_version_range}
+	versionRange="${neo_version_range}"
+${requirement = null}
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.${mod_id}]]
+	modId="minecraft"
+	type="required"
+	versionRange="${minecraft_version_range}"
+	ordering="NONE"
+	side="BOTH"
+${requirement = structure_gel_version & structure_gel_version_range}
+[[dependencies.${mod_id}]]
+	modId="structure_gel"
+	type="required"
+	versionRange="${structure_gel_version_range}"
+	ordering="NONE"
+	side="BOTH"
+${requirement = null}
+
+${requirement = use_mixin & !mixin_file}
+[[mixins]]
+	config="${mod_id}.mixins.json"
+${requirement = null}
+${requirement = use_mixin & mixin_file}
+[[mixins]]
+	config="${mixin_file}"
+${requirement = null}
+
+[modproperties.${mod_id}]
+	catalogueImageIcon="logo.png"

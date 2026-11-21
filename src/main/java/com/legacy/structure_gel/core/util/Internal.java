@@ -1,4 +1,13 @@
 package com.legacy.structure_gel.core.util;
 
-public @interface Internal {
+/**
+ * Used internally. You shouldn't need to override or call what this is
+ * annotating. Anything marked with this is subject to be changed between
+ * updates in ways that could be break if you reference it.
+ *
+ * @author Silver_David
+ */
+public @interface Internal
+{
+
 }

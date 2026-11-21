@@ -1,67 +1,88 @@
 package com.legacy.structure_gel.api.util;
 
 import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
+
 import net.neoforged.neoforge.common.util.Lazy;
 
-public class LazyOptional<T> implements Lazy<T> {
-   protected final Lazy<T> lazy;
-   protected boolean isPresent = false;
+/**
+ * Stores a {@link Lazy} and keeps track of if a value has been obtained from
+ * it.
+ * 
+ * @author Silver_David
+ *
+ * @param <T>
+ */
+public class LazyOptional<T> implements Supplier<T>
+{
+	protected final Lazy<T> lazy;
+	protected boolean isPresent = false;
 
-   public static <T> LazyOptional<T> of(Supplier<T> supplier) {
-      return new LazyOptional<>(supplier);
-   }
+	public static <T> LazyOptional<T> of(Supplier<T> supplier)
+	{
+		return new LazyOptional<T>(supplier);
+	}
 
-   public static <T> LazyOptional<T> concurrent(Supplier<T> supplier) {
-      return new LazyOptional.Concurrent<>(supplier);
-   }
+	public static <T> LazyOptional<T> concurrent(Supplier<T> supplier)
+	{
+		return new LazyOptional.Concurrent<>(supplier);
+	}
 
-   protected LazyOptional(Supplier<T> supplier) {
-      this.lazy = Lazy.of(supplier);
-   }
+	protected LazyOptional(Supplier<T> supplier)
+	{
+		this.lazy = Lazy.of(supplier);
+	}
 
-   @Nullable
-   public T get() {
-      if (!this.isPresent) {
-         this.isPresent = true;
-      }
+	@Override
+	@Nullable
+	public T get()
+	{
+		if (!this.isPresent)
+			this.isPresent = true;
+		return this.lazy.get();
+	}
 
-      return (T)this.lazy.get();
-   }
+	public <E extends T> T orElseGet(Supplier<E> orElse)
+	{
+		return this.isPresent ? this.get() : orElse.get();
+	}
+	
+	public T getOrThrow(String message, Object... args) throws IllegalStateException
+	{
+		if (this.isPresent)
+			return this.get();
+		throw new IllegalStateException(String.format(message, args));
+	}
 
-   public <E extends T> T orElseGet(Supplier<E> orElse) {
-      return (T)(this.isPresent ? this.get() : orElse.get());
-   }
+	public boolean isPresent()
+	{
+		return this.isPresent;
+	}
 
-   public T getOrThrow(String message, Object... args) throws IllegalStateException {
-      if (this.isPresent) {
-         return this.get();
-      } else {
-         throw new IllegalStateException(String.format(message, args));
-      }
-   }
+	public static class Concurrent<T> extends LazyOptional<T>
+	{
+		private volatile Object lock = new Object();
 
-   public boolean isPresent() {
-      return this.isPresent;
-   }
+		protected Concurrent(Supplier<T> supplier)
+		{
+			super(supplier);
+		}
 
-   public static class Concurrent<T> extends LazyOptional<T> {
-      private volatile Object lock = new Object();
-
-      protected Concurrent(Supplier<T> supplier) {
-         super(supplier);
-      }
-
-      @Nullable
-      @Override
-      public final T get() {
-         if (!this.isPresent) {
-            synchronized (this.lock) {
-               this.lock = null;
-               return super.get();
-            }
-         } else {
-            return super.get();
-         }
-      }
-   }
+		@Override
+		@Nullable
+		public final T get()
+		{
+			if (!this.isPresent)
+			{
+				Object localLock = this.lock;
+				synchronized (localLock)
+				{
+					this.lock = null;
+					return super.get();
+				}
+			}
+			return super.get();
+		}
+	}
 }

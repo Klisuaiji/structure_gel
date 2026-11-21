@@ -1,25 +1,38 @@
 package com.legacy.structure_gel.api.data_handler;
 
+import java.util.function.Function;
+
 import com.legacy.structure_gel.api.data_handler.handlers.DataHandler;
 import com.legacy.structure_gel.api.data_handler.parsing.DataMap;
 import com.legacy.structure_gel.api.data_handler.parsing.DataParser;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-public class DataHandlerType<T extends DataHandler<T>> {
-   private final Function<DataMap, T> factory;
-   private final Supplier<DataParser> dataParser;
+import net.minecraft.core.HolderLookup;
 
-   public DataHandlerType(Function<DataMap, T> factory, Supplier<DataParser> dataParser) {
-      this.factory = factory;
-      this.dataParser = dataParser;
-   }
+/**
+ * Internally registered object that creates a {@link DataHandler}
+ * 
+ * @author Silver_David
+ *
+ * @param <T>
+ */
+public class DataHandlerType<T extends DataHandler<T>>
+{
+	private final Function<DataMap, T> factory;
+	private final DataParser.Factory dataParserFactory;
 
-   public T create(DataMap dataMap) {
-      return this.factory.apply(dataMap);
-   }
+	public DataHandlerType(Function<DataMap, T> factory, DataParser.Factory dataParserFactory)
+	{
+		this.factory = factory;
+		this.dataParserFactory = dataParserFactory;
+	}
 
-   public DataParser getDataParser() {
-      return this.dataParser.get();
-   }
+	public T create(DataMap dataMap)
+	{
+		return this.factory.apply(dataMap);
+	}
+
+	public DataParser getDataParser(HolderLookup.Provider registryAccess)
+	{
+		return this.dataParserFactory.build(this, registryAccess);
+	}
 }

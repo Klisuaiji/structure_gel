@@ -1,54 +1,57 @@
 package com.legacy.structure_gel.core.network.c_to_s;
 
-import com.legacy.structure_gel.api.util.NetworkUtil;
 import com.legacy.structure_gel.core.StructureGelMod;
 import com.legacy.structure_gel.core.capability.level.BuildingToolPlayerData;
+import com.legacy.structure_gel.core.data_components.CloneRegion;
 import com.legacy.structure_gel.core.item.building_tool.CapturedBlocks;
 import com.legacy.structure_gel.core.network.SGPacketHandler;
 import com.legacy.structure_gel.core.network.s_to_c.EditClipboardPacket;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class RequestClipboardPacket implements SGPacketHandler.ModPacket<RequestClipboardPacket, RequestClipboardPacket.Handler> {
-   final BoundingBox bounds;
+public record RequestClipboardPacket(CloneRegion cloneRegion) implements CustomPacketPayload
+{
+	public static final Type<RequestClipboardPacket> TYPE = new Type<>(StructureGelMod.locate("request_clipboard_packet"));
 
-   public RequestClipboardPacket(BoundingBox bounds) {
-      this.bounds = bounds;
-   }
+	public static final StreamCodec<RegistryFriendlyByteBuf, RequestClipboardPacket> CODEC = new StreamCodec<>()
+	{
+		@Override
+		public void encode(RegistryFriendlyByteBuf buff, RequestClipboardPacket packet)
+		{
+			CloneRegion.STREAM_CODEC.encode(buff, packet.cloneRegion);
+		}
 
-   public RequestClipboardPacket.Handler handler() {
-      return new RequestClipboardPacket.Handler();
-   }
+		@Override
+		public RequestClipboardPacket decode(RegistryFriendlyByteBuf buff)
+		{
+			return new RequestClipboardPacket(CloneRegion.STREAM_CODEC.decode(buff));
+		}
+	};
 
-   public static class Handler implements SGPacketHandler.PlayHandler<RequestClipboardPacket> {
-      @Override
-      public ResourceLocation id() {
-         return StructureGelMod.locate("request_clipboard_packet");
-      }
+	@Override
+	public Type<? extends CustomPacketPayload> type()
+	{
+		return TYPE;
+	}
 
-      public void encoder(RequestClipboardPacket packet, FriendlyByteBuf buff) {
-         NetworkUtil.writeBoundingBox(buff, packet.bounds);
-      }
-
-      public RequestClipboardPacket decoder(FriendlyByteBuf buff) {
-         return new RequestClipboardPacket(NetworkUtil.readBoundingBox(buff));
-      }
-
-      public void handler(RequestClipboardPacket packet, IPayloadContext context) {
-         context.enqueueWork(() -> {
-            ServerPlayer player = this.serverPlayer(context);
-            if (player != null) {
-               ServerLevel level = player.serverLevel();
-               CapturedBlocks captured = BuildingToolPlayerData.get(level, player.getGameProfile().getName()).getCapturedBlocks(packet.bounds);
-               if (captured != null && !packet.bounds.equals(BoundingBox.infinite())) {
-                  SGPacketHandler.sendToClient(new EditClipboardPacket(level, packet.bounds, captured, BoundingBox.infinite()), player);
-               }
-            }
-         });
-      }
-   }
+	public static void handler(RequestClipboardPacket packet, IPayloadContext context)
+	{
+		context.enqueueWork(() ->
+		{
+			if (!(context.player() instanceof ServerPlayer player))
+				return;
+			CloneRegion cloneRegion = packet.cloneRegion;
+			String owner = cloneRegion.playerName();
+			ServerLevel level = player.getServer().getLevel(cloneRegion.levelKey());
+			CapturedBlocks captured = BuildingToolPlayerData.get(level, owner).getCapturedBlocks(cloneRegion.bounds(), owner);
+			if (captured != null && !packet.cloneRegion.bounds().equals(BoundingBox.infinite()))
+				SGPacketHandler.sendToClient(new EditClipboardPacket(owner, cloneRegion.bounds(), captured, BoundingBox.infinite()), player);
+		});
+	}
 }

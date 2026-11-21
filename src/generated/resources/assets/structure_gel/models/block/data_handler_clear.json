@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube_directional",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "down": "structure_gel:block/data_handler_side_clear",
+    "east": "structure_gel:block/data_handler_side_clear",
+    "north": "structure_gel:block/data_handler_front_clear",
+    "particle": "structure_gel:block/data_handler_front_clear",
+    "south": "structure_gel:block/data_handler_back_clear",
+    "up": "structure_gel:block/data_handler_side_clear",
+    "west": "structure_gel:block/data_handler_side_clear"
+  }
+}

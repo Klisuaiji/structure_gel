@@ -1,63 +1,45 @@
 package com.legacy.structure_gel.api.item;
 
-import com.google.common.collect.UnmodifiableIterator;
-import com.legacy.structure_gel.api.block.StructureGelBlock;
-import com.legacy.structure_gel.api.block.base.IStructureGel;
-import com.legacy.structure_gel.core.util.SGText;
-import java.util.List;
-import javax.annotation.Nullable;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import com.legacy.structure_gel.core.registry.SGRegistry;
+
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.GameMasterBlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class StructureGelItem extends GameMasterBlockItem {
-   public StructureGelItem(StructureGelBlock structureGelBlock, Properties properties) {
-      super(
-         structureGelBlock,
-         properties == null
-            ? new Properties().stacksTo(structureGelBlock.behaviors.contains(IStructureGel.Behavior.DYNAMIC_SPREAD_DIST) ? 50 : 64).rarity(Rarity.EPIC)
-            : properties
-      );
-   }
+/**
+ * The item used by structure gel blocks.
+ *
+ * @author Silver_David
+ */
+public class StructureGelItem extends GameMasterBlockItem
+{
+	public StructureGelItem(Block block, Item.Properties properties)
+	{
+		super(block, properties);
+	}
 
-   public StructureGelItem(StructureGelBlock structureGelBlock) {
-      this(structureGelBlock, null);
-   }
-
-   public InteractionResult place(BlockPlaceContext context) {
-      return !context.getPlayer().isCreative() ? InteractionResult.FAIL : super.place(context);
-   }
-
-   @OnlyIn(Dist.CLIENT)
-   public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag advancedTooltips) {
-      if (!Screen.hasShiftDown()) {
-         tooltip.add(SGText.applyKeybindFilter(Component.translatable("info.structure_gel.hold_shift")));
-      } else if (this.getBlock() instanceof StructureGelBlock structureGel) {
-         tooltip.add(Component.translatable("info.structure_gel.place").withStyle(ChatFormatting.GRAY));
-         tooltip.add(Component.translatable("info.structure_gel.gunpowder").withStyle(ChatFormatting.GRAY));
-         tooltip.add(Component.literal(""));
-         if (structureGel.behaviors.isEmpty()) {
-            tooltip.add(Component.translatable(IStructureGel.Behavior.DEFAULT.getTranslation()).withStyle(ChatFormatting.GRAY));
-         }
-
-         UnmodifiableIterator var8 = structureGel.behaviors.iterator();
-
-         while (var8.hasNext()) {
-            IStructureGel.Behavior behavior = (IStructureGel.Behavior)var8.next();
-            tooltip.add(Component.translatable(behavior.getTranslation()).withStyle(ChatFormatting.GRAY));
-         }
-      } else {
-         tooltip.add(Component.translatable("info.structure_gel.unknown_behavior").withStyle(ChatFormatting.RED));
-      }
-   }
+	@Override
+	public InteractionResult place(BlockPlaceContext context)
+	{
+		// Prevent placement outside of creative mode
+		if (!context.getPlayer().isCreative())
+			return InteractionResult.FAIL;
+		else
+			return super.place(context);
+	}
+	
+	@Override
+	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level level, Player player, ItemStack stack, BlockState state)
+	{
+		boolean flag = super.updateCustomBlockEntityTag(pos, level, player, stack, state);
+		level.getBlockEntity(pos, SGRegistry.BlockEntities.GEL_SPREADER.get()).ifPresent(spreader -> spreader.applyProperties(stack, level.registryAccess()));
+		return flag;
+	}
 }

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube_directional",
+  "textures": {
+    "down": "structure_gel:block/data_handler_side",
+    "east": "structure_gel:block/data_handler_side",
+    "north": "structure_gel:block/data_handler_front",
+    "particle": "structure_gel:block/data_handler_front",
+    "south": "structure_gel:block/data_handler_back",
+    "up": "structure_gel:block/data_handler_side",
+    "west": "structure_gel:block/data_handler_side"
+  }
+}

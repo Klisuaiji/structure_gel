@@ -1,32 +1,57 @@
 package com.legacy.structure_gel.api.structure.base;
 
-import com.google.common.collect.UnmodifiableIterator;
-import java.util.Map.Entry;
+import java.util.Map;
+
 import javax.annotation.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
-public interface IModifyState {
-   IModifyState NOOP = (level, rand, pos, originalState) -> originalState;
+/**
+ * Used to modify blocks placed by structures.
+ *
+ * @author Silver_David
+ */
+public interface IModifyState
+{
+	public static final IModifyState NOOP = (level, rand, pos, originalState) -> originalState;
+	
+	/**
+	 * Modifies the passed state. This method is called after processors are applied
+	 *
+	 * @param level
+	 * @param rand
+	 * @param pos
+	 * @param originalState
+	 * @return The new block state to place, or null to prevent placement
+	 */
+	@Nullable
+	BlockState modifyState(ServerLevelAccessor level, RandomSource rand, BlockPos pos, BlockState originalState);
 
-   @Nullable
-   BlockState modifyState(ServerLevelAccessor var1, RandomSource var2, BlockPos var3, BlockState var4);
-
-   static BlockState mergeStates(BlockState to, BlockState from) {
-      BlockState state = to;
-      UnmodifiableIterator var3 = from.getValues().entrySet().iterator();
-
-      while (var3.hasNext()) {
-         Entry<Property<?>, Comparable<?>> entry = (Entry<Property<?>, Comparable<?>>)var3.next();
-         Property property = entry.getKey();
-         if (state.hasProperty(property)) {
-            state = (BlockState)state.setValue(property, entry.getValue());
-         }
-      }
-
-      return state;
-   }
+	/**
+	 * Attempts to merge the blockstate properties in "from" into "to"
+	 * 
+	 * @param to
+	 *            The blockstate to merge properties into
+	 * @param from
+	 *            The blockstate to get properties from
+	 * @return The merged blockstate
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static BlockState mergeStates(BlockState to, BlockState from)
+	{
+		BlockState state = to;
+		for (Map.Entry<Property<?>, Comparable<?>> entry : from.getValues().entrySet())
+		{
+			Property property = entry.getKey();
+			if (state.hasProperty(property))
+			{
+				state = state.setValue(property, (Comparable) entry.getValue());
+			}
+		}
+		return state;
+	}
 }

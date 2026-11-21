@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://neoforged.forgecdn.net/releases' }
+        gradlePluginPortal()
+        maven { url 'https://maven.neoforged.net/releases/' }
+        maven { url 'https://maven.creeperhost.net/' }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'structure-gel-1211-port'

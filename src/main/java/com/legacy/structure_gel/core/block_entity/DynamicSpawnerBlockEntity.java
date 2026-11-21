@@ -1,129 +1,165 @@
 package com.legacy.structure_gel.core.block_entity;
 
-import net.minecraft.core.HolderLookup;
 import com.legacy.structure_gel.api.dynamic_spawner.DynamicSpawnerType;
 import com.legacy.structure_gel.api.registry.StructureGelRegistries;
 import com.legacy.structure_gel.core.dynamic_spawner.DynamicSpawner;
 import com.legacy.structure_gel.core.registry.SGRegistry;
+import com.mojang.datafixers.util.Either;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Spawner;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DynamicSpawnerBlockEntity extends SGBlockEntity {
-   public static final String SPAWNER_ID_KEY = "SpawnerID";
-   public static final String SPAWNER_KEY = "Spawner";
-   public static final String EXP_RANGE_KEY = "exp_range";
-   private ResourceLocation spawnerID = SGRegistry.DynamicSpawnerTypes.DEFAULT.getName();
-   private DynamicSpawner spawner = SGRegistry.DynamicSpawnerTypes.DEFAULT.get().createSpawner(this.level, this.worldPosition);
-   private DynamicSpawnerBlockEntity.ExpRange expRange = DynamicSpawnerBlockEntity.ExpRange.VANILLA;
+public class DynamicSpawnerBlockEntity extends SGBlockEntity implements Spawner
+{
+	public static final String SPAWNER_ID_KEY = "SpawnerID", SPAWNER_KEY = "Spawner", EXP_RANGE_KEY = "exp_range";
 
-   public DynamicSpawnerBlockEntity(BlockPos pos, BlockState state) {
-      super(SGRegistry.BlockEntities.DYNAMIC_SPAWNER.get(), pos, state);
-   }
+	private ResourceLocation spawnerID = SGRegistry.DynamicSpawnerTypes.DEFAULT.getName();
+	private final DynamicSpawner spawner = new DynamicSpawner()
+	{
+		public com.mojang.datafixers.util.Either<net.minecraft.world.level.block.entity.BlockEntity, net.minecraft.world.entity.Entity> getOwner()
+		{
+			return Either.left(DynamicSpawnerBlockEntity.this);
+		}
+	};
+	private ExpRange expRange = ExpRange.VANILLA;
 
-   public void setSpawner(DynamicSpawnerType type) {
-      ResourceLocation newName = StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getKey(type);
-      if (newName != null && !newName.equals(this.spawnerID)) {
-         this.spawnerID = newName;
-         this.spawner = type.createSpawner(this.level, this.worldPosition);
-      }
-   }
+	public DynamicSpawnerBlockEntity(BlockPos pos, BlockState state)
+	{
+		super(SGRegistry.BlockEntities.DYNAMIC_SPAWNER.get(), pos, state);
+	}
 
-   public ResourceLocation getSpawnerID() {
-      return this.spawnerID;
-   }
+	public void setSpawner(DynamicSpawnerType type, HolderLookup.Provider lookup)
+	{
+		ResourceLocation newName = StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getKey(type);
+		if (newName != null && !newName.equals(this.spawnerID))
+		{
+			this.spawnerID = newName;
+			this.spawner.copyFrom(type.create(lookup));
+		}
+	}
 
-   public void setExpRange(DynamicSpawnerBlockEntity.ExpRange maxInclusive) {
-      this.expRange = maxInclusive;
-      this.setChanged();
-   }
+	@Override
+	public void setEntityId(EntityType<?> entityType, RandomSource random)
+	{
+	}
 
-   public DynamicSpawnerBlockEntity.ExpRange getExpRange() {
-      return this.expRange;
-   }
+	public ResourceLocation getSpawnerID()
+	{
+		return this.spawnerID;
+	}
 
-   public void loadAdditional(CompoundTag tag, HolderLookup.Provider p) {
-      super.loadAdditional(tag, p);
-      if (tag.contains("SpawnerID", 8)) {
-         ResourceLocation typeName = ResourceLocation.parse(tag.getString("SpawnerID"));
-         if (tag.contains("Spawner", 10)) {
-            this.spawnerID = typeName;
-            this.spawner.load(this.level, this.worldPosition, tag.getCompound("Spawner"));
-         } else {
-            this.setSpawner((DynamicSpawnerType)StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.get(typeName));
-         }
-      }
+	public void setExpRange(ExpRange maxInclusive)
+	{
+		this.expRange = maxInclusive;
+		this.setChanged();
+	}
 
-      if (tag.contains("exp_range", 10)) {
-         this.expRange = DynamicSpawnerBlockEntity.ExpRange.load(tag.getCompound("exp_range"));
-      }
-   }
+	public ExpRange getExpRange()
+	{
+		return this.expRange;
+	}
 
-   protected void saveAdditional(CompoundTag tag, HolderLookup.Provider p) {
-      super.saveAdditional(tag, p);
-      if (this.spawnerID != null) {
-         tag.putString("SpawnerID", this.spawnerID.toString());
-      }
+	@Override
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider lookup)
+	{
+		super.loadAdditional(tag, lookup);
+		if (tag.contains(SPAWNER_ID_KEY, Tag.TAG_STRING))
+		{
+			ResourceLocation typeName = ResourceLocation.parse(tag.getString(SPAWNER_ID_KEY));
+			if (tag.contains(SPAWNER_KEY, Tag.TAG_COMPOUND)) // Exists when data is sent from server to client
+			{
+				this.spawnerID = typeName;
+				this.spawner.load(this.level, this.worldPosition, tag.getCompound(SPAWNER_KEY));
+			}
+			else
+			{
+				this.setSpawner(StructureGelRegistries.DYNAMIC_SPAWNER_TYPE.getValue(typeName), lookup);
+			}
+		}
+		if (tag.contains(EXP_RANGE_KEY, Tag.TAG_COMPOUND))
+			this.expRange = ExpRange.load(tag.getCompound(EXP_RANGE_KEY));
+	}
 
-      tag.put("exp_range", this.expRange.save());
-   }
+	@Override
+	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider lookup)
+	{
+		super.saveAdditional(tag, lookup);
+		if (this.spawnerID != null)
+			tag.putString(SPAWNER_ID_KEY, this.spawnerID.toString());
+		tag.put(EXP_RANGE_KEY, this.expRange.save());
+	}
 
-   @Override
-   public ClientboundBlockEntityDataPacket getUpdatePacket() {
-      return ClientboundBlockEntityDataPacket.create(this, (b, registries) -> {
-         CompoundTag tag = this.saveWithFullMetadata(registries);
-         this.saveAdditional(tag, registries);
-         CompoundTag spawnerTag = this.spawner.save(new CompoundTag());
-         tag.put("Spawner", spawnerTag);
-         return tag;
-      });
-   }
+	@Override
+	public ClientboundBlockEntityDataPacket getUpdatePacket()
+	{
+		return ClientboundBlockEntityDataPacket.create(this, (b, r) ->
+		{
+			CompoundTag tag = this.saveWithoutMetadata(r);
+			CompoundTag spawnerTag = this.spawner.save(new CompoundTag());
+			tag.put(SPAWNER_KEY, spawnerTag);
+			return tag;
+		});
+	}
 
-   public static void clientTick(Level level, BlockPos pos, BlockState state, DynamicSpawnerBlockEntity blockEntity) {
-      blockEntity.spawner.clientTick(level, pos);
-   }
+	public static void clientTick(Level level, BlockPos pos, BlockState state, DynamicSpawnerBlockEntity blockEntity)
+	{
+		blockEntity.spawner.clientTick(level, pos);
+	}
 
-   public static void serverTick(Level level, BlockPos pos, BlockState state, DynamicSpawnerBlockEntity blockEntity) {
-      blockEntity.spawner.serverTick((ServerLevel)level, pos);
-   }
+	public static void serverTick(Level level, BlockPos pos, BlockState state, DynamicSpawnerBlockEntity blockEntity)
+	{
+		blockEntity.spawner.serverTick((ServerLevel) level, pos);
+	}
 
-   public boolean triggerEvent(int paramA, int paramB) {
-      return this.spawner.onEventTriggered(this.level, paramA) ? true : super.triggerEvent(paramA, paramB);
-   }
+	@Override
+	public boolean triggerEvent(int paramA, int paramB)
+	{
+		return this.spawner.onEventTriggered(this.level, paramA) ? true : super.triggerEvent(paramA, paramB);
+	}
 
-   public boolean onlyOpCanSetNbt() {
-      return true;
-   }
+	public DynamicSpawner getSpawner()
+	{
+		return this.spawner;
+	}
 
-   public DynamicSpawner getSpawner() {
-      return this.spawner;
-   }
+	public static class ExpRange
+	{
+		public static final String MIN_KEY = "min", MAX_KEY = "max";
+		/**
+		 * Values based on vanilla mob spawner
+		 */
+		public static final ExpRange VANILLA = new ExpRange(15, 43);
+		public final int min, max;
 
-   public static class ExpRange {
-      public static final String MIN_KEY = "min";
-      public static final String MAX_KEY = "max";
-      public static final DynamicSpawnerBlockEntity.ExpRange VANILLA = new DynamicSpawnerBlockEntity.ExpRange(15, 43);
-      public final int min;
-      public final int max;
+		public ExpRange(int minInclusive, int maxInclusive)
+		{
+			this.min = Math.max(0, minInclusive);
+			this.max = Math.max(this.min, maxInclusive);
+		}
 
-      public ExpRange(int minInclusive, int maxInclusive) {
-         this.min = Math.max(0, minInclusive);
-         this.max = Math.max(this.min, maxInclusive);
-      }
+		public static ExpRange load(CompoundTag tag)
+		{
+			if (tag.contains(MIN_KEY, Tag.TAG_INT) && tag.contains(MAX_KEY, Tag.TAG_INT))
+				return new ExpRange(tag.getInt(MIN_KEY), tag.getInt(MAX_KEY));
+			return ExpRange.VANILLA;
+		}
 
-      public static DynamicSpawnerBlockEntity.ExpRange load(CompoundTag tag) {
-         return tag.contains("min", 3) && tag.contains("max", 3) ? new DynamicSpawnerBlockEntity.ExpRange(tag.getInt("min"), tag.getInt("max")) : VANILLA;
-      }
-
-      public CompoundTag save() {
-         CompoundTag tag = new CompoundTag();
-         tag.putInt("min", this.min);
-         tag.putInt("max", this.max);
-         return tag;
-      }
-   }
+		public CompoundTag save()
+		{
+			CompoundTag tag = new CompoundTag();
+			tag.putInt(MIN_KEY, this.min);
+			tag.putInt(MAX_KEY, this.max);
+			return tag;
+		}
+	}
 }
