@@ -13,6 +13,7 @@ import com.legacy.structure_gel.core.SGConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen;
@@ -53,7 +54,7 @@ public abstract class StructureBlockEditScreenMixin extends Screen
 	}
 
 	@Inject(at = @At("TAIL"), method = "render")
-	private void onUpdateMode(CallbackInfo callback)
+	private void onUpdateMode(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo callback)
 	{
 		boolean showInvis = this.toggleAirButton.visible && this.toggleAirButton.getValue();
 		this.structure_gel$renderAir.visible = showInvis;

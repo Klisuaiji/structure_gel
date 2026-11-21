@@ -12,10 +12,15 @@ import com.legacy.structure_gel.api.structure.base.IPieceBuilderModifier;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import java.util.Optional;
+
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -32,16 +37,19 @@ public class StructureMixin
 {
 	// Prevents structure generation if this structure isn't allowed in the dimension
 	@Inject(at = @At(value = "HEAD"), method = "generate", cancellable = true)
-	private void checkDimension(Holder<Structure> structure, ResourceKey<Level> level, RegistryAccess registryAccess, ChunkGenerator chunkGen, BiomeSource biomeSource, RandomState randomState, StructureTemplateManager structureTemplateManager, long levelSeed, ChunkPos chunkPos, int refs, LevelHeightAccessor levelHeight, Predicate<Holder<Biome>> biomeTest, CallbackInfoReturnable<StructureStart> callback)
+	private void checkDimension(RegistryAccess registryAccess, ChunkGenerator chunkGen, BiomeSource biomeSource, RandomState randomState, StructureTemplateManager structureTemplateManager, long levelSeed, ChunkPos chunkPos, int refs, LevelHeightAccessor levelHeight, Predicate<Holder<Biome>> biomeTest, CallbackInfoReturnable<StructureStart> callback)
 	{
-		// So they added the structure and level key as method args in 1.21.4. 
-		// I don't need the commented code below this anymore, but they only added 
-		// it for JVM logging. So it'll probably vanish randomly in like 4 updates
+		// 1.21.1 Structure#generate has no Holder<Structure>/ResourceKey<Level> args (added in 1.21.4).
+		// Recover both from the registry and the height accessor instead.
+		Optional<ResourceKey<Structure>> structureKey = registryAccess.registryOrThrow(Registries.STRUCTURE).getResourceKey((Structure) (Object) this);
 
-		//boolean validDim = true;
-		//if (levelHeight instanceof ChunkAccessMixin.Access access && access.getHeightAccessor() instanceof ServerLevel level) // ChunkAccess on worldgen, ServerLevel otherwise
-		//	validDim = StructureAccessHelper.isValidDimension(registryAccess.lookupOrThrow(Registries.STRUCTURE).getResourceKey((Structure) (Object) this), level.dimension());
-		boolean validDim = StructureAccessHelper.isValidDimension(structure.unwrapKey(), level);
+		ResourceKey<Level> dimension = null;
+		if (levelHeight instanceof Level level)
+			dimension = level.dimension();
+		else if (levelHeight instanceof ChunkAccessMixin.Access access && access.getHeightAccessor() instanceof Level level)
+			dimension = level.dimension();
+
+		boolean validDim = dimension != null && StructureAccessHelper.isValidDimension(structureKey, dimension);
 
 		if (!validDim)
 			callback.setReturnValue(StructureStart.INVALID_START);
