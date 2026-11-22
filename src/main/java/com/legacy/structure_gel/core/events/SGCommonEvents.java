@@ -57,7 +57,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 @Internal
 public class SGCommonEvents
 {
-	@EventBusSubscriber(modid = StructureGelMod.MODID, bus = EventBusSubscriber.Bus.MOD)
+	@EventBusSubscriber(modid = StructureGelMod.MODID, )
 	protected static class ModBus
 	{
 		@SubscribeEvent
@@ -175,7 +175,7 @@ public class SGCommonEvents
 		}
 	}
 
-	@EventBusSubscriber(modid = StructureGelMod.MODID, bus = EventBusSubscriber.Bus.GAME)
+	@EventBusSubscriber(modid = StructureGelMod.MODID, )
 	protected static class ForgeBus
 	{
 		@SubscribeEvent
