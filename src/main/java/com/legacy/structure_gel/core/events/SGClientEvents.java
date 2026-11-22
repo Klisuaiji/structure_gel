@@ -44,7 +44,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 @Internal
 public class SGClientEvents
 {
-	@EventBusSubscriber(modid = StructureGelMod.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+	@EventBusSubscriber(modid = StructureGelMod.MODID, value = Dist.CLIENT)
 	protected static class ModBus
 	{
 		@SubscribeEvent
@@ -87,7 +87,7 @@ public class SGClientEvents
 		}*/
 	}
 
-	@EventBusSubscriber(modid = StructureGelMod.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+	@EventBusSubscriber(modid = StructureGelMod.MODID, value = Dist.CLIENT)
 	protected static class ForgeBus
 	{
 		@SubscribeEvent
