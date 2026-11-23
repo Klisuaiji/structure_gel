@@ -739,8 +739,14 @@ public class ActionHistory
 		}
 	}
 
-	public static void init()
+	private static boolean initialized = false;
+
+	public static synchronized void init()
 	{
+		if (initialized)
+			return;
+
 		Change.init();
+		initialized = true;
 	}
 }
